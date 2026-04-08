@@ -1,0 +1,20 @@
+{
+  "name": "ai-research-lab",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "workspaces": ["packages/*", "apps/*", "worker"],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "db:push": "turbo db:push --filter=@research-lab/db",
+    "db:generate": "turbo db:generate --filter=@research-lab/db",
+    "ingest": "tsx scripts/ingest.ts",
+    "analyze": "tsx scripts/analyze.ts",
+    "worker": "tsx worker/index.ts"
+  },
+  "devDependencies": {
+    "turbo": "^2",
+    "typescript": "^5.7",
+    "tsx": "^4"
+  }
+}

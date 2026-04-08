@@ -1,0 +1,19 @@
+{
+  "name": "@research-lab/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build"
+  },
+  "dependencies": {
+    "next": "^15",
+    "react": "^19",
+    "react-dom": "^19",
+    "@research-lab/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19"
+  }
+}

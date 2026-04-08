@@ -1,0 +1,10 @@
+{
+  "name": "@research-lab/worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ai": "^6",
+    "@research-lab/db": "workspace:*"
+  }
+}
