@@ -1,7 +1,17 @@
 import 'dotenv/config';
+import http from 'node:http';
 import { claimNextPendingJob, completeJob, failJob, getTopicById } from '@research-lab/db';
 import { ingestTopic } from './ingestion/index.js';
 import { runAnalysis } from './orchestrator.js';
+
+// Health check server for Cloud Run
+const port = parseInt(process.env.PORT ?? '8080', 10);
+http.createServer((_req, res) => {
+  res.writeHead(200);
+  res.end('ok');
+}).listen(port, () => {
+  console.log(`[worker] Health check listening on :${port}`);
+});
 
 async function main() {
   console.log('[worker] Started. Polling for jobs...');
