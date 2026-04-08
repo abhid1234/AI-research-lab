@@ -2,7 +2,12 @@
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TopicEvolutionChart } from '@/components/charts/topic-evolution';
+import dynamic from 'next/dynamic';
+
+const TopicEvolutionChart = dynamic(
+  () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
+  { ssr: false, loading: () => <div className="h-[260px] flex items-center justify-center text-muted-foreground text-sm">Loading chart...</div> }
+);
 
 interface OverviewTabProps {
   artifacts: { agentType: string; data: any }[];

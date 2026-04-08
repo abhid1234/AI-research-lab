@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
 import { TopicSelector } from '@/components/layout/topic-selector';
 import { JobStatusBar } from '@/components/layout/job-status-bar';
-import { ChatPanel } from '@/components/chat/chat-panel';
+import dynamic from 'next/dynamic';
+const ChatPanel = dynamic(() => import('@/components/chat/chat-panel').then(m => ({ default: m.ChatPanel })), { ssr: false });
 import { ArtifactViewer, type ArtifactItem } from '@/components/artifacts/artifact-viewer';
+import { ErrorBoundary } from '@/components/error-boundary';
 
 export default function Home() {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
@@ -48,6 +50,7 @@ export default function Home() {
   };
 
   return (
+    <ErrorBoundary>
     <AppShell>
       {/* Left panel: chat */}
       <aside className="w-[340px] shrink-0 border-r border-border flex flex-col overflow-hidden">
@@ -88,5 +91,6 @@ export default function Home() {
         <JobStatusBar jobId={latestJobId} />
       </main>
     </AppShell>
+    </ErrorBoundary>
   );
 }
