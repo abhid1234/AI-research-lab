@@ -67,27 +67,54 @@ Inspired by [@omarsar0's DAIR Papers Observatory](https://x.com/omarsar0/status/
 
 ## Getting Started
 
+### 1. Clone and install
+
 ```bash
-# Clone
 git clone https://github.com/abhid1234/AI-research-lab.git
 cd AI-research-lab
+pnpm install
+```
 
-# Install
-npm install
+### 2. Set up environment
 
-# Set up environment
+```bash
 cp .env.example .env.local
-# Add your API keys (Gemini, Anthropic/OpenAI, database URL)
+# Add your API keys (see .env.example for all required vars)
+```
 
-# Database
-docker compose up -d  # PostgreSQL + pgvector
-npm run db:push
+### 3. Start the database
 
-# Ingest papers
-npm run ingest -- --topic "reinforcement learning" --count 50
+```bash
+docker compose up -d
+pnpm db:setup
+pnpm db:push
+```
 
-# Dev server
-npm run dev
+### 4. Seed with demo data (optional — no API keys needed)
+
+```bash
+pnpm seed
+```
+
+This inserts 5 pre-built LLM agent papers and pre-generated artifacts so all 5 dashboard tabs render immediately without any API calls.
+
+### 5. Start the app
+
+```bash
+# Terminal 1: Start the background worker (handles ingestion + analysis jobs)
+pnpm worker
+
+# Terminal 2: Start the frontend
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Ingest real papers (requires API keys)
+
+```bash
+pnpm ingest -- --topic "LLM agents" --count 20
+pnpm analyze -- --topic "LLM agents"
 ```
 
 ## Project Status

@@ -15,7 +15,8 @@
     "db:setup": "tsx scripts/setup-db.ts",
     "ingest": "tsx scripts/ingest.ts",
     "analyze": "tsx scripts/analyze.ts",
-    "worker": "tsx worker/index.ts"
+    "worker": "tsx worker/index.ts",
+    "seed": "tsx scripts/seed.ts"
   },
   "devDependencies": {
     "tsx": "^4",
