@@ -14,6 +14,21 @@ export default function Home() {
   const [artifacts, setArtifacts] = useState<ArtifactItem[]>([]);
   const [latestJobId, setLatestJobId] = useState<string | null>(null);
   const [loadingArtifacts, setLoadingArtifacts] = useState(false);
+  const [paperCount, setPaperCount] = useState<number | undefined>(undefined);
+  const [topicCount, setTopicCount] = useState<number | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<string | undefined>(undefined);
+
+  // Fetch total topic count once
+  useEffect(() => {
+    fetch('/api/topics')
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTopicCount(data.length);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const fetchArtifacts = useCallback(async (topicId: string) => {
     setLoadingArtifacts(true);
@@ -22,13 +37,41 @@ export default function Home() {
       if (!res.ok) return;
       const { artifacts: raw } = await res.json();
       if (Array.isArray(raw)) {
-        setArtifacts(
-          raw.map((a: any) => ({
-            agentType: a.agentType ?? a.agent_type ?? '',
-            tabTarget: a.tabTarget ?? a.tab_target ?? 'overview',
-            data: typeof a.data === 'string' ? JSON.parse(a.data) : (a.data ?? {}),
-          }))
-        );
+        const mapped: ArtifactItem[] = raw.map((a: any) => ({
+          agentType: a.agentType ?? a.agent_type ?? '',
+          tabTarget: a.tabTarget ?? a.tab_target ?? 'overview',
+          data: typeof a.data === 'string' ? JSON.parse(a.data) : (a.data ?? {}),
+        }));
+        setArtifacts(mapped);
+
+        // Derive header stats from paper-analyzer artifact
+        const paperArtifact = mapped.find((a) => a.agentType === 'paper-analyzer');
+        if (paperArtifact?.data?.papers) {
+          const papers: any[] = paperArtifact.data.papers;
+          setPaperCount(papers.length);
+
+          // Try to extract a date range from paper IDs (format: YYYY-MM or similar)
+          const dates: string[] = papers
+            .map((p) => p.paperId as string)
+            .filter(Boolean)
+            .map((id) => {
+              const match = id.match(/(\d{4}-\d{2})/);
+              return match ? match[1] : null;
+            })
+            .filter(Boolean) as string[];
+
+          if (dates.length > 0) {
+            const sorted = [...dates].sort();
+            const first = sorted[0];
+            const last = sorted[sorted.length - 1];
+            setDateRange(first === last ? first : `${first} to ${last}`);
+          } else {
+            setDateRange(undefined);
+          }
+        } else {
+          setPaperCount(undefined);
+          setDateRange(undefined);
+        }
       }
     } catch {
       setArtifacts([]);
@@ -51,7 +94,7 @@ export default function Home() {
 
   return (
     <ErrorBoundary>
-    <AppShell>
+    <AppShell paperCount={paperCount} topicCount={topicCount} dateRange={dateRange}>
       {/* Left panel: chat */}
       <aside className="w-[340px] shrink-0 border-r border-border flex flex-col overflow-hidden">
         <ChatPanel />

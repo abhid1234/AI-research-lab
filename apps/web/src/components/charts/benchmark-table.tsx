@@ -20,6 +20,30 @@ interface BenchmarkTableData {
   entries: BenchmarkEntry[];
 }
 
+const MODEL_BADGE_COLORS = [
+  'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  'bg-orange-500/20 text-orange-400 border-orange-500/30',
+  'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  'bg-teal-500/20 text-teal-400 border-teal-500/30',
+  'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  'bg-pink-500/20 text-pink-400 border-pink-500/30',
+] as const;
+
+function ModelBadge({ name, index }: { name: string; index: number }) {
+  const colorClass = MODEL_BADGE_COLORS[index % MODEL_BADGE_COLORS.length];
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${colorClass}`}
+        aria-hidden="true"
+      >
+        ●
+      </span>
+      <span className="font-medium">{name}</span>
+    </div>
+  );
+}
+
 function ScoreCell({ value }: { value: number | string }) {
   const num = typeof value === 'number' ? value : parseFloat(String(value));
   if (isNaN(num)) {
@@ -59,7 +83,9 @@ export function BenchmarkTable({ table }: { table: BenchmarkTableData }) {
         <TableBody>
           {table.entries.map((entry, i) => (
             <TableRow key={i}>
-              <TableCell className="font-medium">{entry.model}</TableCell>
+              <TableCell>
+                <ModelBadge name={entry.model} index={i} />
+              </TableCell>
               {scoreKeys.map((k) => (
                 <TableCell key={k}>
                   <ScoreCell value={entry.scores[k]} />
