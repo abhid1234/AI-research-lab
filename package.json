@@ -2,7 +2,11 @@
   "name": "ai-research-lab",
   "private": true,
   "packageManager": "pnpm@9.15.0",
-  "workspaces": ["packages/*", "apps/*", "worker"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "worker"
+  ],
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
@@ -14,8 +18,11 @@
     "worker": "tsx worker/index.ts"
   },
   "devDependencies": {
+    "tsx": "^4",
     "turbo": "^2",
-    "typescript": "^5.7",
-    "tsx": "^4"
+    "typescript": "^5.7"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   }
 }
