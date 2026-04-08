@@ -64,7 +64,7 @@ function PaperCard({ paper }: { paper: any }) {
           </CardTitle>
           {paper.methodology && (
             <Badge variant="outline" className="shrink-0 text-[10px]">
-              {paper.methodology}
+              {typeof paper.methodology === 'string' ? paper.methodology : paper.methodology.type ?? 'empirical'}
             </Badge>
           )}
         </div>
@@ -89,14 +89,14 @@ function PaperCard({ paper }: { paper: any }) {
           </div>
         )}
         {paper.limitations && (
-          <Field label="Limitations" value={paper.limitations} muted />
+          <Field label="Limitations" value={Array.isArray(paper.limitations) ? paper.limitations.join(', ') : paper.limitations} muted />
         )}
         {paper.claims && paper.claims.length > 0 && (
           <div>
             <p className="text-xs text-muted-foreground font-medium mb-1.5">Claims</p>
             <div className="flex flex-wrap gap-1.5">
-              {paper.claims.map((c: string, i: number) => (
-                <Badge key={i} variant="secondary" className="text-[10px]">{c}</Badge>
+              {paper.claims.map((c: any, i: number) => (
+                <Badge key={i} variant="secondary" className="text-[10px]">{typeof c === 'string' ? c : c.statement ?? JSON.stringify(c)}</Badge>
               ))}
             </div>
           </div>

@@ -67,11 +67,13 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <div className="rounded-md bg-rose-500/5 border border-rose-500/15 p-3 text-sm">
                       <p className="text-xs text-rose-400 font-medium mb-1">Claim A</p>
-                      {c.claim1}
+                      <p>{typeof c.claim1 === 'string' ? c.claim1 : c.claim1?.statement ?? ''}</p>
+                      {c.claim1?.paper?.title && <p className="text-xs text-muted-foreground mt-1">— {c.claim1.paper.title}</p>}
                     </div>
                     <div className="rounded-md bg-blue-500/5 border border-blue-500/15 p-3 text-sm">
                       <p className="text-xs text-blue-400 font-medium mb-1">Claim B</p>
-                      {c.claim2}
+                      <p>{typeof c.claim2 === 'string' ? c.claim2 : c.claim2?.statement ?? ''}</p>
+                      {c.claim2?.paper?.title && <p className="text-xs text-muted-foreground mt-1">— {c.claim2.paper.title}</p>}
                     </div>
                   </div>
                   {c.analysis && (

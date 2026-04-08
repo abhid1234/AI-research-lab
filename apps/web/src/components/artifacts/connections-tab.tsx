@@ -59,7 +59,7 @@ export function ConnectionsTab({ artifacts }: ConnectionsTabProps) {
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{p.keyInnovation}</p>
                     )}
                     {p.methodology && (
-                      <Badge variant="outline" className="mt-1.5 text-[10px]">{p.methodology}</Badge>
+                      <Badge variant="outline" className="mt-1.5 text-[10px]">{typeof p.methodology === 'string' ? p.methodology : p.methodology?.type ?? 'empirical'}</Badge>
                     )}
                   </div>
                 </CardContent>
