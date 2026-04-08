@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@research-lab/db": "workspace:*",
     "ai": "^6",
-    "@research-lab/db": "workspace:*"
+    "dotenv": "^16",
+    "zod": "^4.3.6"
   }
 }
