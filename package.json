@@ -8,8 +8,6 @@
     "build": "turbo build",
     "db:push": "turbo db:push --filter=@research-lab/db",
     "db:generate": "turbo db:generate --filter=@research-lab/db",
-    "ingest": "tsx scripts/ingest.ts",
-    "analyze": "tsx scripts/analyze.ts",
     "worker": "tsx worker/index.ts"
   },
   "devDependencies": {
