@@ -29,11 +29,12 @@ export function MessageList({ messages }: { messages: Message[] }) {
                   return <p key={i} className="whitespace-pre-wrap text-sm">{part.text}</p>;
                 }
                 if (isToolUIPart(part)) {
+                  const toolName = part.type.startsWith('tool-') ? part.type.slice(5) : part.type;
                   return (
                     <div key={i} className="text-xs text-muted-foreground mt-1 italic">
                       {part.state === 'output-available'
-                        ? `Used ${part.toolName}`
-                        : `Using ${part.toolName}...`}
+                        ? `Used ${toolName}`
+                        : `Using ${toolName}...`}
                     </div>
                   );
                 }
