@@ -93,15 +93,15 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
                   {f.implications && (
                     <div>
                       <p className="text-xs text-muted-foreground font-medium mb-0.5">Implications</p>
-                      <p className="text-sm text-muted-foreground">{f.implications}</p>
+                      <p className="text-sm text-muted-foreground">{Array.isArray(f.implications) ? f.implications.join('. ') : f.implications}</p>
                     </div>
                   )}
                   {f.sourcePapers && f.sourcePapers.length > 0 && (
                     <div>
                       <p className="text-xs text-muted-foreground font-medium mb-1.5">Source Papers</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {f.sourcePapers.map((sp: string, j: number) => (
-                          <Badge key={j} variant="outline" className="text-[10px]">{sp}</Badge>
+                        {f.sourcePapers.map((sp: any, j: number) => (
+                          <Badge key={j} variant="outline" className="text-[10px]">{typeof sp === 'string' ? sp : sp.title ?? sp.id ?? ''}</Badge>
                         ))}
                       </div>
                     </div>
@@ -145,7 +145,11 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
                     )}
                   </div>
                   {t.evidence && (
-                    <p className="text-xs text-muted-foreground">{t.evidence}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {Array.isArray(t.evidence)
+                        ? t.evidence.map((e: any) => typeof e === 'string' ? e : e.quote ?? '').join('; ')
+                        : String(t.evidence)}
+                    </p>
                   )}
                 </CardContent>
               </Card>

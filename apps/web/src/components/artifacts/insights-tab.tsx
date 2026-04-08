@@ -135,9 +135,14 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   )}
                 </CardHeader>
                 {d.sides && d.sides.length > 0 && (
-                  <CardContent className="flex flex-wrap gap-2">
-                    {d.sides.map((side: string, j: number) => (
-                      <Badge key={j} variant="outline">{side}</Badge>
+                  <CardContent className="space-y-2">
+                    {d.sides.map((side: any, j: number) => (
+                      <div key={j} className="rounded-md border border-border p-2.5 text-sm">
+                        <p className="font-medium text-xs">{typeof side === 'string' ? side : side.position ?? ''}</p>
+                        {side.strongestEvidence && (
+                          <p className="text-xs text-muted-foreground mt-1">{side.strongestEvidence}</p>
+                        )}
+                      </div>
                     ))}
                   </CardContent>
                 )}
@@ -154,10 +159,13 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
             Benchmark Warnings
           </h3>
           <div className="space-y-2">
-            {warnings.map((w: string, i: number) => (
+            {warnings.map((w: any, i: number) => (
               <div key={i} className="flex gap-2 items-start rounded-md bg-amber-500/5 border border-amber-500/15 px-3 py-2 text-sm text-amber-300">
                 <span className="shrink-0 mt-0.5">⚠</span>
-                {w}
+                <div>
+                  <p className="font-medium">{typeof w === 'string' ? w : w.issue ?? ''}</p>
+                  {w.explanation && <p className="text-xs mt-0.5 opacity-80">{w.explanation}</p>}
+                </div>
               </div>
             ))}
           </div>

@@ -23,7 +23,7 @@ export function PapersTab({ artifacts }: PapersTabProps) {
           (p.problem ?? '').toLowerCase().includes(q) ||
           (p.approach ?? '').toLowerCase().includes(q) ||
           (p.takeaway ?? '').toLowerCase().includes(q) ||
-          (p.methodology ?? '').toLowerCase().includes(q)
+          (typeof p.methodology === 'string' ? p.methodology : p.methodology?.type ?? '').toLowerCase().includes(q)
         );
       })
     : papers;

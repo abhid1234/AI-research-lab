@@ -24,7 +24,7 @@ export function ConnectionsTab({ artifacts }: ConnectionsTabProps) {
       for (const author of p.authors) {
         const affiliation = author.affiliation ?? 'Unknown';
         if (!authorMap[affiliation]) authorMap[affiliation] = [];
-        authorMap[affiliation].push(author.name ?? author);
+        authorMap[affiliation].push(typeof author === 'string' ? author : author.name ?? String(author));
       }
     }
   }
