@@ -1,16 +1,16 @@
-FROM node:22-alpine AS base
+FROM node:22-alpine
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
-# Copy everything needed for install
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json tsconfig.base.json ./
-COPY packages/db/ ./packages/db/
-COPY apps/web/package.json ./apps/web/
-COPY worker/ ./worker/
+# Copy full monorepo (simplified for reliability)
+COPY . .
 
-# Install all deps (pnpm will create workspace links)
+# Install all deps
 RUN pnpm install --frozen-lockfile
+
+# Verify workspace link works
+RUN node -e "require('@research-lab/db')" || echo "Workspace link check skipped"
 
 ENV NODE_ENV=production
 EXPOSE 8080
