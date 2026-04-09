@@ -29,7 +29,7 @@ const MODEL_BADGE_COLORS = [
   'bg-pink-500/20 text-pink-400 border-pink-500/30',
 ] as const;
 
-function ModelBadge({ name, index }: { name: string; index: number }) {
+function ModelBadge({ name, index, conditions }: { name: string; index: number; conditions?: string }) {
   const colorClass = MODEL_BADGE_COLORS[index % MODEL_BADGE_COLORS.length];
   return (
     <div className="flex items-center gap-2">
@@ -39,7 +39,12 @@ function ModelBadge({ name, index }: { name: string; index: number }) {
       >
         ●
       </span>
-      <span className="font-medium">{name}</span>
+      <div>
+        <span className="font-medium">{name}</span>
+        {conditions && (
+          <span className="block text-[10px] text-muted-foreground mt-0.5">{conditions}</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -49,11 +54,21 @@ function ScoreCell({ value }: { value: number | string }) {
   if (isNaN(num)) {
     return <span className="text-muted-foreground">{String(value)}</span>;
   }
-  const color =
-    num >= 80 ? 'text-emerald-400' :
-    num >= 60 ? 'text-amber-400' :
-    'text-rose-400';
-  return <span className={`font-medium tabular-nums ${color}`}>{num.toFixed(1)}</span>;
+  const barColor =
+    num >= 80 ? 'bg-emerald-500' :
+    num >= 60 ? 'bg-amber-500' :
+    'bg-rose-500';
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs tabular-nums w-10 text-right">{num.toFixed(1)}</span>
+      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+        <div
+          className={`h-full rounded-full ${barColor}`}
+          style={{ width: `${Math.min(num, 100)}%` }}
+        />
+      </div>
+    </div>
+  );
 }
 
 export function BenchmarkTable({ table }: { table: BenchmarkTableData }) {
@@ -77,23 +92,19 @@ export function BenchmarkTable({ table }: { table: BenchmarkTableData }) {
             {scoreKeys.map((k) => (
               <TableHead key={k}>{k}</TableHead>
             ))}
-            <TableHead>Conditions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {table.entries.map((entry, i) => (
             <TableRow key={i}>
               <TableCell>
-                <ModelBadge name={entry.model} index={i} />
+                <ModelBadge name={entry.model} index={i} conditions={entry.conditions} />
               </TableCell>
               {scoreKeys.map((k) => (
                 <TableCell key={k}>
                   <ScoreCell value={entry.scores[k]} />
                 </TableCell>
               ))}
-              <TableCell className="text-muted-foreground text-xs">
-                {entry.conditions ?? '—'}
-              </TableCell>
             </TableRow>
           ))}
         </TableBody>

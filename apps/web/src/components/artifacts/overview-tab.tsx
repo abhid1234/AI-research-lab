@@ -170,19 +170,59 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
                 {filteredPapers.slice(0, 5).map((p, i) => {
                   const dotColor = FINDING_COLORS[i % FINDING_COLORS.length];
                   const title: string = p.mainResult ?? p.takeaway ?? '—';
-                  const paperId: string = p.paperId ?? '';
+                  const paperTitle: string = p.title ?? p.paperId ?? '';
+                  const authorName: string = p.authors ?? p.author ?? '';
+                  const date: string = p.date ?? p.year ?? p.publishedAt ?? '';
+
+                  // Derive tag labels from methodology or category
+                  const tag1: string | undefined =
+                    typeof p.methodology === 'string' && p.methodology.trim()
+                      ? p.methodology.trim().split(/\s+/)[0]
+                      : typeof p.category === 'string' && p.category.trim()
+                      ? p.category.trim()
+                      : undefined;
+                  const tag2: string | undefined =
+                    typeof p.topic === 'string' && p.topic.trim() ? p.topic.trim() : undefined;
+
                   return (
                     <div key={i} className="rounded-lg border border-border bg-card p-3 space-y-1.5">
+                      {/* Tag badges */}
+                      {(tag1 || tag2) && (
+                        <div className="flex gap-1 mb-1">
+                          {tag1 && (
+                            <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                              {tag1}
+                            </span>
+                          )}
+                          {tag2 && (
+                            <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded">
+                              {tag2}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {/* Finding title */}
                       <div className="flex items-start gap-2">
                         <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${dotColor}`} aria-hidden="true" />
                         <p className="text-sm font-semibold leading-snug">{title}</p>
                       </div>
+                      {/* Approach description */}
                       {p.approach && (
-                        <p className="text-xs text-muted-foreground leading-relaxed pl-4">{p.approach}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed pl-4 line-clamp-2">{p.approach}</p>
                       )}
-                      {paperId && (
-                        <p className="text-[11px] text-muted-foreground/70 pl-4 font-mono">
-                          {paperId}
+                      {/* Paper citation */}
+                      {paperTitle && (
+                        <p className="text-xs text-muted-foreground/80 mt-1.5 pl-4 flex items-center gap-1">
+                          <span className="text-primary/60">↗</span>
+                          <span className="italic">{paperTitle}</span>
+                          {(authorName || date) && (
+                            <span>
+                              {'— '}
+                              {authorName ? authorName : ''}
+                              {authorName && date ? ', ' : ''}
+                              {date ? date : ''}
+                            </span>
+                          )}
                         </p>
                       )}
                     </div>
