@@ -183,7 +183,7 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
                       </div>
 
                       {/* Right — 1/3 sidebar */}
-                      <div className="sm:w-64 shrink-0 p-4 space-y-4 bg-muted/30">
+                      <div className="sm:w-64 shrink-0 p-4 space-y-4 bg-blue-500/5 border-l border-blue-500/20">
                         {f.confidence != null && (
                           <ConfidenceBar value={typeof f.confidence === 'number' ? f.confidence : 0} />
                         )}

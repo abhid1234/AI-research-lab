@@ -97,46 +97,48 @@ export default function Home() {
   return (
     <ErrorBoundary>
     <AppShell paperCount={paperCount} topicCount={topicCount} dateRange={dateRange}>
-      {/* Left panel: chat — hidden when artifact panel is maximized */}
+      {/* Left panel: chat — dark, hidden when artifact panel is maximized */}
       {!isMaximized && (
-        <aside className="w-[340px] shrink-0 border-r border-border flex flex-col overflow-hidden">
+        <aside className="w-[340px] shrink-0 border-r border-border flex flex-col overflow-hidden bg-[oklch(0.145_0.014_260)] text-[oklch(0.985_0.002_260)]">
           <ChatPanel />
         </aside>
       )}
 
-      {/* Right panel: artifacts */}
+      {/* Right panel: artifacts — always light */}
       <main className="flex flex-1 flex-col overflow-hidden">
-        {/* Topic selector toolbar */}
-        <div className="flex items-center gap-3 border-b border-border px-4 h-12 shrink-0">
-          <span className="text-xs text-muted-foreground font-medium">Topic</span>
-          <TopicSelector
-            selectedId={selectedTopicId}
-            onChange={handleTopicChange}
-          />
-          {selectedTopicId && (
-            <button
-              onClick={() => fetchArtifacts(selectedTopicId)}
-              className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Refresh
-            </button>
-          )}
-          <PanelToggle isMaximized={isMaximized} onToggle={() => setIsMaximized((v) => !v)} />
-        </div>
+        <div className="artifact-panel flex flex-1 flex-col overflow-hidden">
+          {/* Topic selector toolbar */}
+          <div className="flex items-center gap-3 border-b border-[oklch(0.9_0_0)] px-4 h-12 shrink-0">
+            <span className="text-xs text-[oklch(0.45_0_0)] font-medium">Topic</span>
+            <TopicSelector
+              selectedId={selectedTopicId}
+              onChange={handleTopicChange}
+            />
+            {selectedTopicId && (
+              <button
+                onClick={() => fetchArtifacts(selectedTopicId)}
+                className="ml-auto text-xs text-[oklch(0.45_0_0)] hover:text-[oklch(0.145_0_0)] transition-colors"
+              >
+                Refresh
+              </button>
+            )}
+            <PanelToggle isMaximized={isMaximized} onToggle={() => setIsMaximized((v) => !v)} />
+          </div>
 
-        {/* Artifact viewer */}
-        <div className="flex-1 overflow-hidden">
-          {loadingArtifacts ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-              Loading artifacts...
-            </div>
-          ) : (
-            <ArtifactViewer artifacts={artifacts} />
-          )}
-        </div>
+          {/* Artifact viewer */}
+          <div className="flex-1 overflow-hidden">
+            {loadingArtifacts ? (
+              <div className="flex items-center justify-center h-full text-[oklch(0.45_0_0)] text-sm">
+                Loading artifacts...
+              </div>
+            ) : (
+              <ArtifactViewer artifacts={artifacts} />
+            )}
+          </div>
 
-        {/* Job status bar */}
-        <JobStatusBar jobId={latestJobId} />
+          {/* Job status bar */}
+          <JobStatusBar jobId={latestJobId} />
+        </div>
       </main>
     </AppShell>
     </ErrorBoundary>

@@ -32,8 +32,8 @@ async function main() {
     await db.insert(papers).values(p).onConflictDoNothing();
     await db.insert(topicPapers).values({ topicId: topic.id, paperId: p.id }).onConflictDoNothing();
 
-    // Create a chunk with a zero-vector embedding (1536 dims)
-    const zeroVector = new Array(1536).fill(0);
+    // Create a chunk with a zero-vector embedding (768 dims — matches Gemini text-embedding-004)
+    const zeroVector = new Array(768).fill(0);
     await db.insert(paperChunks).values({
       paperId: p.id,
       chunkIndex: 0,

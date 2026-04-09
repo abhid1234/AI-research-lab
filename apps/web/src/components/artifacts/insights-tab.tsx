@@ -96,6 +96,11 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
         <SummaryCard label="Warnings" value={warnings.length} icon="⚠" />
       </div>
 
+      {/* Two-column newspaper layout */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Left column: Contradictions + Open Debates */}
+        <div className="space-y-6">
+
       {/* Contradictions */}
       {contradictions.length > 0 && (
         <section>
@@ -194,6 +199,76 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
         </section>
       )}
 
+      {/* Open Debates */}
+      {openDebates.length > 0 && (
+        <section>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+            Open Debates ({openDebates.length})
+          </h3>
+          <p className="text-xs text-muted-foreground mb-4">Unresolved questions where the community is actively split.</p>
+          <div className="space-y-4">
+            {openDebates.map((d, i) => {
+              const question = typeof d.question === 'string' ? d.question : safeString(d.question);
+              const significance = typeof d.significance === 'string' ? d.significance : '';
+              const sides: any[] = Array.isArray(d.sides) ? d.sides : [];
+
+              return (
+                <Card key={i}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-semibold">{question}</CardTitle>
+                    {significance && (
+                      <CardDescription className="text-xs">{significance}</CardDescription>
+                    )}
+                  </CardHeader>
+                  {sides.length > 0 && (
+                    <CardContent className="pt-0">
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {sides.map((side: any, j: number) => {
+                          const position = typeof side === 'string' ? side : (typeof side?.position === 'string' ? side.position : '');
+                          const evidence = typeof side?.strongestEvidence === 'string' ? side.strongestEvidence : '';
+                          const papers: any[] = Array.isArray(side?.papers) ? side.papers : [];
+                          const label = j === 0 ? 'Position A' : j === 1 ? 'Position B' : `Position ${j + 1}`;
+                          const labelColor = j === 0 ? 'text-violet-400' : 'text-sky-400';
+                          const borderColor = j === 0 ? 'border-violet-500/20 bg-violet-500/5' : 'border-sky-500/20 bg-sky-500/5';
+
+                          return (
+                            <div key={j} className={`rounded-md border p-3 space-y-1.5 ${borderColor}`}>
+                              <p className={`text-[10px] font-semibold uppercase tracking-wide ${labelColor}`}>{label}</p>
+                              <p className="text-sm font-medium leading-snug">{position}</p>
+                              {evidence && (
+                                <p className="text-xs text-muted-foreground">{evidence}</p>
+                              )}
+                              {papers.length > 0 && (
+                                <div className="space-y-0.5 pt-1">
+                                  {papers.map((p: any, k: number) => {
+                                    const t = typeof p === 'string' ? p : (typeof p?.title === 'string' ? p.title : safeString(p));
+                                    return (
+                                      <p key={k} className="text-[11px] text-muted-foreground/70 flex items-start gap-1">
+                                        <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/30" />
+                                        {t}
+                                      </p>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+        </div>{/* end left column */}
+
+        {/* Right column: Consensus + Benchmark Warnings */}
+        <div className="space-y-6">
+
       {/* Consensus */}
       {consensus.length > 0 && (
         <section>
@@ -263,71 +338,6 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
         </section>
       )}
 
-      {/* Open Debates */}
-      {openDebates.length > 0 && (
-        <section>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-1">
-            Open Debates ({openDebates.length})
-          </h3>
-          <p className="text-xs text-muted-foreground mb-4">Unresolved questions where the community is actively split.</p>
-          <div className="space-y-4">
-            {openDebates.map((d, i) => {
-              const question = typeof d.question === 'string' ? d.question : safeString(d.question);
-              const significance = typeof d.significance === 'string' ? d.significance : '';
-              const sides: any[] = Array.isArray(d.sides) ? d.sides : [];
-
-              return (
-                <Card key={i}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-semibold">{question}</CardTitle>
-                    {significance && (
-                      <CardDescription className="text-xs">{significance}</CardDescription>
-                    )}
-                  </CardHeader>
-                  {sides.length > 0 && (
-                    <CardContent className="pt-0">
-                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        {sides.map((side: any, j: number) => {
-                          const position = typeof side === 'string' ? side : (typeof side?.position === 'string' ? side.position : '');
-                          const evidence = typeof side?.strongestEvidence === 'string' ? side.strongestEvidence : '';
-                          const papers: any[] = Array.isArray(side?.papers) ? side.papers : [];
-                          const label = j === 0 ? 'Position A' : j === 1 ? 'Position B' : `Position ${j + 1}`;
-                          const labelColor = j === 0 ? 'text-violet-400' : 'text-sky-400';
-                          const borderColor = j === 0 ? 'border-violet-500/20 bg-violet-500/5' : 'border-sky-500/20 bg-sky-500/5';
-
-                          return (
-                            <div key={j} className={`rounded-md border p-3 space-y-1.5 ${borderColor}`}>
-                              <p className={`text-[10px] font-semibold uppercase tracking-wide ${labelColor}`}>{label}</p>
-                              <p className="text-sm font-medium leading-snug">{position}</p>
-                              {evidence && (
-                                <p className="text-xs text-muted-foreground">{evidence}</p>
-                              )}
-                              {papers.length > 0 && (
-                                <div className="space-y-0.5 pt-1">
-                                  {papers.map((p: any, k: number) => {
-                                    const t = typeof p === 'string' ? p : (typeof p?.title === 'string' ? p.title : safeString(p));
-                                    return (
-                                      <p key={k} className="text-[11px] text-muted-foreground/70 flex items-start gap-1">
-                                        <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/30" />
-                                        {t}
-                                      </p>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  )}
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
       {/* Benchmark Warnings */}
       {warnings.length > 0 && (
         <section>
@@ -374,7 +384,10 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
         </section>
       )}
 
-      {/* Benchmark tables */}
+        </div>{/* end right column */}
+      </div>{/* end two-column grid */}
+
+      {/* Benchmark tables — full width below columns */}
       {benchmarkTables.length > 0 && (
         <section>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
