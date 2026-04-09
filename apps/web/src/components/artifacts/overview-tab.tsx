@@ -130,16 +130,16 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
         <button onClick={() => setDrawerOpen(true)} className="text-left">
           <GradientStatCard label="Papers" value={totalPaperCount ?? papers.length} clickable />
         </button>
-        <GradientStatCard label="Topics Tracked" value={topicEvolution.length} />
+        <GradientStatCard label="Topics Tracked" value={Math.max(uniqueClusters.length, topicEvolution.length)} />
         <GradientStatCard label="Insights" value={insightCount} />
         <GradientStatCard label="Emerging Topics" value={emergingTopics.length} />
       </div>
 
       {/* Collection description banner */}
-      {(papers.length > 0 || topicEvolution.length > 0) && (
+      {((totalPaperCount ?? papers.length) > 0 || topicEvolution.length > 0) && (
         <p className="text-sm text-muted-foreground">
-          {papers.length} paper{papers.length !== 1 ? 's' : ''} spanning{' '}
-          {topicEvolution.length} distinct research topic{topicEvolution.length !== 1 ? 's' : ''}.
+          {totalPaperCount ?? papers.length} paper{(totalPaperCount ?? papers.length) !== 1 ? 's' : ''} spanning{' '}
+          {uniqueClusters.length || topicEvolution.length} distinct research topic{(uniqueClusters.length || topicEvolution.length) !== 1 ? 's' : ''}.
           The topics are grouped in the chart below based on research clusters discovered
           in the current batch analysis.
         </p>
