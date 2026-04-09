@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getTopicById, getArtifactsByTopic } from '@research-lab/db';
+import { getTopicById, getArtifactsByTopic, getPapersByTopic } from '@research-lab/db';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -9,6 +9,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     return NextResponse.json({ error: 'Topic not found' }, { status: 404 });
   }
 
-  const artifacts = await getArtifactsByTopic(id);
-  return NextResponse.json({ topic, artifacts });
+  const [artifacts, papers] = await Promise.all([
+    getArtifactsByTopic(id),
+    getPapersByTopic(id),
+  ]);
+
+  return NextResponse.json({ topic, artifacts, papers });
 }

@@ -20,6 +20,7 @@ const ResearchLandscape = dynamic(
 interface OverviewTabProps {
   artifacts: { agentType: string; data: any }[];
   totalPaperCount?: number;
+  dbPapers?: any[];
 }
 
 const FINDING_COLORS = [
@@ -56,7 +57,7 @@ const TOPIC_COLORS = [
   '#8b5cf6', // violet
 ] as const;
 
-export function OverviewTab({ artifacts, totalPaperCount }: OverviewTabProps) {
+export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTabProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
 
@@ -169,29 +170,30 @@ export function OverviewTab({ artifacts, totalPaperCount }: OverviewTabProps) {
         </div>
       )}
 
-      {/* Research Landscape scatter plot */}
-      {papers.length > 0 && (
+      {/* Side-by-side: Research Landscape + Topic Evolution */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Research Landscape radar chart */}
         <Card>
           <CardHeader>
             <CardTitle>Research Landscape</CardTitle>
-            <CardDescription>Papers plotted by semantic similarity — colored by cluster</CardDescription>
+            <CardDescription>Click topic to filter — distribution across areas</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResearchLandscape papers={papers} activeFilter={activeFilter} />
+            <ResearchLandscape papers={dbPapers && dbPapers.length > 0 ? dbPapers : papers} activeFilter={activeFilter} />
           </CardContent>
         </Card>
-      )}
 
-      {/* Topic Evolution chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Topic Evolution</CardTitle>
-          <CardDescription>Monthly paper volume per topic</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TopicEvolutionChart data={topicEvolution} />
-        </CardContent>
-      </Card>
+        {/* Topic Evolution chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Topic Evolution Over Time</CardTitle>
+            <CardDescription>Tracked data showing research intensity across key topics</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TopicEvolutionChart data={topicEvolution} />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Two-column: Benchmark Highlights + Key Results */}
       {(visibleBenchmarkTables.length > 0 || filteredPapers.length > 0) && (

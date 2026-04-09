@@ -15,6 +15,7 @@ export default function Home() {
   const [paperCount, setPaperCount] = useState<number | undefined>(undefined);
   const [topicCount, setTopicCount] = useState<number | undefined>(undefined);
   const [dateRange, setDateRange] = useState<string | undefined>(undefined);
+  const [dbPapers, setDbPapers] = useState<any[]>([]);
 
   // Fetch total topic count once
   useEffect(() => {
@@ -33,11 +34,16 @@ export default function Home() {
     try {
       const res = await fetch(`/api/topics/${topicId}`);
       if (!res.ok) return;
-      const { topic: topicData, artifacts: raw } = await res.json();
+      const { topic: topicData, artifacts: raw, papers: dbPapersRaw } = await res.json();
 
       // Use real paper count from database topic record
       if (topicData?.paperCount) {
         setPaperCount(topicData.paperCount);
+      }
+
+      // Store DB papers for charts
+      if (Array.isArray(dbPapersRaw)) {
+        setDbPapers(dbPapersRaw);
       }
 
       if (Array.isArray(raw)) {
@@ -96,7 +102,7 @@ export default function Home() {
                   Loading artifacts...
                 </div>
               ) : (
-                <ArtifactViewer artifacts={artifacts} totalPaperCount={paperCount} />
+                <ArtifactViewer artifacts={artifacts} totalPaperCount={paperCount} dbPapers={dbPapers} />
               )}
             </div>
 

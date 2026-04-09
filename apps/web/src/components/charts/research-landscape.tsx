@@ -22,6 +22,8 @@ const CATEGORIES = [
 
 function derivePaperCategory(p: any): string {
   const text = [
+    p.title ?? '',
+    p.abstract ?? '',
     p.category ?? '',
     p.topic ?? '',
     ...(Array.isArray(p.categories) ? p.categories : []),
