@@ -51,7 +51,7 @@ export const paperChunks = pgTable('paper_chunks', {
   chunkIndex: integer('chunk_index').notNull(),
   content: text('content').notNull(),
   source: text('source').notNull().default('abstract'), // 'abstract' | 'fulltext'
-  embedding: vector('embedding', { dimensions: 1536 }),
+  embedding: vector('embedding', { dimensions: 768 }),
   metadata: jsonb('metadata').$type<{ section?: string; pageNum?: number }>(),
 }, (table) => ({
   embeddingIdx: index('embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),

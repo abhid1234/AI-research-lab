@@ -98,7 +98,7 @@ async function main() {
     },
   ];
 
-  const zeroVec = `[${new Array(1536).fill(0).join(',')}]`;
+  const zeroVec = `[${new Array(768).fill(0).join(',')}]`;
 
   for (const p of demoPapers) {
     await client.query(
