@@ -2,6 +2,7 @@
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { CitationGraph } from '@/components/charts/citation-graph';
 
 interface ConnectionsTabProps {
   artifacts: { agentType: string; data: any }[];
@@ -95,6 +96,23 @@ export function ConnectionsTab({ artifacts, dbPapers = [] }: ConnectionsTabProps
 
   return (
     <div className="space-y-6">
+      {/* Citation Graph */}
+      {dbPapers.length > 0 && (
+        <section>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-semibold">Paper Relationships</CardTitle>
+              <CardDescription>
+                Papers by research category and publication date ({dbPapers.length} total)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CitationGraph papers={dbPapers} />
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
       {/* Most cited / key papers */}
       {topPapers.length > 0 && (
         <section>
