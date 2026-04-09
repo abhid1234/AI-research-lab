@@ -151,14 +151,29 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
                             <div className="space-y-0.5">
                               {sourcePapers.map((sp: any, j: number) => {
                                 const title = typeof sp === 'string' ? sp : sp.title ?? sp.id ?? '';
+                                const paperId: string = typeof sp?.paperId === 'string' ? sp.paperId : typeof sp?.id === 'string' ? sp.id : '';
                                 const contribution = typeof sp?.contribution === 'string' ? sp.contribution : '';
+                                const titleNode = (
+                                  <>
+                                    {title}
+                                    {contribution && <span className="opacity-60"> — {contribution}</span>}
+                                  </>
+                                );
                                 return (
                                   <div key={j} className="flex items-start gap-1.5">
                                     <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
-                                    <span className="text-xs text-muted-foreground">
-                                      {title}
-                                      {contribution && <span className="opacity-60"> — {contribution}</span>}
-                                    </span>
+                                    {paperId ? (
+                                      <a
+                                        href={`https://www.semanticscholar.org/paper/${paperId}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-primary/70 hover:text-primary transition-colors"
+                                      >
+                                        {titleNode}
+                                      </a>
+                                    ) : (
+                                      <span className="text-xs text-muted-foreground">{titleNode}</span>
+                                    )}
                                   </div>
                                 );
                               })}

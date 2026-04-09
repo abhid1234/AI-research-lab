@@ -1,6 +1,7 @@
 'use client';
 
 import { ThemeToggle } from './theme-toggle';
+import { ExportButton } from './export-button';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -40,6 +41,7 @@ export function AppShell({ children, paperCount, topicCount, dateRange }: AppShe
             <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_1px_rgba(52,211,153,0.5)]" aria-hidden="true" />
             <span className="text-xs text-muted-foreground">Connected</span>
           </div>
+          <ExportButton />
           <ThemeToggle />
         </div>
       </header>

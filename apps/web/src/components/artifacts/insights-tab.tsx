@@ -109,8 +109,10 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
               const badgeClass = natureBadgeClass[nature] ?? 'bg-muted text-muted-foreground border-border';
               const claim1Statement = typeof c.claim1 === 'string' ? c.claim1 : (typeof c.claim1?.statement === 'string' ? c.claim1.statement : '');
               const claim1Title = typeof c.claim1?.paper?.title === 'string' ? c.claim1.paper.title : '';
+              const claim1PaperId: string = typeof c.claim1?.paper?.paperId === 'string' ? c.claim1.paper.paperId : typeof c.claim1?.paper?.id === 'string' ? c.claim1.paper.id : '';
               const claim2Statement = typeof c.claim2 === 'string' ? c.claim2 : (typeof c.claim2?.statement === 'string' ? c.claim2.statement : '');
               const claim2Title = typeof c.claim2?.paper?.title === 'string' ? c.claim2.paper.title : '';
+              const claim2PaperId: string = typeof c.claim2?.paper?.paperId === 'string' ? c.claim2.paper.paperId : typeof c.claim2?.paper?.id === 'string' ? c.claim2.paper.id : '';
               const analysis = typeof c.analysis === 'string' ? c.analysis : '';
 
               return (
@@ -134,7 +136,19 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                         <p className="text-xs text-rose-400 font-semibold">Claim A</p>
                         <p className="text-sm">{claim1Statement}</p>
                         {claim1Title && (
-                          <p className="text-xs text-muted-foreground">— {claim1Title}</p>
+                          claim1PaperId ? (
+                            <a
+                              href={`https://www.semanticscholar.org/paper/${claim1PaperId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1"
+                            >
+                              <span>↗</span>
+                              <span className="italic">{claim1Title}</span>
+                            </a>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">— {claim1Title}</p>
+                          )
                         )}
                         {c.claim1?.evidence && (
                           <p className="text-[11px] text-muted-foreground/70 italic mt-1">
@@ -146,7 +160,19 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                         <p className="text-xs text-blue-400 font-semibold">Claim B</p>
                         <p className="text-sm">{claim2Statement}</p>
                         {claim2Title && (
-                          <p className="text-xs text-muted-foreground">— {claim2Title}</p>
+                          claim2PaperId ? (
+                            <a
+                              href={`https://www.semanticscholar.org/paper/${claim2PaperId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1"
+                            >
+                              <span>↗</span>
+                              <span className="italic">{claim2Title}</span>
+                            </a>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">— {claim2Title}</p>
+                          )
                         )}
                         {c.claim2?.evidence && (
                           <p className="text-[11px] text-muted-foreground/70 italic mt-1">

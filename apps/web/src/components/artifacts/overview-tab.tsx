@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import dynamic from 'next/dynamic';
 import { BenchmarkTable } from '@/components/charts/benchmark-table';
+import { TimelineScrubber } from '@/components/charts/timeline-scrubber';
 
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
@@ -46,8 +47,17 @@ function derivePaperCluster(paper: any): string {
   return 'Other';
 }
 
+const TOPIC_COLORS = [
+  '#f43f5e', // rose
+  '#10b981', // emerald
+  '#f59e0b', // amber
+  '#3b82f6', // blue
+  '#8b5cf6', // violet
+] as const;
+
 export function OverviewTab({ artifacts }: OverviewTabProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [activeMonth, setActiveMonth] = useState<string | null>(null);
 
   const trendArtifact = artifacts.find((a) => a.agentType === 'trend-mapper');
   const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
@@ -68,16 +78,43 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
     (trendData.emergingTopics?.length ?? 0) +
     (trendData.methodShifts?.length ?? 0);
 
+  // Derive sorted unique months from topicEvolution data for timeline scrubber
+  const months: string[] = Array.from(
+    new Set(
+      topicEvolution.flatMap((entry: any) =>
+        Array.isArray(entry.data)
+          ? entry.data.map((d: any) => (typeof d.month === 'string' ? d.month : '')).filter(Boolean)
+          : []
+      )
+    )
+  ).sort() as string[];
+
+  // Topic legend for timeline scrubber
+  const topicLegend = topicEvolution.slice(0, 5).map((entry: any, i: number) => ({
+    name: typeof entry.topic === 'string' ? entry.topic : `Topic ${i + 1}`,
+    color: TOPIC_COLORS[i % TOPIC_COLORS.length],
+  }));
+
+  // Filter papers by active month (using date/year field) for key results
+  const monthFilteredPapers =
+    activeMonth === null
+      ? papers
+      : papers.filter((p: any) => {
+          const d: string = p.date ?? p.year ?? p.publishedAt ?? '';
+          // Match "YYYY-MM" prefix
+          return typeof d === 'string' && d.startsWith(activeMonth);
+        });
+
   // Derive unique filter labels from the paper clusters
   const uniqueClusters: string[] = Array.from(
     new Set(papers.map((p) => derivePaperCluster(p)))
   ).filter((c) => c !== 'Other');
 
-  // Papers visible to the filtered views
+  // Papers visible to the filtered views (cluster filter applied on top of month filter)
   const filteredPapers =
     activeFilter === 'all'
-      ? papers
-      : papers.filter((p) => derivePaperCluster(p).toLowerCase() === activeFilter.toLowerCase());
+      ? monthFilteredPapers
+      : monthFilteredPapers.filter((p) => derivePaperCluster(p).toLowerCase() === activeFilter.toLowerCase());
 
   // Filtered benchmark tables (pass-through — filtering is paper-level only)
   const visibleBenchmarkTables = benchmarkTables;
@@ -100,6 +137,16 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
           The topics are grouped in the chart below based on research clusters discovered
           in the current batch analysis.
         </p>
+      )}
+
+      {/* Timeline scrubber */}
+      {months.length > 0 && (
+        <TimelineScrubber
+          months={months}
+          topics={topicLegend}
+          activeMonth={activeMonth}
+          onMonthClick={setActiveMonth}
+        />
       )}
 
       {/* Sub-tab filter chips */}
@@ -212,18 +259,37 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
                       )}
                       {/* Paper citation */}
                       {paperTitle && (
-                        <p className="text-xs text-muted-foreground/80 mt-1.5 pl-4 flex items-center gap-1">
-                          <span className="text-primary/60">↗</span>
-                          <span className="italic">{paperTitle}</span>
-                          {(authorName || date) && (
-                            <span>
-                              {'— '}
-                              {authorName ? authorName : ''}
-                              {authorName && date ? ', ' : ''}
-                              {date ? date : ''}
-                            </span>
-                          )}
-                        </p>
+                        (() => {
+                          const paperId: string = p.paperId ?? p.id ?? '';
+                          const inner = (
+                            <>
+                              <span>↗</span>
+                              <span className="italic">{paperTitle}</span>
+                              {(authorName || date) && (
+                                <span className="text-muted-foreground">
+                                  {'— '}
+                                  {authorName ? authorName : ''}
+                                  {authorName && date ? ', ' : ''}
+                                  {date ? date : ''}
+                                </span>
+                              )}
+                            </>
+                          );
+                          return paperId ? (
+                            <a
+                              href={`https://www.semanticscholar.org/paper/${paperId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary/70 hover:text-primary transition-colors mt-1.5 pl-4 flex items-center gap-1"
+                            >
+                              {inner}
+                            </a>
+                          ) : (
+                            <p className="text-xs text-muted-foreground/80 mt-1.5 pl-4 flex items-center gap-1">
+                              {inner}
+                            </p>
+                          );
+                        })()
                       )}
                     </div>
                   );
