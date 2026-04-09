@@ -10,9 +10,12 @@ interface AppShellProps {
   topicCount?: number;
   dateRange?: string;
   selectedTopicId?: string | null;
+  exportTopic?: string;
+  exportPapers?: any[];
+  exportArtifacts?: any[];
 }
 
-export function AppShell({ children, paperCount, topicCount, dateRange, selectedTopicId }: AppShellProps) {
+export function AppShell({ children, paperCount, topicCount, dateRange, selectedTopicId, exportTopic, exportPapers, exportArtifacts }: AppShellProps) {
   const hasStats = paperCount !== undefined || topicCount !== undefined || dateRange !== undefined;
 
   return (
@@ -46,7 +49,7 @@ export function AppShell({ children, paperCount, topicCount, dateRange, selected
             <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_1px_rgba(52,211,153,0.5)]" aria-hidden="true" />
             <span className="text-xs text-muted-foreground">Connected</span>
           </div>
-          <ExportButton />
+          <ExportButton topic={exportTopic} papers={exportPapers} artifacts={exportArtifacts} />
           <ThemeToggle />
         </div>
       </header>

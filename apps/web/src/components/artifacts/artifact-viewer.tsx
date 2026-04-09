@@ -108,7 +108,7 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers }: Artifac
         </TabsContent>
 
         <TabsContent value="connections" className="p-4 h-full">
-          <ConnectionsTab artifacts={artifacts} />
+          <ConnectionsTab artifacts={artifacts} dbPapers={dbPapers} />
         </TabsContent>
 
         <TabsContent value="papers" className="p-4 h-full">

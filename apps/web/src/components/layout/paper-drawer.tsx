@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PaperDetailModal } from './paper-detail-modal';
+import { PaperComparisonModal } from './paper-comparison-modal';
+import { upvotePaper, getVoteCount } from '@/lib/votes';
 
 
 interface PaperDrawerProps {
@@ -15,6 +17,35 @@ interface PaperDrawerProps {
 export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
   const [search, setSearch] = useState('');
   const [selectedPaper, setSelectedPaper] = useState<any | null>(null);
+  const [compareIds, setCompareIds] = useState<Set<string>>(new Set());
+  const [comparingOpen, setComparingOpen] = useState(false);
+  const [votes, setVotes] = useState<Record<string, number>>(() => {
+    if (typeof window === 'undefined') return {};
+    const all = papers.reduce<Record<string, number>>((acc, p) => {
+      const id = String(p.id ?? '');
+      if (id) acc[id] = getVoteCount(id);
+      return acc;
+    }, {});
+    return all;
+  });
+
+  const toggleCompare = (id: string) => {
+    setCompareIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else if (next.size < 3) {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleUpvote = (e: React.MouseEvent, paperId: string) => {
+    e.stopPropagation();
+    const newCount = upvotePaper(paperId);
+    setVotes((prev) => ({ ...prev, [paperId]: newCount }));
+  };
 
   if (!open) return null;
 
@@ -27,6 +58,8 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
       })
     : papers;
 
+  const compareItems = papers.filter((p) => compareIds.has(String(p.id ?? '')));
+
   return (
     <>
       {/* Backdrop */}
@@ -36,7 +69,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
       />
 
       {/* Drawer panel */}
-      <div className="fixed top-0 right-0 h-full w-[480px] max-w-[90vw] bg-white border-l border-[oklch(0.9_0_0)] shadow-xl z-50 flex flex-col">
+      <div className="fixed top-0 right-0 h-full w-[480px] max-w-[90vw] bg-white border-l border-[oklch(0.9_0_0)] shadow-xl z-50 flex flex-col relative">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[oklch(0.9_0_0)]">
           <div>
@@ -65,6 +98,15 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
           />
         </div>
 
+        {/* Compare hint */}
+        {compareIds.size > 0 && (
+          <div className="px-5 py-2 border-b border-[oklch(0.9_0_0)] bg-[oklch(0.97_0.03_260)]">
+            <p className="text-[10px] text-[oklch(0.4_0.15_260)]">
+              {compareIds.size} selected · {compareIds.size < 2 ? 'Select at least 2 to compare' : compareIds.size < 3 ? 'Select up to 1 more or compare now' : 'Max 3 papers selected'}
+            </p>
+          </div>
+        )}
+
         {/* Paper list */}
         <div className="flex-1 overflow-y-auto">
           <div className="divide-y divide-[oklch(0.95_0_0)]">
@@ -91,9 +133,23 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
                     ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}`
                     : '#';
 
+              const paperId = String(paper.id ?? i);
+              const isChecked = compareIds.has(paperId);
+              const voteCount = votes[paperId] ?? 0;
+
               return (
                 <div key={paper.id ?? i} className="px-5 py-3 hover:bg-[oklch(0.98_0_0)] transition-colors">
                   <div className="flex items-start gap-2">
+                    {/* Compare checkbox */}
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      disabled={!isChecked && compareIds.size >= 3}
+                      onChange={() => toggleCompare(paperId)}
+                      aria-label="Select for comparison"
+                      className="mt-1 shrink-0 accent-[oklch(0.45_0.19_260)] cursor-pointer"
+                      onClick={(e) => e.stopPropagation()}
+                    />
                     <span className="text-[10px] text-[oklch(0.6_0_0)] font-mono mt-1 shrink-0 w-5">{i + 1}.</span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start gap-1">
@@ -114,6 +170,18 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
                         >
                           ↗
                         </a>
+                        {/* Upvote button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleUpvote(e, paperId)}
+                          aria-label="Upvote paper"
+                          className="shrink-0 mt-0.5 flex items-center gap-0.5 text-[oklch(0.55_0_0)] hover:text-[oklch(0.35_0.19_260)] transition-colors text-[10px]"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="18 15 12 9 6 15" />
+                          </svg>
+                          {voteCount > 0 && <span className="tabular-nums">{voteCount}</span>}
+                        </button>
                       </div>
 
                       {/* Meta line */}
@@ -158,12 +226,36 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
         </div>
       </div>
 
+      {/* Floating compare button */}
+      {compareIds.size >= 2 && (
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none" style={{ zIndex: 60 }}>
+          <button
+            type="button"
+            onClick={() => setComparingOpen(true)}
+            className="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full bg-[oklch(0.45_0.19_260)] text-white text-sm font-semibold shadow-lg hover:bg-[oklch(0.38_0.19_260)] transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="18" rx="1" /><rect x="14" y="3" width="7" height="18" rx="1" />
+            </svg>
+            Compare selected ({compareIds.size})
+          </button>
+        </div>
+      )}
+
       {/* Paper detail modal */}
       <PaperDetailModal
         paper={selectedPaper}
         onClose={() => setSelectedPaper(null)}
         allPapers={papers}
       />
+
+      {/* Comparison modal */}
+      {comparingOpen && compareItems.length >= 2 && (
+        <PaperComparisonModal
+          papers={compareItems}
+          onClose={() => setComparingOpen(false)}
+        />
+      )}
     </>
   );
 }

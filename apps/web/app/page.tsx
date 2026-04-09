@@ -17,6 +17,7 @@ export default function Home() {
   const [topicCount, setTopicCount] = useState<number | undefined>(undefined);
   const [dateRange, setDateRange] = useState<string | undefined>(undefined);
   const [dbPapers, setDbPapers] = useState<any[]>([]);
+  const [topicName, setTopicName] = useState<string>('');
 
   // Fetch total topic count once
   useEffect(() => {
@@ -40,6 +41,9 @@ export default function Home() {
       // Use real paper count from database topic record
       if (topicData?.paperCount) {
         setPaperCount(topicData.paperCount);
+      }
+      if (topicData?.name) {
+        setTopicName(topicData.name);
       }
 
       // Store DB papers for charts
@@ -77,7 +81,15 @@ export default function Home() {
   return (
     <ErrorBoundary>
       <ChatModal />
-      <AppShell paperCount={paperCount} topicCount={topicCount} dateRange={dateRange} selectedTopicId={selectedTopicId}>
+      <AppShell
+        paperCount={paperCount}
+        topicCount={topicCount}
+        dateRange={dateRange}
+        selectedTopicId={selectedTopicId}
+        exportTopic={topicName}
+        exportPapers={dbPapers}
+        exportArtifacts={artifacts}
+      >
         <main className="flex flex-1 flex-col overflow-hidden">
           <div className="artifact-panel flex flex-col flex-1 overflow-hidden">
             {/* Topic selector toolbar */}

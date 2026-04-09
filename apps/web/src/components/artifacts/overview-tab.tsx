@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import dynamic from 'next/dynamic';
 import { BenchmarkTable } from '@/components/charts/benchmark-table';
 import { TimelineScrubber } from '@/components/charts/timeline-scrubber';
+import { TemporalSlider, filterPapersByWindow } from '@/components/charts/temporal-slider';
 import { PaperDrawer } from '@/components/layout/paper-drawer';
 
 const TopicEvolutionChart = dynamic(
@@ -62,6 +63,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [timeWindowMonths, setTimeWindowMonths] = useState<number>(0);
 
   const trendArtifact = artifacts.find((a) => a.agentType === 'trend-mapper');
   const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
@@ -123,6 +125,9 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
   // Filtered benchmark tables (pass-through — filtering is paper-level only)
   const visibleBenchmarkTables = benchmarkTables;
 
+  // Time-window filtered db papers (for landscape chart and drawer)
+  const timeFilteredDbPapers = filterPapersByWindow(dbPapers ?? [], timeWindowMonths);
+
   return (
     <div className="space-y-6">
       {/* Gradient stat cards */}
@@ -174,6 +179,11 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
         </div>
       )}
 
+      {/* Temporal slider */}
+      {(dbPapers && dbPapers.length > 0) && (
+        <TemporalSlider activeMonths={timeWindowMonths} onChange={setTimeWindowMonths} />
+      )}
+
       {/* Side-by-side: Research Landscape + Topic Evolution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Research Landscape radar chart */}
@@ -183,7 +193,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
             <CardDescription>Click topic to filter — distribution across areas</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResearchLandscape papers={dbPapers && dbPapers.length > 0 ? dbPapers : papers} activeFilter={activeFilter} />
+            <ResearchLandscape papers={timeFilteredDbPapers.length > 0 ? timeFilteredDbPapers : (dbPapers && dbPapers.length > 0 ? dbPapers : papers)} activeFilter={activeFilter} />
           </CardContent>
         </Card>
 
@@ -381,7 +391,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
 
       {/* Paper drawer */}
       <PaperDrawer
-        papers={dbPapers && dbPapers.length > 0 ? dbPapers : papers}
+        papers={timeFilteredDbPapers.length > 0 ? timeFilteredDbPapers : (dbPapers && dbPapers.length > 0 ? dbPapers : papers)}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       />
