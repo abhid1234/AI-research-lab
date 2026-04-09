@@ -79,11 +79,15 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
                 : '';
               const citationCount = typeof paper.citationCount === 'number' ? paper.citationCount : 0;
 
+              // Build a valid URL — skip demo/fake IDs
+              const isRealArxivId = arxivId && !arxivId.startsWith('demo-') && (arxivId.includes('.') || arxivId.includes('/'));
               const paperUrl = arxivId.includes('arxiv.org')
                 ? arxivId
-                : arxivId
+                : isRealArxivId
                   ? `https://arxiv.org/abs/${arxivId}`
-                  : `https://www.semanticscholar.org/paper/${paper.id ?? ''}`;
+                  : title
+                    ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}`
+                    : '#';
 
               return (
                 <div key={paper.id ?? i} className="px-5 py-3 hover:bg-[oklch(0.98_0_0)] transition-colors">
