@@ -4,9 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
 import { TopicSelector } from '@/components/layout/topic-selector';
 import { JobStatusBar } from '@/components/layout/job-status-bar';
-import { PanelToggle } from '@/components/layout/panel-toggle';
-import dynamic from 'next/dynamic';
-const ChatPanel = dynamic(() => import('@/components/chat/chat-panel').then(m => ({ default: m.ChatPanel })), { ssr: false });
 import { ArtifactViewer, type ArtifactItem } from '@/components/artifacts/artifact-viewer';
 import { ErrorBoundary } from '@/components/error-boundary';
 
@@ -18,7 +15,6 @@ export default function Home() {
   const [paperCount, setPaperCount] = useState<number | undefined>(undefined);
   const [topicCount, setTopicCount] = useState<number | undefined>(undefined);
   const [dateRange, setDateRange] = useState<string | undefined>(undefined);
-  const [isMaximized, setIsMaximized] = useState(false);
 
   // Fetch total topic count once
   useEffect(() => {
@@ -73,51 +69,42 @@ export default function Home() {
 
   return (
     <ErrorBoundary>
-    <AppShell paperCount={paperCount} topicCount={topicCount} dateRange={dateRange}>
-      {/* Left panel: chat — dark, hidden when artifact panel is maximized */}
-      {!isMaximized && (
-        <aside className="w-[340px] shrink-0 border-r border-border flex flex-col overflow-hidden bg-[oklch(0.145_0.014_260)] text-[oklch(0.985_0.002_260)]">
-          <ChatPanel />
-        </aside>
-      )}
+      <AppShell paperCount={paperCount} topicCount={topicCount} dateRange={dateRange}>
+        <main className="flex flex-1 flex-col overflow-hidden">
+          <div className="artifact-panel flex flex-col flex-1 overflow-hidden">
+            {/* Topic selector toolbar */}
+            <div className="flex items-center gap-3 border-b border-[oklch(0.9_0_0)] px-4 h-12 shrink-0">
+              <span className="text-xs text-[oklch(0.45_0_0)] font-medium">Topic</span>
+              <TopicSelector
+                selectedId={selectedTopicId}
+                onChange={handleTopicChange}
+              />
+              {selectedTopicId && (
+                <button
+                  onClick={() => fetchArtifacts(selectedTopicId)}
+                  className="ml-auto text-xs text-[oklch(0.45_0_0)] hover:text-[oklch(0.145_0_0)] transition-colors"
+                >
+                  Refresh
+                </button>
+              )}
+            </div>
 
-      {/* Right panel: artifacts — always light */}
-      <main className="flex flex-1 flex-col overflow-hidden">
-        <div className="artifact-panel flex flex-1 flex-col overflow-hidden">
-          {/* Topic selector toolbar */}
-          <div className="flex items-center gap-3 border-b border-[oklch(0.9_0_0)] px-4 h-12 shrink-0">
-            <span className="text-xs text-[oklch(0.45_0_0)] font-medium">Topic</span>
-            <TopicSelector
-              selectedId={selectedTopicId}
-              onChange={handleTopicChange}
-            />
-            {selectedTopicId && (
-              <button
-                onClick={() => fetchArtifacts(selectedTopicId)}
-                className="ml-auto text-xs text-[oklch(0.45_0_0)] hover:text-[oklch(0.145_0_0)] transition-colors"
-              >
-                Refresh
-              </button>
-            )}
-            <PanelToggle isMaximized={isMaximized} onToggle={() => setIsMaximized((v) => !v)} />
+            {/* Artifact viewer */}
+            <div className="flex-1 overflow-hidden">
+              {loadingArtifacts ? (
+                <div className="flex items-center justify-center h-full text-[oklch(0.45_0_0)] text-sm">
+                  Loading artifacts...
+                </div>
+              ) : (
+                <ArtifactViewer artifacts={artifacts} totalPaperCount={paperCount} />
+              )}
+            </div>
+
+            {/* Job status bar */}
+            <JobStatusBar jobId={latestJobId} />
           </div>
-
-          {/* Artifact viewer */}
-          <div className="flex-1 overflow-hidden">
-            {loadingArtifacts ? (
-              <div className="flex items-center justify-center h-full text-[oklch(0.45_0_0)] text-sm">
-                Loading artifacts...
-              </div>
-            ) : (
-              <ArtifactViewer artifacts={artifacts} totalPaperCount={paperCount} />
-            )}
-          </div>
-
-          {/* Job status bar */}
-          <JobStatusBar jobId={latestJobId} />
-        </div>
-      </main>
-    </AppShell>
+        </main>
+      </AppShell>
     </ErrorBoundary>
   );
 }

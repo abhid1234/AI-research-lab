@@ -1,204 +1,113 @@
 'use client';
 
 import {
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
   ResponsiveContainer,
-  Cell,
+  Tooltip,
 } from 'recharts';
 
-interface PaperPoint {
-  x: number;
-  y: number;
-  label: string;
-  cluster: string;
+interface RadarDataPoint {
+  category: string;
+  count: number;
 }
 
-const CLUSTER_COLORS = [
-  '#6366f1',
-  '#22d3ee',
-  '#f59e0b',
-  '#10b981',
-  '#f43f5e',
-  '#8b5cf6',
-  '#14b8a6',
-  '#fb923c',
+const CATEGORIES = [
+  'Agents', 'Safety', 'Reasoning', 'Scaling', 'Training',
+  'Architecture', 'Retrieval', 'Multi-Agent', 'Benchmarks',
 ];
 
-/** Deterministic integer hash from a string + numeric seed */
-function hashStr(str: string, seed: number): number {
-  let h = seed;
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(h ^ str.charCodeAt(i), 0x9e3779b9);
-    h ^= h >>> 16;
-  }
-  return h;
-}
+function derivePaperCategory(p: any): string {
+  const text = [
+    p.category ?? '',
+    p.topic ?? '',
+    ...(Array.isArray(p.categories) ? p.categories : []),
+    typeof p.methodology === 'string' ? p.methodology : p.methodology?.type ?? '',
+    p.problem ?? '',
+    p.approach ?? '',
+  ].join(' ').toLowerCase();
 
-/** Map a hash to [0, 100] */
-function hashToCoord(str: string, seed: number): number {
-  const raw = hashStr(str, seed);
-  return Math.abs(raw % 1000) / 10; // 0–100
-}
-
-/** Derive a cluster label from available paper fields */
-function deriveCluster(paper: any): string {
-  if (typeof paper.methodology === 'string' && paper.methodology.trim()) {
-    // Take first word of methodology to keep clusters manageable
-    return paper.methodology.trim().split(/\s+/)[0];
-  }
-  if (typeof paper.category === 'string' && paper.category.trim()) {
-    return paper.category.trim();
-  }
-  if (Array.isArray(paper.categories) && paper.categories.length > 0) {
-    const first = paper.categories[0];
-    return typeof first === 'string' ? first : 'Other';
-  }
-  if (typeof paper.topic === 'string' && paper.topic.trim()) {
-    return paper.topic.trim();
-  }
-  return 'Other';
-}
-
-function buildPoints(papers: any[]): { points: PaperPoint[]; clusters: string[] } {
-  const clusterSet = new Set<string>();
-
-  const points: PaperPoint[] = papers.map((p) => {
-    const id: string =
-      typeof p.paperId === 'string' ? p.paperId :
-      typeof p.id === 'string' ? p.id :
-      JSON.stringify(p).slice(0, 32);
-
-    const title: string =
-      typeof p.title === 'string' ? p.title :
-      typeof p.mainResult === 'string' ? p.mainResult :
-      'Untitled';
-
-    const cluster = deriveCluster(p);
-    clusterSet.add(cluster);
-
-    return {
-      x: Math.round(hashToCoord(id, 1) * 10) / 10,
-      y: Math.round(hashToCoord(id, 2) * 10) / 10,
-      label: title,
-      cluster,
-    };
-  });
-
-  return { points, clusters: Array.from(clusterSet) };
-}
-
-interface CustomDotTooltipProps {
-  active?: boolean;
-  payload?: any[];
-}
-
-function CustomTooltip({ active, payload }: CustomDotTooltipProps) {
-  if (!active || !payload || payload.length === 0) return null;
-  const entry = payload[0]?.payload as PaperPoint | undefined;
-  if (!entry) return null;
-
-  return (
-    <div
-      className="rounded-lg border border-border bg-card px-3 py-2 shadow-md max-w-[240px]"
-      style={{ fontSize: 12 }}
-    >
-      <p className="font-semibold leading-snug text-foreground line-clamp-3">{entry.label}</p>
-      <p className="mt-1 text-muted-foreground text-[11px]">Cluster: {entry.cluster}</p>
-    </div>
-  );
+  if (text.includes('multi-agent') || text.includes('collaborat')) return 'Multi-Agent';
+  if (text.includes('agent')) return 'Agents';
+  if (text.includes('safe') || text.includes('align')) return 'Safety';
+  if (text.includes('reason') || text.includes('chain') || text.includes('cot')) return 'Reasoning';
+  if (text.includes('scal')) return 'Scaling';
+  if (text.includes('train') || text.includes('fine-tun') || text.includes('rlhf')) return 'Training';
+  if (text.includes('architect') || text.includes('transform') || text.includes('attention')) return 'Architecture';
+  if (text.includes('retriev') || text.includes('rag') || text.includes('search')) return 'Retrieval';
+  if (text.includes('bench') || text.includes('eval') || text.includes('metric')) return 'Benchmarks';
+  return 'Agents'; // default
 }
 
 export function ResearchLandscape({ papers, activeFilter }: { papers: any[]; activeFilter?: string }) {
   if (!papers || papers.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
-        No papers to display
+      <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">
+        No landscape data
       </div>
     );
   }
 
   const filteredPapers =
     activeFilter && activeFilter !== 'all'
-      ? papers.filter((p) => deriveCluster(p).toLowerCase() === activeFilter.toLowerCase())
+      ? papers.filter((p) => derivePaperCategory(p).toLowerCase() === activeFilter.toLowerCase())
       : papers;
 
   if (filteredPapers.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
+      <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">
         No papers match the selected filter.
       </div>
     );
   }
 
-  const { points, clusters } = buildPoints(filteredPapers);
+  const categoryCounts: Record<string, number> = {};
+  for (const cat of CATEGORIES) categoryCounts[cat] = 0;
 
-  // Group points by cluster for separate <Scatter> layers (one per cluster for color coding)
-  const byCluster: Record<string, PaperPoint[]> = {};
-  for (const pt of points) {
-    if (!byCluster[pt.cluster]) byCluster[pt.cluster] = [];
-    byCluster[pt.cluster].push(pt);
+  for (const p of filteredPapers) {
+    const cat = derivePaperCategory(p);
+    if (categoryCounts[cat] !== undefined) {
+      categoryCounts[cat]++;
+    }
   }
 
-  return (
-    <div className="space-y-3">
-      {/* Legend */}
-      <div className="flex flex-wrap gap-2 px-1">
-        {clusters.map((c, i) => (
-          <div key={c} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span
-              className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
-              style={{ background: CLUSTER_COLORS[i % CLUSTER_COLORS.length] }}
-            />
-            {c}
-          </div>
-        ))}
-      </div>
+  const data: RadarDataPoint[] = CATEGORIES.map((cat) => ({
+    category: cat,
+    count: categoryCounts[cat],
+  }));
 
-      <ResponsiveContainer width="100%" height={300}>
-        <ScatterChart margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
-          <XAxis
-            type="number"
-            dataKey="x"
-            domain={[0, 100]}
-            tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
-            tickLine={false}
-            axisLine={false}
-            label={{ value: 'Semantic Axis A', position: 'insideBottomRight', offset: -5, fontSize: 10, fill: 'var(--muted-foreground)' }}
-          />
-          <YAxis
-            type="number"
-            dataKey="y"
-            domain={[0, 100]}
-            tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
-            tickLine={false}
-            axisLine={false}
-            label={{ value: 'Semantic Axis B', angle: -90, position: 'insideLeft', offset: 10, fontSize: 10, fill: 'var(--muted-foreground)' }}
-          />
-          <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
-          {Object.entries(byCluster).map(([cluster, pts], i) => (
-            <Scatter
-              key={cluster}
-              name={cluster}
-              data={pts}
-              fill={CLUSTER_COLORS[i % CLUSTER_COLORS.length]}
-            >
-              {pts.map((_, j) => (
-                <Cell
-                  key={j}
-                  fill={CLUSTER_COLORS[i % CLUSTER_COLORS.length]}
-                  fillOpacity={0.8}
-                />
-              ))}
-            </Scatter>
-          ))}
-        </ScatterChart>
-      </ResponsiveContainer>
-    </div>
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <RadarChart data={data} cx="50%" cy="50%" outerRadius="70%">
+        <PolarGrid stroke="oklch(0.8 0 0)" />
+        <PolarAngleAxis
+          dataKey="category"
+          tick={{ fontSize: 11, fill: 'oklch(0.45 0 0)' }}
+        />
+        <PolarRadiusAxis
+          tick={{ fontSize: 9, fill: 'oklch(0.6 0 0)' }}
+          axisLine={false}
+        />
+        <Radar
+          name="Papers"
+          dataKey="count"
+          stroke="#6366f1"
+          fill="#6366f1"
+          fillOpacity={0.15}
+          strokeWidth={2}
+        />
+        <Tooltip
+          contentStyle={{
+            background: 'white',
+            border: '1px solid oklch(0.9 0 0)',
+            borderRadius: '8px',
+            fontSize: '12px',
+          }}
+        />
+      </RadarChart>
+    </ResponsiveContainer>
   );
 }
