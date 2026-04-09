@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PaperDetailModal } from './paper-detail-modal';
 
 
 interface PaperDrawerProps {
@@ -13,6 +14,7 @@ interface PaperDrawerProps {
 
 export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
   const [search, setSearch] = useState('');
+  const [selectedPaper, setSelectedPaper] = useState<any | null>(null);
 
   if (!open) return null;
 
@@ -42,7 +44,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
               All Papers ({papers.length})
             </h2>
             <p className="text-xs text-[oklch(0.45_0_0)] mt-0.5">
-              Click a paper title to view on arxiv
+              Click a title to view details · ↗ opens arxiv
             </p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 text-[oklch(0.45_0_0)]">
@@ -94,15 +96,25 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
                   <div className="flex items-start gap-2">
                     <span className="text-[10px] text-[oklch(0.6_0_0)] font-mono mt-1 shrink-0 w-5">{i + 1}.</span>
                     <div className="min-w-0 flex-1">
-                      <a
-                        href={paperUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-[oklch(0.2_0_0)] hover:text-[oklch(0.4_0.19_260)] transition-colors leading-snug block"
-                      >
-                        {title}
-                        <span className="inline-block ml-1 text-[oklch(0.5_0.19_260)] text-xs">↗</span>
-                      </a>
+                      <div className="flex items-start gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPaper(paper)}
+                          className="text-sm font-medium text-[oklch(0.2_0_0)] hover:text-[oklch(0.4_0.19_260)] transition-colors leading-snug text-left flex-1"
+                        >
+                          {title}
+                        </button>
+                        <a
+                          href={paperUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Open on arxiv"
+                          className="shrink-0 mt-0.5 text-[oklch(0.5_0.19_260)] hover:text-[oklch(0.35_0.19_260)] text-xs transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          ↗
+                        </a>
+                      </div>
 
                       {/* Meta line */}
                       <div className="flex items-center gap-2 mt-1 text-[10px] text-[oklch(0.5_0_0)]">
@@ -145,6 +157,13 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
           </div>
         </div>
       </div>
+
+      {/* Paper detail modal */}
+      <PaperDetailModal
+        paper={selectedPaper}
+        onClose={() => setSelectedPaper(null)}
+        allPapers={papers}
+      />
     </>
   );
 }

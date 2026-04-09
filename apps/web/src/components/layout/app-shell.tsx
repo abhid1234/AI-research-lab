@@ -2,28 +2,33 @@
 
 import { ThemeToggle } from './theme-toggle';
 import { ExportButton } from './export-button';
+import { GlobalSearch } from './global-search';
 
 interface AppShellProps {
   children: React.ReactNode;
   paperCount?: number;
   topicCount?: number;
   dateRange?: string;
+  selectedTopicId?: string | null;
 }
 
-export function AppShell({ children, paperCount, topicCount, dateRange }: AppShellProps) {
+export function AppShell({ children, paperCount, topicCount, dateRange, selectedTopicId }: AppShellProps) {
   const hasStats = paperCount !== undefined || topicCount !== undefined || dateRange !== undefined;
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground overflow-hidden">
-      <header className="flex h-12 items-center justify-between border-b border-border px-4 shrink-0">
+      <header className="flex h-12 items-center gap-3 border-b border-border px-4 shrink-0">
         {/* Left: logo + title */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <span className="text-primary text-base leading-none select-none" aria-hidden="true">✦</span>
           <span className="text-sm font-bold tracking-tight">AI Research Lab</span>
         </div>
 
+        {/* Center: global search */}
+        <GlobalSearch topicId={selectedTopicId} />
+
         {/* Right: stats + connected indicator */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 shrink-0 ml-auto">
           {hasStats && (
             <span className="text-xs text-muted-foreground tabular-nums">
               {paperCount !== undefined && (
