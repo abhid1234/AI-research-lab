@@ -36,6 +36,18 @@ function safeString(val: any): string {
   return typeof val === 'string' ? val : val?.title ?? val?.id ?? '';
 }
 
+function SummaryCard({ label, value, icon }: { label: string; value: number; icon: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-3 flex items-center gap-3">
+      <span className="text-xl">{icon}</span>
+      <div>
+        <p className="text-lg font-bold">{value}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+      </div>
+    </div>
+  );
+}
+
 function ImportanceDot({ importance }: { importance: any }) {
   const key = typeof importance === 'string' ? importance.toLowerCase() : '';
   const dot = importanceDot[key] ?? importanceDot.low;
@@ -76,12 +88,21 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
 
   return (
     <div className="space-y-8">
+      {/* Insights summary */}
+      <div className="grid grid-cols-4 gap-3">
+        <SummaryCard label="Contradictions" value={contradictions.length} icon="⚡" />
+        <SummaryCard label="Consensus" value={consensus.length} icon="✓" />
+        <SummaryCard label="Open Debates" value={openDebates.length} icon="?" />
+        <SummaryCard label="Warnings" value={warnings.length} icon="⚠" />
+      </div>
+
       {/* Contradictions */}
       {contradictions.length > 0 && (
         <section>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-1">
             Contradictions ({contradictions.length})
           </h3>
+          <p className="text-xs text-muted-foreground mb-4">Claims where papers disagree — revealing where the field is still uncertain.</p>
           <div className="space-y-4">
             {contradictions.map((c, i) => {
               const nature = typeof c.nature === 'string' ? c.nature : '';
@@ -150,9 +171,10 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
       {/* Consensus */}
       {consensus.length > 0 && (
         <section>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-1">
             Consensus Findings ({consensus.length})
           </h3>
+          <p className="text-xs text-muted-foreground mb-4">Findings confirmed independently by multiple research groups.</p>
           <div className="space-y-3">
             {consensus.map((c, i) => {
               const finding = typeof c.finding === 'string' ? c.finding : safeString(c.finding);
@@ -218,9 +240,10 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
       {/* Open Debates */}
       {openDebates.length > 0 && (
         <section>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-1">
             Open Debates ({openDebates.length})
           </h3>
+          <p className="text-xs text-muted-foreground mb-4">Unresolved questions where the community is actively split.</p>
           <div className="space-y-4">
             {openDebates.map((d, i) => {
               const question = typeof d.question === 'string' ? d.question : safeString(d.question);
@@ -282,9 +305,10 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
       {/* Benchmark Warnings */}
       {warnings.length > 0 && (
         <section>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-1">
             Benchmark Warnings ({warnings.length})
           </h3>
+          <p className="text-xs text-muted-foreground mb-4">Papers whose reported results may need closer scrutiny.</p>
           <div className="space-y-2">
             {warnings.map((w: any, i: number) => {
               const issue = typeof w === 'string' ? w : (typeof w?.issue === 'string' ? w.issue : safeString(w));

@@ -81,6 +81,32 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
         </p>
       </div>
 
+      {/* Summary stats row */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-lg border border-border bg-card p-3">
+          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Key Findings</p>
+          <p className="text-lg font-bold mt-0.5">{frontiers.length}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {frontiers.filter(f => f.category === 'paradigm_shift').length} paradigm shifts,{' '}
+            {frontiers.filter(f => f.category === 'method_breakthrough').length} breakthroughs
+          </p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-3">
+          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Pivoting Trends</p>
+          <p className="text-lg font-bold mt-0.5">{pivotingTrends.length}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Directional shifts in research focus
+          </p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-3">
+          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Research Gaps</p>
+          <p className="text-lg font-bold mt-0.5">{gaps.length}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Underexplored areas identified
+          </p>
+        </div>
+      </div>
+
       {/* Frontier findings */}
       {frontiers.length > 0 && (
         <section>
