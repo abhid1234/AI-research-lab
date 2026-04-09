@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import dynamic from 'next/dynamic';
@@ -8,6 +9,11 @@ import { BenchmarkTable } from '@/components/charts/benchmark-table';
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
   { ssr: false, loading: () => <div className="h-[260px] flex items-center justify-center text-muted-foreground text-sm">Loading chart...</div> }
+);
+
+const ResearchLandscape = dynamic(
+  () => import('@/components/charts/research-landscape').then(m => ({ default: m.ResearchLandscape })),
+  { ssr: false, loading: () => <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">Loading landscape...</div> }
 );
 
 interface OverviewTabProps {
@@ -22,7 +28,27 @@ const FINDING_COLORS = [
   'bg-purple-500',
 ] as const;
 
+/** Derive a stable cluster label from a paper object (mirrors research-landscape logic) */
+function derivePaperCluster(paper: any): string {
+  if (typeof paper.methodology === 'string' && paper.methodology.trim()) {
+    return paper.methodology.trim().split(/\s+/)[0];
+  }
+  if (typeof paper.category === 'string' && paper.category.trim()) {
+    return paper.category.trim();
+  }
+  if (Array.isArray(paper.categories) && paper.categories.length > 0) {
+    const first = paper.categories[0];
+    return typeof first === 'string' ? first : 'Other';
+  }
+  if (typeof paper.topic === 'string' && paper.topic.trim()) {
+    return paper.topic.trim();
+  }
+  return 'Other';
+}
+
 export function OverviewTab({ artifacts }: OverviewTabProps) {
+  const [activeFilter, setActiveFilter] = useState<string>('all');
+
   const trendArtifact = artifacts.find((a) => a.agentType === 'trend-mapper');
   const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
   const benchmarkArtifact = artifacts.find((a) => a.agentType === 'benchmark-extractor');
@@ -42,6 +68,20 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
     (trendData.emergingTopics?.length ?? 0) +
     (trendData.methodShifts?.length ?? 0);
 
+  // Derive unique filter labels from the paper clusters
+  const uniqueClusters: string[] = Array.from(
+    new Set(papers.map((p) => derivePaperCluster(p)))
+  ).filter((c) => c !== 'Other');
+
+  // Papers visible to the filtered views
+  const filteredPapers =
+    activeFilter === 'all'
+      ? papers
+      : papers.filter((p) => derivePaperCluster(p).toLowerCase() === activeFilter.toLowerCase());
+
+  // Filtered benchmark tables (pass-through — filtering is paper-level only)
+  const visibleBenchmarkTables = benchmarkTables;
+
   return (
     <div className="space-y-6">
       {/* Gradient stat cards */}
@@ -51,6 +91,48 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
         <GradientStatCard label="Insights" value={insightCount} />
         <GradientStatCard label="Emerging Topics" value={emergingTopics.length} />
       </div>
+
+      {/* Collection description banner */}
+      {(papers.length > 0 || topicEvolution.length > 0) && (
+        <p className="text-sm text-muted-foreground">
+          {papers.length} paper{papers.length !== 1 ? 's' : ''} spanning{' '}
+          {topicEvolution.length} distinct research topic{topicEvolution.length !== 1 ? 's' : ''}.
+          The topics are grouped in the chart below based on research clusters discovered
+          in the current batch analysis.
+        </p>
+      )}
+
+      {/* Sub-tab filter chips */}
+      {uniqueClusters.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <FilterChip
+            label="All"
+            active={activeFilter === 'all'}
+            onClick={() => setActiveFilter('all')}
+          />
+          {uniqueClusters.map((cluster) => (
+            <FilterChip
+              key={cluster}
+              label={cluster}
+              active={activeFilter === cluster.toLowerCase()}
+              onClick={() => setActiveFilter(cluster.toLowerCase())}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Research Landscape scatter plot */}
+      {papers.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Research Landscape</CardTitle>
+            <CardDescription>Papers plotted by semantic similarity — colored by cluster</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResearchLandscape papers={papers} activeFilter={activeFilter} />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Topic Evolution chart */}
       <Card>
@@ -64,14 +146,14 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
       </Card>
 
       {/* Two-column: Benchmark Highlights + Key Results */}
-      {(benchmarkTables.length > 0 || papers.length > 0) && (
+      {(visibleBenchmarkTables.length > 0 || filteredPapers.length > 0) && (
         <div className="flex gap-4">
           {/* Left: Benchmark Highlights */}
           <div className="w-1/2 space-y-4">
             <h3 className="text-sm font-semibold text-foreground">Benchmark Highlights from Papers</h3>
-            {benchmarkTables.length > 0 ? (
+            {visibleBenchmarkTables.length > 0 ? (
               <div className="space-y-4">
-                {benchmarkTables.slice(0, 2).map((table, i) => (
+                {visibleBenchmarkTables.slice(0, 2).map((table, i) => (
                   <BenchmarkTable key={i} table={table} />
                 ))}
               </div>
@@ -83,9 +165,9 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
           {/* Right: Key Results */}
           <div className="w-1/2 space-y-4">
             <h3 className="text-sm font-semibold text-foreground">Key Results Worth Knowing</h3>
-            {papers.length > 0 ? (
+            {filteredPapers.length > 0 ? (
               <div className="space-y-3">
-                {papers.slice(0, 5).map((p, i) => {
+                {filteredPapers.slice(0, 5).map((p, i) => {
                   const dotColor = FINDING_COLORS[i % FINDING_COLORS.length];
                   const title: string = p.mainResult ?? p.takeaway ?? '—';
                   const paperId: string = p.paperId ?? '';
@@ -108,7 +190,9 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
                 })}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No key results available.</p>
+              <p className="text-sm text-muted-foreground">
+                {activeFilter !== 'all' ? 'No papers match the selected filter.' : 'No key results available.'}
+              </p>
             )}
           </div>
         </div>
@@ -182,6 +266,31 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
         <EmptyState message="Run an analysis to populate the overview." />
       )}
     </div>
+  );
+}
+
+function FilterChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        'rounded-full px-3 py-1 text-xs font-medium transition-colors',
+        active
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-muted/50 text-muted-foreground hover:bg-muted',
+      ].join(' ')}
+    >
+      {label}
+    </button>
   );
 }
 
