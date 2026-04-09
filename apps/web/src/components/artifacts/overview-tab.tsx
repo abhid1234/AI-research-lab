@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import dynamic from 'next/dynamic';
 import { BenchmarkTable } from '@/components/charts/benchmark-table';
 import { TimelineScrubber } from '@/components/charts/timeline-scrubber';
+import { PaperDrawer } from '@/components/layout/paper-drawer';
 
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
@@ -60,6 +61,7 @@ const TOPIC_COLORS = [
 export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTabProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const trendArtifact = artifacts.find((a) => a.agentType === 'trend-mapper');
   const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
@@ -125,7 +127,9 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
     <div className="space-y-6">
       {/* Gradient stat cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <GradientStatCard label="Papers" value={totalPaperCount ?? papers.length} />
+        <button onClick={() => setDrawerOpen(true)} className="text-left">
+          <GradientStatCard label="Papers" value={totalPaperCount ?? papers.length} clickable />
+        </button>
         <GradientStatCard label="Topics Tracked" value={topicEvolution.length} />
         <GradientStatCard label="Insights" value={insightCount} />
         <GradientStatCard label="Emerging Topics" value={emergingTopics.length} />
@@ -374,6 +378,13 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
       {papers.length === 0 && topicEvolution.length === 0 && (
         <EmptyState message="Run an analysis to populate the overview." />
       )}
+
+      {/* Paper drawer */}
+      <PaperDrawer
+        papers={dbPapers && dbPapers.length > 0 ? dbPapers : papers}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
     </div>
   );
 }
@@ -403,10 +414,13 @@ function FilterChip({
   );
 }
 
-function GradientStatCard({ label, value }: { label: string; value: number }) {
+function GradientStatCard({ label, value, clickable }: { label: string; value: number; clickable?: boolean }) {
   return (
-    <div className="rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 p-4">
-      <p className="text-3xl font-bold tabular-nums text-foreground">{value}</p>
+    <div className={`rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 p-4 ${clickable ? 'cursor-pointer hover:from-primary/30 hover:to-primary/10 transition-colors' : ''}`}>
+      <div className="flex items-center gap-1.5">
+        <p className="text-3xl font-bold tabular-nums text-foreground">{value}</p>
+        {clickable && <span className="text-xs text-primary/60 mt-1">↗</span>}
+      </div>
       <p className="text-xs text-muted-foreground mt-1">{label}</p>
     </div>
   );
