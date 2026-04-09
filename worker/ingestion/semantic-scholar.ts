@@ -26,9 +26,10 @@ async function fetchWithRetry(url: string, attempt = 0): Promise<Response> {
   const res = await fetch(url);
 
   if (res.status === 429) {
-    console.warn('[semantic-scholar] Rate limited (429). Waiting 5s before retry...');
-    await sleep(5000);
-    if (attempt >= 3) throw new Error(`Rate limited after ${attempt} retries: ${url}`);
+    const wait = 10000 + attempt * 5000; // 10s, 15s, 20s, 25s, 30s
+    console.warn(`[semantic-scholar] Rate limited (429). Waiting ${wait/1000}s before retry ${attempt + 1}/5...`);
+    await sleep(wait);
+    if (attempt >= 5) throw new Error(`Rate limited after ${attempt} retries: ${url}`);
     return fetchWithRetry(url, attempt + 1);
   }
 
@@ -44,7 +45,7 @@ export async function searchPapers(
   query: string,
   limit: number,
 ): Promise<SemanticScholarPaper[]> {
-  await sleep(1100); // Respect 1 req/s unauthenticated limit
+  await sleep(3000); // Respect rate limits — 3s between requests for safety
 
   const url = `${BASE_URL}/paper/search?query=${encodeURIComponent(query)}&limit=${limit}&fields=${SEARCH_FIELDS}`;
   const res = await fetchWithRetry(url);
