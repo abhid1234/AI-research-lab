@@ -101,7 +101,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                         className={`inline-flex items-center rounded border px-2 py-0.5 text-xs font-medium ${badgeClass}`}
                       >
                         {nature
-                          ? nature.replace(/_/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase())
+                          ? nature.replace(/_/g, ' ').replace(/\b\w/g, (ch: string) => ch.toUpperCase())
                           : 'Contradiction'}
                       </span>
                       {c.importance && <ImportanceDot importance={c.importance} />}
