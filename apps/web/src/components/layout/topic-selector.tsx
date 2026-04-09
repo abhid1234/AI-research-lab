@@ -22,9 +22,16 @@ export function TopicSelector({ selectedId, onChange }: TopicSelectorProps) {
       .then((r) => r.json())
       .then((data) => {
         const list: Topic[] = Array.isArray(data) ? data : [];
+        // Sort: "All AI Papers" first, then alphabetical
+        list.sort((a, b) => {
+          if (a.name === 'All AI Papers') return -1;
+          if (b.name === 'All AI Papers') return 1;
+          return a.name.localeCompare(b.name);
+        });
         setTopics(list);
+        // Auto-select first topic (All AI Papers if it exists)
         if (list.length > 0 && !selectedId) {
-          onChange(list[0].id);
+          setTimeout(() => onChange(list[0].id), 0);
         }
       })
       .catch(() => {})
