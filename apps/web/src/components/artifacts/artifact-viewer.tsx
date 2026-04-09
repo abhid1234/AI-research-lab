@@ -15,6 +15,7 @@ export interface ArtifactItem {
 
 interface ArtifactViewerProps {
   artifacts: ArtifactItem[];
+  totalPaperCount?: number;
 }
 
 const TAB_IDS = ['overview', 'insights', 'connections', 'papers', 'frontiers'] as const;
@@ -78,7 +79,7 @@ function getTabCount(tab: TabId, artifacts: ArtifactItem[]): number {
   return 0;
 }
 
-export function ArtifactViewer({ artifacts }: ArtifactViewerProps) {
+export function ArtifactViewer({ artifacts, totalPaperCount }: ArtifactViewerProps) {
   // Some tabs aggregate multiple agent outputs — pass all artifacts and let each tab pick what it needs
   return (
     <Tabs defaultValue="overview" className="h-full flex flex-col">
@@ -98,7 +99,7 @@ export function ArtifactViewer({ artifacts }: ArtifactViewerProps) {
 
       <div className="flex-1 overflow-y-auto">
         <TabsContent value="overview" className="p-4 h-full">
-          <OverviewTab artifacts={artifacts} />
+          <OverviewTab artifacts={artifacts} totalPaperCount={totalPaperCount} />
         </TabsContent>
 
         <TabsContent value="insights" className="p-4 h-full">

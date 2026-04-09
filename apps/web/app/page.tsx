@@ -37,7 +37,13 @@ export default function Home() {
     try {
       const res = await fetch(`/api/topics/${topicId}`);
       if (!res.ok) return;
-      const { artifacts: raw } = await res.json();
+      const { topic: topicData, artifacts: raw } = await res.json();
+
+      // Use real paper count from database topic record
+      if (topicData?.paperCount) {
+        setPaperCount(topicData.paperCount);
+      }
+
       if (Array.isArray(raw)) {
         const mapped: ArtifactItem[] = raw.map((a: any) => ({
           agentType: a.agentType ?? a.agent_type ?? '',
@@ -45,35 +51,6 @@ export default function Home() {
           data: typeof a.data === 'string' ? JSON.parse(a.data) : (a.data ?? {}),
         }));
         setArtifacts(mapped);
-
-        // Derive header stats from paper-analyzer artifact
-        const paperArtifact = mapped.find((a) => a.agentType === 'paper-analyzer');
-        if (paperArtifact?.data?.papers) {
-          const papers: any[] = paperArtifact.data.papers;
-          setPaperCount(papers.length);
-
-          // Try to extract a date range from paper IDs (format: YYYY-MM or similar)
-          const dates: string[] = papers
-            .map((p) => p.paperId as string)
-            .filter(Boolean)
-            .map((id) => {
-              const match = id.match(/(\d{4}-\d{2})/);
-              return match ? match[1] : null;
-            })
-            .filter(Boolean) as string[];
-
-          if (dates.length > 0) {
-            const sorted = [...dates].sort();
-            const first = sorted[0];
-            const last = sorted[sorted.length - 1];
-            setDateRange(first === last ? first : `${first} to ${last}`);
-          } else {
-            setDateRange(undefined);
-          }
-        } else {
-          setPaperCount(undefined);
-          setDateRange(undefined);
-        }
       }
     } catch {
       setArtifacts([]);
@@ -132,7 +109,7 @@ export default function Home() {
                 Loading artifacts...
               </div>
             ) : (
-              <ArtifactViewer artifacts={artifacts} />
+              <ArtifactViewer artifacts={artifacts} totalPaperCount={paperCount} />
             )}
           </div>
 

@@ -19,6 +19,7 @@ const ResearchLandscape = dynamic(
 
 interface OverviewTabProps {
   artifacts: { agentType: string; data: any }[];
+  totalPaperCount?: number;
 }
 
 const FINDING_COLORS = [
@@ -55,7 +56,7 @@ const TOPIC_COLORS = [
   '#8b5cf6', // violet
 ] as const;
 
-export function OverviewTab({ artifacts }: OverviewTabProps) {
+export function OverviewTab({ artifacts, totalPaperCount }: OverviewTabProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
 
@@ -123,7 +124,7 @@ export function OverviewTab({ artifacts }: OverviewTabProps) {
     <div className="space-y-6">
       {/* Gradient stat cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <GradientStatCard label="Papers" value={papers.length} />
+        <GradientStatCard label="Papers" value={totalPaperCount ?? papers.length} />
         <GradientStatCard label="Topics Tracked" value={topicEvolution.length} />
         <GradientStatCard label="Insights" value={insightCount} />
         <GradientStatCard label="Emerging Topics" value={emergingTopics.length} />
