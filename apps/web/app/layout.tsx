@@ -18,7 +18,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn("dark", "font-sans", geist.variable)}>
+    <html lang="en" className={cn("font-sans", geist.variable)}>
+      {/* Inline theme script: reads localStorage before React hydrates to prevent flash.
+          Content is a static string with no user input — not an XSS risk. */}
+      <head>
+        {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
+        <script
+          // nosec: static string, no user-controlled input
+          // biome-ignore lint: intentional dangerouslySetInnerHTML for theme flash prevention
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark')}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={inter.className}>{children}</body>
     </html>
   );

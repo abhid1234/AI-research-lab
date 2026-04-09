@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
 import { TopicSelector } from '@/components/layout/topic-selector';
 import { JobStatusBar } from '@/components/layout/job-status-bar';
+import { PanelToggle } from '@/components/layout/panel-toggle';
 import dynamic from 'next/dynamic';
 const ChatPanel = dynamic(() => import('@/components/chat/chat-panel').then(m => ({ default: m.ChatPanel })), { ssr: false });
 import { ArtifactViewer, type ArtifactItem } from '@/components/artifacts/artifact-viewer';
@@ -17,6 +18,7 @@ export default function Home() {
   const [paperCount, setPaperCount] = useState<number | undefined>(undefined);
   const [topicCount, setTopicCount] = useState<number | undefined>(undefined);
   const [dateRange, setDateRange] = useState<string | undefined>(undefined);
+  const [isMaximized, setIsMaximized] = useState(false);
 
   // Fetch total topic count once
   useEffect(() => {
@@ -95,10 +97,12 @@ export default function Home() {
   return (
     <ErrorBoundary>
     <AppShell paperCount={paperCount} topicCount={topicCount} dateRange={dateRange}>
-      {/* Left panel: chat */}
-      <aside className="w-[340px] shrink-0 border-r border-border flex flex-col overflow-hidden">
-        <ChatPanel />
-      </aside>
+      {/* Left panel: chat — hidden when artifact panel is maximized */}
+      {!isMaximized && (
+        <aside className="w-[340px] shrink-0 border-r border-border flex flex-col overflow-hidden">
+          <ChatPanel />
+        </aside>
+      )}
 
       {/* Right panel: artifacts */}
       <main className="flex flex-1 flex-col overflow-hidden">
@@ -117,6 +121,7 @@ export default function Home() {
               Refresh
             </button>
           )}
+          <PanelToggle isMaximized={isMaximized} onToggle={() => setIsMaximized((v) => !v)} />
         </div>
 
         {/* Artifact viewer */}

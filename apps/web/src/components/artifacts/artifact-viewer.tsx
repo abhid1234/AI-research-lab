@@ -28,21 +28,71 @@ const TAB_LABELS: Record<TabId, string> = {
   frontiers: 'Research Frontiers',
 };
 
-export function ArtifactViewer({ artifacts }: ArtifactViewerProps) {
-  // Group artifacts by tabTarget, also include all artifacts for tabs that need cross-agent data
-  const byTab = (tab: TabId) =>
-    artifacts.filter((a) => a.tabTarget === tab || a.tabTarget === 'all');
+function CountBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span className="ml-1.5 text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full tabular-nums">
+      {count}
+    </span>
+  );
+}
 
+function getTabCount(tab: TabId, artifacts: ArtifactItem[]): number {
+  if (artifacts.length === 0) return 0;
+
+  if (tab === 'overview' || tab === 'papers') {
+    const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
+    return paperArtifact?.data?.papers?.length ?? 0;
+  }
+
+  if (tab === 'insights') {
+    const contradictionArtifact = artifacts.find((a) => a.agentType === 'contradiction-finder');
+    const benchmarkArtifact = artifacts.find((a) => a.agentType === 'benchmark-extractor');
+    const contradictions: any[] = contradictionArtifact?.data?.contradictions ?? [];
+    const consensus: any[] = contradictionArtifact?.data?.consensus ?? [];
+    const openDebates: any[] = contradictionArtifact?.data?.openDebates ?? [];
+    const warnings: any[] = benchmarkArtifact?.data?.warnings ?? [];
+    return contradictions.length + consensus.length + openDebates.length + warnings.length;
+  }
+
+  if (tab === 'connections') {
+    const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
+    const papers: any[] = paperArtifact?.data?.papers ?? [];
+    // Count unique author affiliations (clusters)
+    const affiliations = new Set<string>();
+    for (const p of papers) {
+      if (Array.isArray(p.authors)) {
+        for (const author of p.authors) {
+          affiliations.add(author.affiliation ?? 'Unknown');
+        }
+      }
+    }
+    return affiliations.size;
+  }
+
+  if (tab === 'frontiers') {
+    const frontierArtifact = artifacts.find((a) => a.agentType === 'frontier-detector');
+    return frontierArtifact?.data?.frontiers?.length ?? 0;
+  }
+
+  return 0;
+}
+
+export function ArtifactViewer({ artifacts }: ArtifactViewerProps) {
   // Some tabs aggregate multiple agent outputs — pass all artifacts and let each tab pick what it needs
   return (
     <Tabs defaultValue="overview" className="h-full flex flex-col">
       <div className="px-4 pt-3 border-b border-border">
         <TabsList>
-          {TAB_IDS.map((id) => (
-            <TabsTrigger key={id} value={id}>
-              {TAB_LABELS[id]}
-            </TabsTrigger>
-          ))}
+          {TAB_IDS.map((id) => {
+            const count = getTabCount(id, artifacts);
+            return (
+              <TabsTrigger key={id} value={id}>
+                {TAB_LABELS[id]}
+                <CountBadge count={count} />
+              </TabsTrigger>
+            );
+          })}
         </TabsList>
       </div>
 
