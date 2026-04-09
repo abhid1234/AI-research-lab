@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 
 interface PaperDrawerProps {
   papers: any[];
@@ -64,7 +64,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
         </div>
 
         {/* Paper list */}
-        <ScrollArea className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           <div className="divide-y divide-[oklch(0.95_0_0)]">
             {filtered.map((paper, i) => {
               const title = typeof paper.title === 'string' ? paper.title : paper.paperId ?? `Paper ${i + 1}`;
@@ -143,7 +143,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </div>
     </>
   );
