@@ -20,10 +20,7 @@ interface TemporalSliderProps {
 
 export function TemporalSlider({ activeMonths, onChange }: TemporalSliderProps) {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide shrink-0">
-        Time window
-      </span>
+    <div className="flex items-center gap-1.5 flex-wrap">
       {TIME_WINDOWS.map((w) => {
         const isActive = w.months === activeMonths;
         return (

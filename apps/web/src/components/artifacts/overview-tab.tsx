@@ -205,28 +205,42 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         />
       )}
 
-      {/* Sub-tab filter chips */}
-      {uniqueClusters.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          <FilterChip
-            label="All"
-            active={activeFilter === 'all'}
-            onClick={() => setActiveFilter('all')}
-          />
-          {uniqueClusters.map((cluster) => (
-            <FilterChip
-              key={cluster}
-              label={cluster}
-              active={activeFilter === cluster.toLowerCase()}
-              onClick={() => setActiveFilter(cluster.toLowerCase())}
-            />
-          ))}
+      {/* Consolidated filter toolbar — cluster chips on top row, time window on bottom */}
+      {(uniqueClusters.length > 0 || (dbPapers && dbPapers.length > 0)) && (
+        <div className="rounded-lg border border-border bg-muted/20 p-3 space-y-2.5">
+          {uniqueClusters.length > 0 && (
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-20">
+                Cluster
+              </span>
+              <div className="flex flex-wrap gap-1.5 flex-1">
+                <FilterChip
+                  label="All"
+                  active={activeFilter === 'all'}
+                  onClick={() => setActiveFilter('all')}
+                />
+                {uniqueClusters.map((cluster) => (
+                  <FilterChip
+                    key={cluster}
+                    label={cluster}
+                    active={activeFilter === cluster.toLowerCase()}
+                    onClick={() => setActiveFilter(cluster.toLowerCase())}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          {dbPapers && dbPapers.length > 0 && (
+            <div className="flex items-center gap-3 border-t border-border/60 pt-2.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground shrink-0 w-20">
+                Time window
+              </span>
+              <div className="flex-1">
+                <TemporalSlider activeMonths={timeWindowMonths} onChange={setTimeWindowMonths} />
+              </div>
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Temporal slider */}
-      {(dbPapers && dbPapers.length > 0) && (
-        <TemporalSlider activeMonths={timeWindowMonths} onChange={setTimeWindowMonths} />
       )}
 
       {/* Side-by-side: Research Landscape + Topic Evolution */}
