@@ -84,6 +84,9 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
     (trendData.emergingTopics?.length ?? 0) +
     (trendData.methodShifts?.length ?? 0);
 
+  // Single source of truth for header stats — stat cards and banner must agree.
+  const displayPaperCount = totalPaperCount ?? papers.length;
+
   // Derive sorted unique months from topicEvolution data for timeline scrubber
   const months: string[] = Array.from(
     new Set(
@@ -116,6 +119,10 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
     new Set(papers.map((p) => derivePaperCluster(p)))
   ).filter((c) => c !== 'Other');
 
+  // Single source of truth for topic count — max of the two signals so
+  // the stat card and the description banner never disagree.
+  const displayTopicCount = Math.max(uniqueClusters.length, topicEvolution.length);
+
   // Papers visible to the filtered views (cluster filter applied on top of month filter)
   const filteredPapers =
     activeFilter === 'all'
@@ -133,18 +140,18 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
       {/* Gradient stat cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <button onClick={() => setDrawerOpen(true)} className="text-left">
-          <GradientStatCard label="Papers" value={totalPaperCount ?? papers.length} clickable />
+          <GradientStatCard label="Papers" value={displayPaperCount} clickable />
         </button>
-        <GradientStatCard label="Topics Tracked" value={Math.max(uniqueClusters.length, topicEvolution.length)} />
+        <GradientStatCard label="Topics Tracked" value={displayTopicCount} />
         <GradientStatCard label="Insights" value={insightCount} />
         <GradientStatCard label="Emerging Topics" value={emergingTopics.length} />
       </div>
 
       {/* Collection description banner */}
-      {((totalPaperCount ?? papers.length) > 0 || topicEvolution.length > 0) && (
+      {(displayPaperCount > 0 || topicEvolution.length > 0) && (
         <p className="text-sm text-muted-foreground">
-          {totalPaperCount ?? papers.length} paper{(totalPaperCount ?? papers.length) !== 1 ? 's' : ''} spanning{' '}
-          {uniqueClusters.length || topicEvolution.length} distinct research topic{(uniqueClusters.length || topicEvolution.length) !== 1 ? 's' : ''}.
+          {displayPaperCount} paper{displayPaperCount !== 1 ? 's' : ''} spanning{' '}
+          {displayTopicCount} distinct research topic{displayTopicCount !== 1 ? 's' : ''}.
           The topics are grouped in the chart below based on research clusters discovered
           in the current batch analysis.
         </p>
