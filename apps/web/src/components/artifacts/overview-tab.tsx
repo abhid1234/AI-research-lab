@@ -272,9 +272,9 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
 
       {/* Two-column: Benchmark Highlights + Key Results */}
       {(visibleBenchmarkTables.length > 0 || filteredPapers.length > 0) && (
-        <div className="flex gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Left: Benchmark Highlights */}
-          <div className="w-1/2 space-y-4">
+          <div className="space-y-4">
             <h3 className="text-sm font-semibold text-foreground">Benchmark Highlights from Papers</h3>
             {visibleBenchmarkTables.length > 0 ? (
               <div className="space-y-4">
@@ -288,7 +288,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
           </div>
 
           {/* Right: Key Results */}
-          <div className="w-1/2 space-y-4">
+          <div className="space-y-4">
             <h3 className="text-sm font-semibold text-foreground">Key Results Worth Knowing</h3>
             {filteredPapers.length > 0 ? (
               <div className="space-y-3">
