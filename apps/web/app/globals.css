@@ -140,6 +140,16 @@
   }
 }
 
+/* Paper drawer slide-in animation */
+@keyframes drawerSlideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes drawerFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 /* Hide scrollbars for horizontally-scrolling tab rails */
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }

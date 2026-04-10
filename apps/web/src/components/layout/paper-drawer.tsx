@@ -71,7 +71,13 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
     <>
       {/* Backdrop */}
       <div
-        style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.2)' }}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9998,
+          background: 'rgba(0,0,0,0.2)',
+          animation: 'drawerFadeIn 200ms ease-out both',
+        }}
         onClick={onClose}
       />
 
@@ -90,6 +96,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
           boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
           display: 'flex',
           flexDirection: 'column' as const,
+          animation: 'drawerSlideIn 200ms ease-out both',
         }}
       >
         {/* Header */}
