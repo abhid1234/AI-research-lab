@@ -117,7 +117,7 @@ export function ChatModal() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Ask the collection"
-        className="fixed bottom-6 right-6 z-40 flex h-13 w-13 items-center justify-center rounded-full bg-[oklch(0.45_0.19_260)] text-white shadow-lg hover:bg-[oklch(0.38_0.19_260)] transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[oklch(0.55_0.19_260)] focus:ring-offset-2"
+        className="fixed bottom-6 right-6 z-40 flex h-13 w-13 items-center justify-center rounded-full bg-[oklch(0.45_0.19_260)] text-white shadow-lg hover:bg-[oklch(0.38_0.19_260)] transition-all motion-safe:hover:scale-105 motion-safe:active:scale-95 focus:outline-none focus:ring-2 focus:ring-[oklch(0.55_0.19_260)] focus:ring-offset-2"
         style={{ width: 52, height: 52 }}
       >
         <svg
