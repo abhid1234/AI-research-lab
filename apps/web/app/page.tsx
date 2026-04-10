@@ -97,8 +97,8 @@ export default function Home() {
         <main className="flex flex-1 flex-col overflow-hidden">
           <div className="artifact-panel flex flex-col flex-1 overflow-hidden">
             {/* Topic selector toolbar */}
-            <div className="flex items-center gap-3 border-b border-[oklch(0.9_0_0)] px-4 h-12 shrink-0">
-              <span className="text-xs text-[oklch(0.45_0_0)] font-medium">Topic</span>
+            <div className="flex items-center gap-3 border-b border-border px-4 h-12 shrink-0">
+              <span className="text-xs text-muted-foreground font-medium">Topic</span>
               <TopicSelector
                 selectedId={selectedTopicId}
                 onChange={handleTopicChange}
@@ -106,7 +106,7 @@ export default function Home() {
               {selectedTopicId && (
                 <button
                   onClick={() => fetchArtifacts(selectedTopicId)}
-                  className="ml-auto text-xs text-[oklch(0.45_0_0)] hover:text-[oklch(0.145_0_0)] transition-colors"
+                  className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Refresh
                 </button>
@@ -120,22 +120,22 @@ export default function Home() {
                   {/* Skeleton stat cards */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {[...Array(4)].map((_, i) => (
-                      <div key={i} className="rounded-xl bg-[oklch(0.94_0_0)] h-[76px]" />
+                      <div key={i} className="rounded-xl bg-muted h-[76px]" />
                     ))}
                   </div>
                   {/* Skeleton banner */}
-                  <div className="h-4 w-3/4 rounded bg-[oklch(0.94_0_0)]" />
+                  <div className="h-4 w-3/4 rounded bg-muted" />
                   {/* Skeleton charts */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div className="rounded-lg bg-[oklch(0.94_0_0)] h-[340px]" />
-                    <div className="rounded-lg bg-[oklch(0.94_0_0)] h-[340px]" />
+                    <div className="rounded-lg bg-muted h-[340px]" />
+                    <div className="rounded-lg bg-muted h-[340px]" />
                   </div>
                   {/* Skeleton content */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div className="rounded-lg bg-[oklch(0.94_0_0)] h-[200px]" />
+                    <div className="rounded-lg bg-muted h-[200px]" />
                     <div className="space-y-3">
                       {[...Array(3)].map((_, i) => (
-                        <div key={i} className="rounded-lg bg-[oklch(0.94_0_0)] h-[80px]" />
+                        <div key={i} className="rounded-lg bg-muted h-[80px]" />
                       ))}
                     </div>
                   </div>

@@ -91,8 +91,8 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
           width: '480px',
           maxWidth: '90vw',
           zIndex: 9999,
-          background: 'white',
-          borderLeft: '1px solid oklch(0.9 0 0)',
+          background: 'var(--card)',
+          borderLeft: '1px solid var(--border)',
           boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
           display: 'flex',
           flexDirection: 'column' as const,
@@ -100,16 +100,16 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[oklch(0.9_0_0)]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
-            <h2 className="text-base font-bold text-[oklch(0.145_0_0)]">
+            <h2 className="text-base font-bold text-foreground">
               All Papers ({papers.length})
             </h2>
-            <p className="text-xs text-[oklch(0.45_0_0)] mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Click a title to view details · ↗ opens arxiv
             </p>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 text-[oklch(0.45_0_0)]">
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 text-muted-foreground">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -117,20 +117,20 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
         </div>
 
         {/* Search */}
-        <div className="px-5 py-3 border-b border-[oklch(0.9_0_0)]">
+        <div className="px-5 py-3 border-b border-border">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search papers..."
-            className="w-full px-3 py-1.5 text-sm rounded-md bg-[oklch(0.97_0_0)] border border-[oklch(0.9_0_0)] text-[oklch(0.145_0_0)] placeholder:text-[oklch(0.6_0_0)] focus:outline-none focus:ring-1 focus:ring-[oklch(0.55_0.19_260)]"
+            className="w-full px-3 py-1.5 text-sm rounded-md bg-muted border border-border text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
         {/* Compare hint */}
         {compareIds.size > 0 && (
-          <div className="px-5 py-2 border-b border-[oklch(0.9_0_0)] bg-[oklch(0.97_0.03_260)]">
-            <p className="text-[10px] text-[oklch(0.4_0.15_260)]">
+          <div className="px-5 py-2 border-b border-border bg-primary/5">
+            <p className="text-[10px] text-primary/70">
               {compareIds.size} selected · {compareIds.size < 2 ? 'Select at least 2 to compare' : compareIds.size < 3 ? 'Select up to 1 more or compare now' : 'Max 3 papers selected'}
             </p>
           </div>
@@ -138,7 +138,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
 
         {/* Paper list */}
         <div className="flex-1 overflow-y-auto">
-          <div className="divide-y divide-[oklch(0.95_0_0)]">
+          <div className="divide-y divide-border/50">
             {filtered.map((paper, i) => {
               const title = typeof paper.title === 'string' ? paper.title : paper.paperId ?? `Paper ${i + 1}`;
               const abstract = typeof paper.abstract === 'string' ? paper.abstract : '';
@@ -167,7 +167,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
               const voteCount = votes[paperId] ?? 0;
 
               return (
-                <div key={paper.id ?? i} className="px-5 py-3 hover:bg-[oklch(0.98_0_0)] transition-colors">
+                <div key={paper.id ?? i} className="px-5 py-3 hover:bg-muted/50 transition-colors">
                   <div className="flex items-start gap-2">
                     {/* Compare checkbox */}
                     <input
@@ -176,16 +176,16 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
                       disabled={!isChecked && compareIds.size >= 3}
                       onChange={() => toggleCompare(paperId)}
                       aria-label="Select for comparison"
-                      className="mt-1 shrink-0 accent-[oklch(0.45_0.19_260)] cursor-pointer"
+                      className="mt-1 shrink-0 accent-primary cursor-pointer"
                       onClick={(e) => e.stopPropagation()}
                     />
-                    <span className="text-[10px] text-[oklch(0.6_0_0)] font-mono mt-1 shrink-0 w-5">{i + 1}.</span>
+                    <span className="text-[10px] text-muted-foreground/70 font-mono mt-1 shrink-0 w-5">{i + 1}.</span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start gap-1">
                         <button
                           type="button"
                           onClick={() => setSelectedPaper(paper)}
-                          className="text-sm font-medium text-[oklch(0.2_0_0)] hover:text-[oklch(0.4_0.19_260)] transition-colors leading-snug text-left flex-1"
+                          className="text-sm font-medium text-foreground hover:text-primary transition-colors leading-snug text-left flex-1"
                         >
                           {title}
                         </button>
@@ -194,7 +194,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label="Open on arxiv"
-                          className="shrink-0 mt-0.5 text-[oklch(0.5_0.19_260)] hover:text-[oklch(0.35_0.19_260)] text-xs transition-colors"
+                          className="shrink-0 mt-0.5 text-primary/60 hover:text-primary text-xs transition-colors"
                           onClick={(e) => e.stopPropagation()}
                         >
                           ↗
@@ -204,7 +204,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
                           type="button"
                           onClick={(e) => handleUpvote(e, paperId)}
                           aria-label="Upvote paper"
-                          className="shrink-0 mt-0.5 flex items-center gap-0.5 text-[oklch(0.55_0_0)] hover:text-[oklch(0.35_0.19_260)] transition-colors text-[10px]"
+                          className="shrink-0 mt-0.5 flex items-center gap-0.5 text-muted-foreground hover:text-primary transition-colors text-[10px]"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="18 15 12 9 6 15" />
@@ -214,7 +214,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
                       </div>
 
                       {/* Meta line */}
-                      <div className="flex items-center gap-2 mt-1 text-[10px] text-[oklch(0.5_0_0)]">
+                      <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
                         {authors && <span>{authors}</span>}
                         {date && <span>· {date}</span>}
                         {citationCount > 0 && <span>· {citationCount} citations</span>}
@@ -222,7 +222,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
 
                       {/* Abstract snippet */}
                       {abstract && (
-                        <p className="text-xs text-[oklch(0.45_0_0)] mt-1.5 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
                           {abstract}
                         </p>
                       )}
@@ -233,7 +233,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
                           {categories.slice(0, 3).map((cat, j) => (
                             <span
                               key={j}
-                              className="text-[9px] px-1.5 py-0.5 rounded bg-[oklch(0.95_0_0)] text-[oklch(0.4_0_0)]"
+                              className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
                             >
                               {typeof cat === 'string' ? cat : ''}
                             </span>
@@ -247,7 +247,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
             })}
 
             {filtered.length === 0 && (
-              <div className="px-5 py-8 text-center text-sm text-[oklch(0.5_0_0)]">
+              <div className="px-5 py-8 text-center text-sm text-muted-foreground">
                 No papers match "{search}"
               </div>
             )}
@@ -261,7 +261,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
           <button
             type="button"
             onClick={() => setComparingOpen(true)}
-            className="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full bg-[oklch(0.45_0.19_260)] text-white text-sm font-semibold shadow-lg hover:bg-[oklch(0.38_0.19_260)] transition-colors"
+            className="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-lg hover:bg-primary/80 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="7" height="18" rx="1" /><rect x="14" y="3" width="7" height="18" rx="1" />

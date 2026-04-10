@@ -163,7 +163,7 @@
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Artifact panel — always light, regardless of system dark mode */
+/* Artifact panel — light mode overrides */
 .artifact-panel {
   --background: oklch(0.995 0 0);
   --foreground: oklch(0.145 0 0);
@@ -183,4 +183,26 @@
   --ring: oklch(0.55 0.19 260);
   color: oklch(0.145 0 0);
   background: oklch(0.995 0 0);
+
+/* Artifact panel — dark mode: inherit from the global dark theme */
+.dark & {
+  --background: oklch(0.16 0.014 260);
+  --foreground: oklch(0.985 0.002 260);
+  --card: oklch(0.2 0.018 260);
+  --card-foreground: oklch(0.985 0.002 260);
+  --muted: oklch(0.25 0.02 260);
+  --muted-foreground: oklch(0.65 0.02 260);
+  --border: oklch(0.3 0.02 260);
+  --primary: oklch(0.65 0.19 260);
+  --primary-foreground: oklch(0.985 0.002 260);
+  --accent: oklch(0.25 0.02 260);
+  --accent-foreground: oklch(0.985 0.002 260);
+  --secondary: oklch(0.25 0.02 260);
+  --secondary-foreground: oklch(0.985 0.002 260);
+  --destructive: oklch(0.704 0.191 22.216);
+  --input: oklch(0.3 0.02 260);
+  --ring: oklch(0.65 0.19 260);
+  color: oklch(0.985 0.002 260);
+  background: oklch(0.16 0.014 260);
+}
 }
