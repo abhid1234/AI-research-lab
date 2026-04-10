@@ -9,7 +9,21 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'AI Research Lab',
-  description: 'Agent-powered research paper observatory',
+  description: 'Agent-powered research paper observatory — ingest AI papers, run 5 specialist agents, explore interactive visual artifacts.',
+  openGraph: {
+    title: 'AI Research Lab',
+    description: 'Agent-powered research paper observatory — ingest AI papers, run 5 specialist agents, explore interactive visual artifacts.',
+    type: 'website',
+    siteName: 'AI Research Lab',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'AI Research Lab',
+    description: 'Agent-powered research paper observatory',
+  },
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
