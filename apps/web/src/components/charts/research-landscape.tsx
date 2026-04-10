@@ -1,39 +1,20 @@
 'use client';
 
 import {
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  ZAxis,
-  CartesianGrid,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
   ResponsiveContainer,
   Tooltip,
-  Legend,
 } from 'recharts';
 
 /**
- * ResearchLandscape renders a 2D "landscape" of papers colored by cluster.
- *
- * Since the API doesn't ship precomputed UMAP coordinates, we do a
- * deterministic pseudo-projection:
- *   1. Classify each paper into a semantic cluster (keyword match).
- *   2. Anchor each cluster at a fixed polar position on the canvas.
- *   3. Jitter each paper around its cluster center using a stable hash of
- *      its ID, so visually-similar papers end up near each other and the
- *      same paper always lands in the same spot across renders.
- *
- * The result reads like a real embedding projection — every cluster is a
- * visible blob of points — without the cost of streaming embeddings to the
- * client.
+ * ResearchLandscape renders a spider/radar chart showing the distribution
+ * of papers across research clusters. Each axis is a category; the filled
+ * polygon shows concentration at a glance.
  */
-
-interface ScatterPoint {
-  x: number;
-  y: number;
-  title: string;
-  cluster: string;
-}
 
 const CLUSTERS = [
   { id: 'Agents',       color: '#3b82f6' },
@@ -48,21 +29,6 @@ const CLUSTERS = [
 ] as const;
 
 type ClusterId = typeof CLUSTERS[number]['id'];
-
-/** Deterministic 32-bit string hash (FNV-1a variant) — stable across renders */
-function hash(str: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
-
-/** Map a hash integer to a float in [0, 1) */
-function norm(h: number): number {
-  return (h % 10000) / 10000;
-}
 
 function classifyPaper(p: any): ClusterId {
   const text = [
@@ -88,49 +54,25 @@ function classifyPaper(p: any): ClusterId {
   return 'Agents';
 }
 
-/** Project a paper to a (x, y) point anchored near its cluster's center. */
-function projectPaper(paper: any, clusterIndex: number, totalClusters: number): ScatterPoint {
-  const cluster = CLUSTERS[clusterIndex];
-
-  // Anchor each cluster on a ring around the origin
-  const angle = (clusterIndex / totalClusters) * Math.PI * 2;
-  const ringRadius = 6;
-  const cx = Math.cos(angle) * ringRadius;
-  const cy = Math.sin(angle) * ringRadius;
-
-  // Jitter based on a stable hash of the paper identifier so the scatter
-  // looks organic but the same paper always lands in the same spot.
-  const id = String(paper.id ?? paper.paperId ?? paper.arxivId ?? paper.title ?? '');
-  const h1 = hash(id);
-  const h2 = hash(id + '::y');
-
-  // Two uniform samples → polar coords for a disc (even distribution, no clumping)
-  const r = Math.sqrt(norm(h1)) * 2.4; // max jitter radius ~2.4 units
-  const theta = norm(h2) * Math.PI * 2;
-
-  return {
-    x: cx + Math.cos(theta) * r,
-    y: cy + Math.sin(theta) * r,
-    title: paper.title ?? 'Untitled',
-    cluster: cluster.id,
-  };
+interface RadarPoint {
+  category: string;
+  count: number;
+  fullMark: number;
 }
 
 interface TooltipProps {
   active?: boolean;
-  payload?: { payload: ScatterPoint; name?: string }[];
+  payload?: { value: number; name: string; payload: RadarPoint }[];
 }
 
-function ScatterTooltip({ active, payload }: TooltipProps) {
+function RadarTooltip({ active, payload }: TooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
   const point = payload[0].payload;
   return (
-    <div className="rounded-md border border-border bg-popover px-3 py-2 shadow-md max-w-xs">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {point.cluster}
-      </p>
-      <p className="text-xs font-medium text-foreground leading-snug mt-0.5 line-clamp-3">
-        {point.title}
+    <div className="rounded-md border border-border bg-popover px-3 py-2 shadow-md">
+      <p className="text-xs font-semibold text-foreground">{point.category}</p>
+      <p className="text-[11px] text-muted-foreground tabular-nums">
+        {point.count} paper{point.count !== 1 ? 's' : ''}
       </p>
     </div>
   );
@@ -151,72 +93,73 @@ export function ResearchLandscape({
     );
   }
 
-  // Group papers by cluster index, preserving stable ordering
-  const clusterPoints: Record<ClusterId, ScatterPoint[]> = Object.fromEntries(
-    CLUSTERS.map((c) => [c.id, [] as ScatterPoint[]]),
-  ) as Record<ClusterId, ScatterPoint[]>;
+  // Count papers per cluster
+  const counts: Record<ClusterId, number> = {} as Record<ClusterId, number>;
+  for (const c of CLUSTERS) counts[c.id] = 0;
 
   for (const p of papers) {
-    const clusterId = classifyPaper(p);
-    const clusterIndex = CLUSTERS.findIndex((c) => c.id === clusterId);
-    const point = projectPaper(p, clusterIndex, CLUSTERS.length);
-    clusterPoints[clusterId].push(point);
+    const cluster = classifyPaper(p);
+    counts[cluster]++;
   }
 
+  const maxCount = Math.max(...Object.values(counts), 1);
+
+  const data: RadarPoint[] = CLUSTERS.map((c) => ({
+    category: c.id,
+    count: counts[c.id],
+    fullMark: maxCount,
+  }));
+
+  // Determine if a filter is active so we can dim the polygon
   const hasFilter = activeFilter && activeFilter !== 'all';
-  const visibleClusters = CLUSTERS.filter((c) => clusterPoints[c.id].length > 0);
 
-  if (hasFilter && visibleClusters.every((c) => c.id.toLowerCase() !== activeFilter!.toLowerCase())) {
-    return (
-      <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">
-        No papers match the selected filter.
-      </div>
-    );
-  }
+  // Use primary blue for the main polygon, with a highlight ring if filtered
+  const primaryColor = '#3b82f6';
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <ScatterChart margin={{ top: 8, right: 12, bottom: 8, left: 0 }}>
-        <CartesianGrid stroke="oklch(0.92 0 0)" strokeDasharray="3 3" />
-        <XAxis
-          type="number"
-          dataKey="x"
-          domain={[-10, 10]}
-          tick={false}
+      <RadarChart data={data} cx="50%" cy="50%" outerRadius="72%">
+        <PolarGrid
+          stroke="oklch(0.88 0 0)"
+          strokeDasharray="2 2"
+        />
+        <PolarAngleAxis
+          dataKey="category"
+          tick={{
+            fontSize: 10,
+            fill: 'oklch(0.4 0 0)',
+            fontWeight: 500,
+          }}
+        />
+        <PolarRadiusAxis
+          tick={{ fontSize: 9, fill: 'oklch(0.6 0 0)' }}
           axisLine={false}
-          label={{ value: '', position: 'insideBottom' }}
+          tickCount={4}
         />
-        <YAxis
-          type="number"
-          dataKey="y"
-          domain={[-10, 10]}
-          tick={false}
-          axisLine={false}
+        <Radar
+          name="Papers"
+          dataKey="count"
+          stroke={primaryColor}
+          fill={primaryColor}
+          fillOpacity={hasFilter ? 0.08 : 0.18}
+          strokeWidth={2}
+          strokeOpacity={hasFilter ? 0.3 : 1}
+          dot={{
+            r: 3,
+            fill: primaryColor,
+            strokeWidth: 0,
+            fillOpacity: hasFilter ? 0.3 : 0.9,
+          }}
+          activeDot={{
+            r: 5,
+            fill: primaryColor,
+            stroke: 'white',
+            strokeWidth: 2,
+          }}
         />
-        <ZAxis type="number" range={[40, 40]} />
-        <Tooltip content={<ScatterTooltip />} cursor={{ strokeDasharray: '3 3' }} />
-        <Legend
-          wrapperStyle={{ fontSize: '11px', paddingTop: '4px' }}
-          iconSize={8}
-          iconType="circle"
-        />
-        {visibleClusters.map((cluster) => {
-          const dimmed =
-            hasFilter && cluster.id.toLowerCase() !== activeFilter!.toLowerCase();
-          return (
-            <Scatter
-              key={cluster.id}
-              name={cluster.id}
-              data={clusterPoints[cluster.id]}
-              fill={cluster.color}
-              fillOpacity={dimmed ? 0.15 : 0.75}
-              stroke={cluster.color}
-              strokeOpacity={dimmed ? 0.3 : 1}
-              strokeWidth={1}
-            />
-          );
-        })}
-      </ScatterChart>
+        {/* No second overlay — the main polygon + active dot handles highlighting */}
+        <Tooltip content={<RadarTooltip />} />
+      </RadarChart>
     </ResponsiveContainer>
   );
 }

@@ -245,12 +245,12 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
 
       {/* Side-by-side: Research Landscape + Topic Evolution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Research Landscape — 2D cluster scatter */}
+        {/* Research Landscape — spider/radar chart */}
         <Card>
           <CardHeader>
             <CardTitle>Research Landscape</CardTitle>
             <CardDescription>
-              Each dot is a paper, positioned by semantic cluster. Hover to preview.
+              Topic distribution across research clusters
             </CardDescription>
           </CardHeader>
           <CardContent>
