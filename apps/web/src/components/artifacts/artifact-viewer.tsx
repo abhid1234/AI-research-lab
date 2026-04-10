@@ -84,18 +84,20 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers }: Artifac
   // Some tabs aggregate multiple agent outputs — pass all artifacts and let each tab pick what it needs
   return (
     <Tabs defaultValue="overview" className="h-full flex flex-col">
-      <div className="px-4 pt-3 border-b border-border">
-        <TabsList>
-          {TAB_IDS.map((id) => {
-            const count = getTabCount(id, artifacts);
-            return (
-              <TabsTrigger key={id} value={id}>
-                {TAB_LABELS[id]}
-                <CountBadge count={count} />
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
+      <div className="border-b border-border">
+        <div className="overflow-x-auto scrollbar-none px-4 pt-3 pb-0.5">
+          <TabsList className="min-w-max">
+            {TAB_IDS.map((id) => {
+              const count = getTabCount(id, artifacts);
+              return (
+                <TabsTrigger key={id} value={id}>
+                  {TAB_LABELS[id]}
+                  <CountBadge count={count} />
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">

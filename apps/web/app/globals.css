@@ -130,6 +130,10 @@
   }
 }
 
+/* Hide scrollbars for horizontally-scrolling tab rails */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* Artifact panel — always light, regardless of system dark mode */
 .artifact-panel {
   --background: oklch(0.995 0 0);
