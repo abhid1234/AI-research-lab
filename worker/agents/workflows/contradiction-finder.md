@@ -1,7 +1,7 @@
 ---
 name: contradiction-finder
 model: strong
-maxOutputTokens: 8192
+maxOutputTokens: 32768
 description: Compares claims across papers to identify conflicts, divergences, and consensus
 ---
 

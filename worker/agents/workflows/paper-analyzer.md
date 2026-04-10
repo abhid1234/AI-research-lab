@@ -1,7 +1,7 @@
 ---
 name: paper-analyzer
 model: fast
-maxOutputTokens: 8192
+maxOutputTokens: 32768
 description: Extracts structured information from research papers
 ---
 

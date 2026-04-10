@@ -32,6 +32,9 @@ export async function runContradictionFinder(
     maxOutputTokens: workflow.maxOutputTokens,
     system: workflow.prompt,
     prompt,
+    providerOptions: {
+      google: { thinkingConfig: { thinkingBudget: 0 } },
+    },
   });
 
   return output;

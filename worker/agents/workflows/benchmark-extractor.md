@@ -1,7 +1,7 @@
 ---
 name: benchmark-extractor
 model: fast
-maxOutputTokens: 8192
+maxOutputTokens: 32768
 description: Extracts benchmark results, normalizes comparisons, and flags evaluation red flags
 ---
 

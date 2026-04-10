@@ -1,7 +1,7 @@
 ---
 name: frontier-detector
 model: strong
-maxOutputTokens: 8192
+maxOutputTokens: 32768
 description: Synthesizes multi-agent outputs to surface the most significant research developments
 ---
 

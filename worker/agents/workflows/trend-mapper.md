@@ -1,7 +1,7 @@
 ---
 name: trend-mapper
 model: fast
-maxOutputTokens: 8192
+maxOutputTokens: 32768
 description: Identifies momentum and directional signals across research paper collections
 ---
 

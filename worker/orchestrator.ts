@@ -10,18 +10,31 @@ import { runBenchmarkExtractor, type BenchmarkExtractorInput } from './agents/be
 import { runContradictionFinder, type ContradictionFinderInput } from './agents/contradiction-finder.js';
 import { runFrontierDetector, type FrontierDetectorInput } from './agents/frontier-detector.js';
 
+// Cap the number of papers fed to any single agent call to keep prompts manageable.
+// Larger context = higher chance of truncation / no output. 20 papers is a sweet spot.
+const MAX_PAPERS_PER_AGENT = 20;
+
 export async function runAnalysis(topicId: string, jobId: string): Promise<void> {
   // 1. Fetch all papers and chunks for this topic
-  const papers = await getPapersByTopic(topicId);
+  const allPapersForTopic = await getPapersByTopic(topicId);
 
-  if (papers.length === 0) {
+  if (allPapersForTopic.length === 0) {
     throw new Error('No papers found for this topic. Run ingestion first.');
   }
+
+  // Take the most recent N papers (by publishedAt) so agents work with a focused set
+  const papers = [...allPapersForTopic]
+    .sort((a, b) => {
+      const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+      const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+      return db - da;
+    })
+    .slice(0, MAX_PAPERS_PER_AGENT);
 
   const paperIds = papers.map((p) => p.id);
   const allChunks = await getPaperChunksByPaperIds(paperIds);
 
-  console.log(`[orchestrator] Analyzing ${papers.length} papers with ${allChunks.length} chunks`);
+  console.log(`[orchestrator] Analyzing ${papers.length} papers (from ${allPapersForTopic.length} in topic) with ${allChunks.length} chunks`);
 
   // ── Phase 1: Paper Analyzer + Trend Mapper + Benchmark Extractor (parallel) ──
 
