@@ -116,8 +116,29 @@ export default function Home() {
             {/* Artifact viewer */}
             <div className="flex-1 overflow-hidden">
               {loadingArtifacts ? (
-                <div className="flex items-center justify-center h-full text-[oklch(0.45_0_0)] text-sm">
-                  Loading artifacts...
+                <div className="p-4 space-y-6 animate-pulse">
+                  {/* Skeleton stat cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="rounded-xl bg-[oklch(0.94_0_0)] h-[76px]" />
+                    ))}
+                  </div>
+                  {/* Skeleton banner */}
+                  <div className="h-4 w-3/4 rounded bg-[oklch(0.94_0_0)]" />
+                  {/* Skeleton charts */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="rounded-lg bg-[oklch(0.94_0_0)] h-[340px]" />
+                    <div className="rounded-lg bg-[oklch(0.94_0_0)] h-[340px]" />
+                  </div>
+                  {/* Skeleton content */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="rounded-lg bg-[oklch(0.94_0_0)] h-[200px]" />
+                    <div className="space-y-3">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="rounded-lg bg-[oklch(0.94_0_0)] h-[80px]" />
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <ArtifactViewer
