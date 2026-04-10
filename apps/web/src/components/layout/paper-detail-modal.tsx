@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface PaperDetailModalProps {
   paper: any | null;
@@ -19,7 +20,10 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
     return () => window.removeEventListener('keydown', handleKey);
   }, [paper, onClose]);
 
-  if (!paper) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!paper || !mounted) return null;
 
   const title = typeof paper.title === 'string' ? paper.title : 'Untitled Paper';
   const abstract = typeof paper.abstract === 'string' ? paper.abstract : '';
@@ -66,23 +70,34 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
     })
     .slice(0, 3);
 
-  return (
+  return createPortal(
     <>
-      {/* Backdrop */}
+      {/* Backdrop — z-index above drawer (9999) */}
       <div
-        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 10000,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          animation: 'drawerFadeIn 150ms ease-out both',
+        }}
         onClick={onClose}
       >
         {/* Modal panel */}
         <div
-          className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+          className="relative rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+          style={{ background: 'var(--card)', color: 'var(--card-foreground)', animation: 'chartFadeIn 200ms ease-out both' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close button */}
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="absolute top-3 right-3 z-10 p-1.5 rounded-md text-[oklch(0.5_0_0)] hover:text-[oklch(0.145_0_0)] hover:bg-[oklch(0.95_0_0)] transition-colors"
+            className="absolute top-3 right-3 z-10 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -103,10 +118,10 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
           {/* Scrollable content */}
           <div className="overflow-y-auto flex-1 p-6 pr-10">
             {/* Title */}
-            <h2 className="text-lg font-bold text-[oklch(0.145_0_0)] leading-snug pr-2">{title}</h2>
+            <h2 className="text-lg font-bold text-foreground leading-snug pr-2">{title}</h2>
 
             {/* Meta row */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-xs text-[oklch(0.45_0_0)]">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-xs text-muted-foreground">
               {authors && <span>{authors}</span>}
               {date && <span className="before:content-['·'] before:mr-3">{date}</span>}
               {venue && (
@@ -125,7 +140,7 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
                 {categories.map((cat, i) => (
                   <span
                     key={i}
-                    className="text-[10px] px-2 py-0.5 rounded-full bg-[oklch(0.94_0.04_260)] text-[oklch(0.35_0.15_260)] font-medium"
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium"
                   >
                     {typeof cat === 'string' ? cat : ''}
                   </span>
@@ -136,10 +151,10 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
             {/* Abstract */}
             {abstract && (
               <div className="mt-5">
-                <h3 className="text-xs font-semibold text-[oklch(0.35_0_0)] uppercase tracking-wide mb-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
                   Abstract
                 </h3>
-                <p className="text-sm text-[oklch(0.25_0_0)] leading-relaxed">{abstract}</p>
+                <p className="text-sm text-foreground/90 leading-relaxed">{abstract}</p>
               </div>
             )}
 
@@ -150,7 +165,7 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
                   href={pdfLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[oklch(0.45_0.19_260)] text-white text-sm font-medium hover:bg-[oklch(0.38_0.19_260)] transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/80 transition-colors"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -173,7 +188,7 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
                 href={paperUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[oklch(0.96_0_0)] text-[oklch(0.25_0_0)] text-sm font-medium hover:bg-[oklch(0.92_0_0)] transition-colors border border-[oklch(0.88_0_0)]"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-muted text-foreground/90 text-sm font-medium hover:bg-muted/80 transition-colors border border-border"
               >
                 View on arxiv ↗
               </a>
@@ -181,11 +196,11 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
 
             {/* Similar papers */}
             <div className="mt-7">
-              <h3 className="text-xs font-semibold text-[oklch(0.35_0_0)] uppercase tracking-wide mb-3">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                 Similar Papers
               </h3>
               {similarPapers.length === 0 ? (
-                <p className="text-xs text-[oklch(0.55_0_0)]">No similar papers found in this collection.</p>
+                <p className="text-xs text-muted-foreground">No similar papers found in this collection.</p>
               ) : (
                 <div className="space-y-2.5">
                   {similarPapers.map((sp: any, i: number) => {
@@ -214,18 +229,18 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
                     return (
                       <div
                         key={sp.id ?? i}
-                        className="p-3 rounded-lg bg-[oklch(0.97_0_0)] border border-[oklch(0.92_0_0)]"
+                        className="p-3 rounded-lg bg-muted/50 border border-border"
                       >
                         <a
                           href={spUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm font-medium text-[oklch(0.2_0_0)] hover:text-[oklch(0.4_0.19_260)] transition-colors leading-snug block"
+                          className="text-sm font-medium text-foreground hover:text-primary transition-colors leading-snug block"
                         >
                           {spTitle} ↗
                         </a>
                         {spAuthors && (
-                          <p className="text-[10px] text-[oklch(0.5_0_0)] mt-0.5">{spAuthors}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{spAuthors}</p>
                         )}
                       </div>
                     );
@@ -236,6 +251,7 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 }
