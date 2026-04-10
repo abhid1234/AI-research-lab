@@ -246,7 +246,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
       {/* Side-by-side: Research Landscape + Topic Evolution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Research Landscape — spider/radar chart */}
-        <Card>
+        <Card className="animate-chart-in">
           <CardHeader>
             <CardTitle>Research Landscape</CardTitle>
             <CardDescription>
@@ -259,7 +259,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         </Card>
 
         {/* Topic Evolution chart */}
-        <Card>
+        <Card className="animate-chart-in" style={{ animationDelay: '100ms' }}>
           <CardHeader>
             <CardTitle>Topic Evolution Over Time</CardTitle>
             <CardDescription>Tracked data showing research intensity across key topics</CardDescription>

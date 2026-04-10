@@ -140,6 +140,15 @@
   }
 }
 
+/* Chart card entrance animation */
+@keyframes chartFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-chart-in {
+  animation: chartFadeIn 400ms ease-out both;
+}
+
 /* Paper drawer slide-in animation */
 @keyframes drawerSlideIn {
   from { transform: translateX(100%); }
