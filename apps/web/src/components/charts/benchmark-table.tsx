@@ -81,10 +81,11 @@ export function BenchmarkTable({ table }: { table: BenchmarkTableData }) {
     : [];
 
   return (
-    <div className="rounded-lg overflow-hidden ring-1 ring-foreground/10">
+    <div className="rounded-lg ring-1 ring-foreground/10">
       <div className="px-4 py-2 bg-muted/50 border-b border-border text-sm font-medium">
         {table.benchmarkName}
       </div>
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -109,6 +110,7 @@ export function BenchmarkTable({ table }: { table: BenchmarkTableData }) {
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }
