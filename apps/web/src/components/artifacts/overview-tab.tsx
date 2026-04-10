@@ -23,6 +23,23 @@ interface OverviewTabProps {
   artifacts: { agentType: string; data: any }[];
   totalPaperCount?: number;
   dbPapers?: any[];
+  topicName?: string;
+  lastSyncAt?: string | null;
+}
+
+/** Render an ISO timestamp as a human-relative string ("2 hours ago"). */
+function formatRelativeTime(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const then = new Date(iso).getTime();
+  if (isNaN(then)) return null;
+  const deltaSec = Math.round((Date.now() - then) / 1000);
+  if (deltaSec < 60) return 'just now';
+  if (deltaSec < 3600) return `${Math.floor(deltaSec / 60)} min ago`;
+  if (deltaSec < 86400) return `${Math.floor(deltaSec / 3600)} hr ago`;
+  const days = Math.floor(deltaSec / 86400);
+  if (days < 7) return `${days} day${days !== 1 ? 's' : ''} ago`;
+  if (days < 30) return `${Math.floor(days / 7)} wk ago`;
+  return `${Math.floor(days / 30)} mo ago`;
 }
 
 const FINDING_COLORS = [
@@ -59,7 +76,7 @@ const TOPIC_COLORS = [
   '#8b5cf6', // violet
 ] as const;
 
-export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTabProps) {
+export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, lastSyncAt }: OverviewTabProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -135,8 +152,29 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers }: OverviewTa
   // Time-window filtered db papers (for landscape chart and drawer)
   const timeFilteredDbPapers = filterPapersByWindow(dbPapers ?? [], timeWindowMonths);
 
+  const agentCount = new Set(artifacts.map((a) => a.agentType)).size;
+  const relativeSync = formatRelativeTime(lastSyncAt);
+
   return (
     <div className="space-y-6">
+      {/* Topic headline + analysis meta */}
+      {(topicName || relativeSync || agentCount > 0) && (
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+          {topicName && (
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">
+              {topicName}
+            </h2>
+          )}
+          <p className="text-[11px] uppercase tracking-wider text-muted-foreground tabular-nums">
+            {relativeSync && <span>Last analyzed {relativeSync}</span>}
+            {relativeSync && agentCount > 0 && <span className="mx-1.5">·</span>}
+            {agentCount > 0 && <span>{agentCount} agents</span>}
+            {(relativeSync || agentCount > 0) && displayPaperCount > 0 && <span className="mx-1.5">·</span>}
+            {displayPaperCount > 0 && <span>{displayPaperCount} papers</span>}
+          </p>
+        </div>
+      )}
+
       {/* Gradient stat cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <button onClick={() => setDrawerOpen(true)} className="text-left">

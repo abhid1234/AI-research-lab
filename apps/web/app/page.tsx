@@ -18,6 +18,7 @@ export default function Home() {
   const [dateRange, setDateRange] = useState<string | undefined>(undefined);
   const [dbPapers, setDbPapers] = useState<any[]>([]);
   const [topicName, setTopicName] = useState<string>('');
+  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
 
   // Fetch total topic count once
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function Home() {
       if (topicData?.name) {
         setTopicName(topicData.name);
       }
+      setLastSyncAt(topicData?.lastSyncAt ?? null);
 
       // Store DB papers for charts
       if (Array.isArray(dbPapersRaw)) {
@@ -116,7 +118,13 @@ export default function Home() {
                   Loading artifacts...
                 </div>
               ) : (
-                <ArtifactViewer artifacts={artifacts} totalPaperCount={paperCount} dbPapers={dbPapers} />
+                <ArtifactViewer
+                  artifacts={artifacts}
+                  totalPaperCount={paperCount}
+                  dbPapers={dbPapers}
+                  topicName={topicName}
+                  lastSyncAt={lastSyncAt}
+                />
               )}
             </div>
 
