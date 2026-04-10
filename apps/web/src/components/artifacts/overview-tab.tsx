@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import { BenchmarkTable } from '@/components/charts/benchmark-table';
 import { TimelineScrubber } from '@/components/charts/timeline-scrubber';
 import { TemporalSlider, filterPapersByWindow } from '@/components/charts/temporal-slider';
-import { PaperDrawer } from '@/components/layout/paper-drawer';
+
 
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
@@ -25,6 +25,7 @@ interface OverviewTabProps {
   dbPapers?: any[];
   topicName?: string;
   lastSyncAt?: string | null;
+  onOpenDrawer?: () => void;
 }
 
 /** Render an ISO timestamp as a human-relative string ("2 hours ago"). */
@@ -76,10 +77,9 @@ const TOPIC_COLORS = [
   '#8b5cf6', // violet
 ] as const;
 
-export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, lastSyncAt }: OverviewTabProps) {
+export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, lastSyncAt, onOpenDrawer }: OverviewTabProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [timeWindowMonths, setTimeWindowMonths] = useState<number>(0);
 
   const trendArtifact = artifacts.find((a) => a.agentType === 'trend-mapper');
@@ -177,7 +177,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
 
       {/* Gradient stat cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <button onClick={() => setDrawerOpen(true)} className="text-left">
+        <button onClick={onOpenDrawer} className="text-left">
           <GradientStatCard label="Papers" value={displayPaperCount} clickable />
         </button>
         <GradientStatCard label="Topics Tracked" value={displayTopicCount} />
@@ -378,12 +378,6 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         <EmptyState message="Run an analysis to populate the overview." />
       )}
 
-      {/* Paper drawer */}
-      <PaperDrawer
-        papers={timeFilteredDbPapers.length > 0 ? timeFilteredDbPapers : (dbPapers && dbPapers.length > 0 ? dbPapers : papers)}
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-      />
     </div>
   );
 }

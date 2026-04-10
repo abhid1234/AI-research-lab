@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PaperDetailModal } from './paper-detail-modal';
@@ -48,7 +47,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
     setVotes((prev) => ({ ...prev, [paperId]: newCount }));
   };
 
-  if (!open || typeof document === 'undefined') return null;
+  if (!open) return null;
 
   const filtered = search.trim()
     ? papers.filter((p) => {
@@ -61,7 +60,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
 
   const compareItems = papers.filter((p) => compareIds.has(String(p.id ?? '')));
 
-  return createPortal(
+  return (
     <>
       {/* Backdrop */}
       <div
@@ -257,7 +256,6 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
           onClose={() => setComparingOpen(false)}
         />
       )}
-    </>,
-    document.body,
+    </>
   );
 }

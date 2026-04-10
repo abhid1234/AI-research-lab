@@ -7,6 +7,7 @@ import { JobStatusBar } from '@/components/layout/job-status-bar';
 import { ArtifactViewer, type ArtifactItem } from '@/components/artifacts/artifact-viewer';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ChatModal } from '@/components/layout/chat-modal';
+import { PaperDrawer } from '@/components/layout/paper-drawer';
 
 export default function Home() {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
@@ -19,6 +20,7 @@ export default function Home() {
   const [dbPapers, setDbPapers] = useState<any[]>([]);
   const [topicName, setTopicName] = useState<string>('');
   const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Fetch total topic count once
   useEffect(() => {
@@ -124,6 +126,7 @@ export default function Home() {
                   dbPapers={dbPapers}
                   topicName={topicName}
                   lastSyncAt={lastSyncAt}
+                  onOpenDrawer={() => setDrawerOpen(true)}
                 />
               )}
             </div>
@@ -133,6 +136,11 @@ export default function Home() {
           </div>
         </main>
       </AppShell>
+      <PaperDrawer
+        papers={dbPapers}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
     </ErrorBoundary>
   );
 }
