@@ -292,86 +292,14 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
             <h3 className="text-sm font-semibold text-foreground">Key Results Worth Knowing</h3>
             {filteredPapers.length > 0 ? (
               <div className="space-y-3">
-                {filteredPapers.slice(0, 5).map((p, i) => {
-                  const dotColor = FINDING_COLORS[i % FINDING_COLORS.length];
-                  const title: string = p.mainResult ?? p.takeaway ?? '—';
-                  const paperTitle: string = p.title ?? p.paperId ?? '';
-                  const authorName: string = p.authors ?? p.author ?? '';
-                  const date: string = p.date ?? p.year ?? p.publishedAt ?? '';
-
-                  // Derive tag labels from methodology or category
-                  const tag1: string | undefined =
-                    typeof p.methodology === 'string' && p.methodology.trim()
-                      ? p.methodology.trim().split(/\s+/)[0]
-                      : typeof p.category === 'string' && p.category.trim()
-                      ? p.category.trim()
-                      : undefined;
-                  const tag2: string | undefined =
-                    typeof p.topic === 'string' && p.topic.trim() ? p.topic.trim() : undefined;
-
-                  return (
-                    <div key={i} className="rounded-lg border border-border bg-card p-3 space-y-1.5">
-                      {/* Tag badges */}
-                      {(tag1 || tag2) && (
-                        <div className="flex gap-1 mb-1">
-                          {tag1 && (
-                            <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">
-                              {tag1}
-                            </span>
-                          )}
-                          {tag2 && (
-                            <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded">
-                              {tag2}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      {/* Finding title */}
-                      <div className="flex items-start gap-2">
-                        <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${dotColor}`} aria-hidden="true" />
-                        <p className="text-sm font-semibold leading-snug">{title}</p>
-                      </div>
-                      {/* Approach description */}
-                      {p.approach && (
-                        <p className="text-xs text-muted-foreground leading-relaxed pl-4 line-clamp-2">{p.approach}</p>
-                      )}
-                      {/* Paper citation */}
-                      {paperTitle && (
-                        (() => {
-                          const paperId: string = p.paperId ?? p.id ?? '';
-                          const inner = (
-                            <>
-                              <span>↗</span>
-                              <span className="italic">{paperTitle}</span>
-                              {(authorName || date) && (
-                                <span className="text-muted-foreground">
-                                  {'— '}
-                                  {authorName ? authorName : ''}
-                                  {authorName && date ? ', ' : ''}
-                                  {date ? date : ''}
-                                </span>
-                              )}
-                            </>
-                          );
-                          return paperId ? (
-                            <a
-                              href={`https://www.semanticscholar.org/paper/${paperId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-primary/70 hover:text-primary transition-colors mt-1.5 pl-4 flex items-center gap-1"
-                            >
-                              {inner}
-                            </a>
-                          ) : (
-                            <p className="text-xs text-muted-foreground/80 mt-1.5 pl-4 flex items-center gap-1">
-                              {inner}
-                            </p>
-                          );
-                        })()
-                      )}
-                    </div>
-                  );
-                })}
+                {filteredPapers.slice(0, 5).map((p, i) => (
+                  <ResultCard
+                    key={i}
+                    paper={p}
+                    accent={FINDING_COLORS[i % FINDING_COLORS.length]}
+                    hero={i === 0}
+                  />
+                ))}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
@@ -456,6 +384,120 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       />
+    </div>
+  );
+}
+
+function ResultCard({
+  paper: p,
+  accent,
+  hero,
+}: {
+  paper: any;
+  accent: string;
+  hero: boolean;
+}) {
+  const title: string = p.mainResult ?? p.takeaway ?? '—';
+  const paperTitle: string = p.title ?? p.paperId ?? '';
+  const authorName: string = p.authors ?? p.author ?? '';
+  const date: string = p.date ?? p.year ?? p.publishedAt ?? '';
+  const paperId: string = p.paperId ?? p.id ?? '';
+
+  const tag1: string | undefined =
+    typeof p.methodology === 'string' && p.methodology.trim()
+      ? p.methodology.trim().split(/\s+/)[0]
+      : typeof p.category === 'string' && p.category.trim()
+      ? p.category.trim()
+      : undefined;
+  const tag2: string | undefined =
+    typeof p.topic === 'string' && p.topic.trim() ? p.topic.trim() : undefined;
+
+  const citationInner = (
+    <>
+      <span>↗</span>
+      <span className="italic">{paperTitle}</span>
+      {(authorName || date) && (
+        <span className="text-muted-foreground">
+          {'— '}
+          {authorName ? authorName : ''}
+          {authorName && date ? ', ' : ''}
+          {date ? date : ''}
+        </span>
+      )}
+    </>
+  );
+
+  const citationEl = paperTitle
+    ? paperId
+      ? (
+        <a
+          href={`https://www.semanticscholar.org/paper/${paperId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1 ${hero ? 'mt-2' : 'mt-1.5 pl-4'}`}
+        >
+          {citationInner}
+        </a>
+      )
+      : (
+        <p className={`text-xs text-muted-foreground/80 flex items-center gap-1 ${hero ? 'mt-2' : 'mt-1.5 pl-4'}`}>
+          {citationInner}
+        </p>
+      )
+    : null;
+
+  if (hero) {
+    return (
+      <div className="relative rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 space-y-2 overflow-hidden">
+        <div className="absolute top-0 left-0 h-full w-0.5 bg-primary" aria-hidden="true" />
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-bold uppercase tracking-wider text-primary">
+            Top finding
+          </span>
+          {tag1 && (
+            <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded font-medium">
+              {tag1}
+            </span>
+          )}
+          {tag2 && (
+            <span className="text-[10px] bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded font-medium">
+              {tag2}
+            </span>
+          )}
+        </div>
+        <p className="text-base font-semibold leading-snug text-foreground">{title}</p>
+        {p.approach && (
+          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{p.approach}</p>
+        )}
+        {citationEl}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-border bg-card p-3 space-y-1.5">
+      {(tag1 || tag2) && (
+        <div className="flex gap-1 mb-1">
+          {tag1 && (
+            <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+              {tag1}
+            </span>
+          )}
+          {tag2 && (
+            <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded">
+              {tag2}
+            </span>
+          )}
+        </div>
+      )}
+      <div className="flex items-start gap-2">
+        <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${accent}`} aria-hidden="true" />
+        <p className="text-sm font-semibold leading-snug">{title}</p>
+      </div>
+      {p.approach && (
+        <p className="text-xs text-muted-foreground leading-relaxed pl-4 line-clamp-2">{p.approach}</p>
+      )}
+      {citationEl}
     </div>
   );
 }
