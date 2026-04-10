@@ -80,8 +80,11 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
 
   if (!hasData) {
     return (
-      <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
-        No insights available yet. Run an analysis to discover contradictions and consensus.
+      <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
+          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <p className="text-sm">No insights yet. Run an analysis to discover contradictions and consensus.</p>
       </div>
     );
   }
