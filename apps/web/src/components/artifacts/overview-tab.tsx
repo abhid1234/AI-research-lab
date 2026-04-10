@@ -443,7 +443,7 @@ function ResultCard({
   if (hero) {
     return (
       <div className="relative rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 space-y-2 overflow-hidden">
-        <div className="absolute top-0 left-0 h-full w-0.5 bg-primary" aria-hidden="true" />
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary rounded-t-xl" aria-hidden="true" />
         <div className="flex items-center gap-2">
           <span className="text-[9px] font-bold uppercase tracking-wider text-primary">
             Top finding
