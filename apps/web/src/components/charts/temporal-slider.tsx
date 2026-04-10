@@ -29,7 +29,7 @@ export function TemporalSlider({ activeMonths, onChange }: TemporalSliderProps) 
             type="button"
             onClick={() => onChange(w.months)}
             className={[
-              'rounded-full px-3 py-1 text-xs font-medium transition-colors border',
+              'rounded-full px-3 py-1 text-xs font-medium transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
               isActive
                 ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted hover:text-foreground',

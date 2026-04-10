@@ -177,7 +177,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
 
       {/* Gradient stat cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <button onClick={onOpenDrawer} className="text-left">
+        <button onClick={onOpenDrawer} className="text-left rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
           <GradientStatCard label="Papers" value={displayPaperCount} clickable />
         </button>
         <GradientStatCard label="Topics Tracked" value={displayTopicCount} />
@@ -510,7 +510,7 @@ function FilterChip({
       type="button"
       onClick={onClick}
       className={[
-        'rounded-full px-3 py-1 text-xs font-medium transition-colors',
+        'rounded-full px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
         active
           ? 'bg-primary text-primary-foreground'
           : 'bg-muted/50 text-muted-foreground hover:bg-muted',
@@ -523,7 +523,7 @@ function FilterChip({
 
 function GradientStatCard({ label, value, clickable }: { label: string; value: number; clickable?: boolean }) {
   return (
-    <div className={`rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 p-4 ${clickable ? 'cursor-pointer hover:from-primary/30 hover:to-primary/10 transition-colors' : ''}`}>
+    <div className={`rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 p-4 ${clickable ? 'cursor-pointer hover:from-primary/30 hover:to-primary/10 transition-colors' : ''} focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1 rounded-xl`}>
       <div className="flex items-center gap-1.5">
         <p className="text-3xl font-bold tabular-nums text-foreground">{value}</p>
         {clickable && <span className="text-xs text-primary/60 mt-1">↗</span>}
