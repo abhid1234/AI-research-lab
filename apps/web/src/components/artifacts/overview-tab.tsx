@@ -231,11 +231,13 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
 
       {/* Side-by-side: Research Landscape + Topic Evolution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Research Landscape radar chart */}
+        {/* Research Landscape — 2D cluster scatter */}
         <Card>
           <CardHeader>
             <CardTitle>Research Landscape</CardTitle>
-            <CardDescription>Click topic to filter — distribution across areas</CardDescription>
+            <CardDescription>
+              Each dot is a paper, positioned by semantic cluster. Hover to preview.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ResearchLandscape papers={timeFilteredDbPapers.length > 0 ? timeFilteredDbPapers : (dbPapers && dbPapers.length > 0 ? dbPapers : papers)} activeFilter={activeFilter} />
