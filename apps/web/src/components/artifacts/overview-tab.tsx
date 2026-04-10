@@ -523,7 +523,7 @@ function FilterChip({
 
 function GradientStatCard({ label, value, clickable }: { label: string; value: number; clickable?: boolean }) {
   return (
-    <div className={`rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 p-4 ${clickable ? 'cursor-pointer hover:from-primary/30 hover:to-primary/10 transition-colors' : ''} focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1 rounded-xl`}>
+    <div className={`rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 p-4 ${clickable ? 'cursor-pointer hover:from-primary/30 hover:to-primary/10 transition-all motion-safe:active:scale-[0.98]' : ''} focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1`}>
       <div className="flex items-center gap-1.5">
         <p className="text-3xl font-bold tabular-nums text-foreground">{value}</p>
         {clickable && <span className="text-xs text-primary/60 mt-1">↗</span>}
