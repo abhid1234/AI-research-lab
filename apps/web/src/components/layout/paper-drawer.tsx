@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PaperDetailModal } from './paper-detail-modal';
@@ -47,7 +48,11 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
     setVotes((prev) => ({ ...prev, [paperId]: newCount }));
   };
 
-  if (!open) return null;
+  // We need a mounted ref for createPortal — it only works client-side
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!open || !mounted) return null;
 
   const filtered = search.trim()
     ? papers.filter((p) => {
@@ -60,16 +65,33 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
 
   const compareItems = papers.filter((p) => compareIds.has(String(p.id ?? '')));
 
-  return (
+  // Portal everything to document.body to escape ALL stacking contexts.
+  // Use inline styles for position/z-index to bypass any Tailwind specificity issues.
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/20 z-40"
+        style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.2)' }}
         onClick={onClose}
       />
 
       {/* Drawer panel */}
-      <div className="fixed top-0 right-0 h-full w-[480px] max-w-[90vw] bg-white border-l border-[oklch(0.9_0_0)] shadow-xl z-50 flex flex-col relative">
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: '480px',
+          maxWidth: '90vw',
+          zIndex: 9999,
+          background: 'white',
+          borderLeft: '1px solid oklch(0.9 0 0)',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+          display: 'flex',
+          flexDirection: 'column' as const,
+        }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[oklch(0.9_0_0)]">
           <div>
@@ -256,6 +278,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
           onClose={() => setComparingOpen(false)}
         />
       )}
-    </>
+    </>,
+    document.body,
   );
 }
