@@ -325,22 +325,53 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
             <CardDescription>How methodologies are evolving</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {methodShifts.map((m, i) => {
                 const method: string = m.method ?? '';
                 const replacedBy: string = m.replacedBy ?? m.status ?? '';
                 const status: string = m.status ?? '';
+                const curve: { month: string; paperCount: number }[] = m.adoptionCurve ?? [];
+                const statusColor =
+                  status === 'rising' ? 'text-emerald-500 bg-emerald-500/10' :
+                  status === 'declining' ? 'text-rose-500 bg-rose-500/10' :
+                  status === 'mainstream' ? 'text-blue-500 bg-blue-500/10' :
+                  'text-muted-foreground bg-muted/50';
+
                 return (
                   <div
                     key={i}
-                    className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-xs"
+                    className="rounded-lg border border-border bg-card p-3 space-y-2"
                   >
-                    <span className="text-muted-foreground">{method}</span>
-                    <span className="text-muted-foreground">→</span>
-                    <span className="font-medium">{replacedBy}</span>
-                    <Badge variant="outline" className="ml-1 text-[10px]">
-                      {status}
-                    </Badge>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 text-xs min-w-0">
+                        <span className="text-muted-foreground truncate">{method}</span>
+                        <span className="text-muted-foreground shrink-0">→</span>
+                        <span className="font-medium truncate">{replacedBy}</span>
+                      </div>
+                      <span className={`text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 ${statusColor}`}>
+                        {status}
+                      </span>
+                    </div>
+                    {/* Mini sparkline from adoption curve */}
+                    {curve.length > 1 && (
+                      <div className="h-6 flex items-end gap-px">
+                        {curve.map((pt, j) => {
+                          const max = Math.max(...curve.map(c => c.paperCount), 1);
+                          const h = (pt.paperCount / max) * 100;
+                          return (
+                            <div
+                              key={j}
+                              className="flex-1 rounded-t-sm bg-primary/40 min-w-[2px]"
+                              style={{ height: `${Math.max(h, 4)}%` }}
+                              title={`${pt.month}: ${pt.paperCount} papers`}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                    {m.evidence && (
+                      <p className="text-[10px] text-muted-foreground line-clamp-1">{m.evidence}</p>
+                    )}
                   </div>
                 );
               })}
@@ -362,6 +393,8 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
             {newBenchmarks.map((b, i) => {
               const name: string = b.name ?? 'Untitled Benchmark';
               const measures: string = b.measures ?? '';
+              const whyNeeded: string = b.whyNeeded ?? '';
+              const adoption: string = b.adoption ?? '';
               return (
                 <div
                   key={i}
@@ -373,6 +406,12 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
                   </div>
                   {measures && (
                     <p className="text-xs text-muted-foreground leading-relaxed">{measures}</p>
+                  )}
+                  {whyNeeded && (
+                    <p className="text-[10px] text-primary/70 leading-relaxed">{whyNeeded}</p>
+                  )}
+                  {adoption && (
+                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400">{adoption}</p>
                   )}
                 </div>
               );

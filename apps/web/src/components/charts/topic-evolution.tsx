@@ -93,7 +93,35 @@ export function TopicEvolutionChart({ data }: TopicEvolutionProps) {
             }}
             labelStyle={{ color: 'oklch(0.3 0 0)', fontWeight: 600, marginBottom: 4 }}
           />
-          <Legend wrapperStyle={{ fontSize: '12px' }} />
+          <Legend
+            wrapperStyle={{ fontSize: '12px' }}
+            content={() => (
+              <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center mt-2 px-2">
+                {data.map((s, i) => {
+                  const momentumIcon =
+                    s.momentum === 'accelerating' ? '↑' :
+                    s.momentum === 'declining' ? '↓' :
+                    s.momentum === 'emerging' ? '★' : '';
+                  const momentumColor =
+                    s.momentum === 'accelerating' ? 'text-emerald-500' :
+                    s.momentum === 'declining' ? 'text-rose-500' :
+                    s.momentum === 'emerging' ? 'text-amber-500' : '';
+                  return (
+                    <span key={s.topic} className="flex items-center gap-1 text-[11px]">
+                      <span
+                        className="h-2 w-2 rounded-full shrink-0"
+                        style={{ background: COLORS[i % COLORS.length] }}
+                      />
+                      <span className="text-foreground/70">{s.topic}</span>
+                      {momentumIcon && (
+                        <span className={`text-[9px] font-bold ${momentumColor}`}>{momentumIcon}</span>
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          />
           {data.map((s, i) => (
             <Area
               key={s.topic}
