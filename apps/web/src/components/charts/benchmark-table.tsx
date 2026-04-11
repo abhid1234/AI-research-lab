@@ -73,12 +73,20 @@ function ScoreCell({ value }: { value: number | string }) {
 
 export function BenchmarkTable({ table }: { table: BenchmarkTableData }) {
   if (!table.entries || table.entries.length === 0) {
-    return <p className="text-sm text-muted-foreground">No benchmark entries</p>;
+    return null; // Don't show empty tables
   }
 
-  const scoreKeys = table.entries.length > 0
-    ? Object.keys(table.entries[0].scores)
-    : [];
+  // Collect ALL score keys across all entries (not just first)
+  const scoreKeySet = new Set<string>();
+  for (const entry of table.entries) {
+    if (entry.scores && typeof entry.scores === 'object') {
+      for (const k of Object.keys(entry.scores)) {
+        scoreKeySet.add(k);
+      }
+    }
+  }
+  const scoreKeys = Array.from(scoreKeySet);
+  const hasScores = scoreKeys.length > 0;
 
   return (
     <div className="rounded-lg ring-1 ring-foreground/10">
@@ -90,22 +98,36 @@ export function BenchmarkTable({ table }: { table: BenchmarkTableData }) {
         <TableHeader>
           <TableRow>
             <TableHead>Model</TableHead>
-            {scoreKeys.map((k) => (
-              <TableHead key={k}>{k}</TableHead>
-            ))}
+            {hasScores ? (
+              scoreKeys.map((k) => (
+                <TableHead key={k}>{k}</TableHead>
+              ))
+            ) : (
+              <TableHead>Details</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
           {table.entries.map((entry, i) => (
             <TableRow key={i}>
               <TableCell>
-                <ModelBadge name={entry.model} index={i} conditions={entry.conditions} />
+                <ModelBadge name={entry.model} index={i} conditions={hasScores ? entry.conditions : undefined} />
               </TableCell>
-              {scoreKeys.map((k) => (
-                <TableCell key={k}>
-                  <ScoreCell value={entry.scores[k]} />
+              {hasScores ? (
+                scoreKeys.map((k) => (
+                  <TableCell key={k}>
+                    {entry.scores[k] != null ? (
+                      <ScoreCell value={entry.scores[k]} />
+                    ) : (
+                      <span className="text-muted-foreground text-xs">—</span>
+                    )}
+                  </TableCell>
+                ))
+              ) : (
+                <TableCell>
+                  <span className="text-xs text-muted-foreground">{entry.conditions ?? '—'}</span>
                 </TableCell>
-              ))}
+              )}
             </TableRow>
           ))}
         </TableBody>
