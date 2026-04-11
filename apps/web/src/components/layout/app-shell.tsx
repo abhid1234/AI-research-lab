@@ -2,6 +2,7 @@
 
 import { ExportButton } from './export-button';
 import { GlobalSearch } from './global-search';
+import { ThemeToggle } from './theme-toggle';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -49,6 +50,7 @@ export function AppShell({ children, paperCount, topicCount, dateRange, selected
             <span className="text-xs text-muted-foreground">Connected</span>
           </div>
           <ExportButton topic={exportTopic} papers={exportPapers} artifacts={exportArtifacts} />
+          <ThemeToggle />
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">{children}</div>

@@ -41,7 +41,7 @@ export default function RootLayout({
           // nosec: static string, no user-controlled input
           // biome-ignore lint: intentional dangerouslySetInnerHTML for theme flash prevention
           dangerouslySetInnerHTML={{
-            __html: `(function(){document.documentElement.classList.add('dark')})();`,
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})();`,
           }}
         />
       </head>
