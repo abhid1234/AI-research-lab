@@ -86,7 +86,7 @@ function getTabCount(tab: TabId, artifacts: ArtifactItem[]): number {
 export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName, lastSyncAt, onOpenDrawer }: ArtifactViewerProps) {
   // Some tabs aggregate multiple agent outputs — pass all artifacts and let each tab pick what it needs
   return (
-    <Tabs defaultValue="overview" className="flex flex-col min-h-0 flex-1">
+    <Tabs defaultValue="overview" className="flex flex-col h-full">
       <div className="border-b border-border">
         <div className="overflow-x-auto scrollbar-none px-4 pt-3 pb-0.5">
           <TabsList className="min-w-max">
