@@ -184,11 +184,11 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
       {/* Gradient stat cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <button onClick={onOpenDrawer} className="text-left rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
-          <GradientStatCard label="Papers" value={displayPaperCount} clickable />
+          <GradientStatCard label="Papers" value={displayPaperCount} clickable color="blue" />
         </button>
-        <GradientStatCard label="Topics Tracked" value={displayTopicCount} />
-        <GradientStatCard label="Insights" value={insightCount} />
-        <GradientStatCard label="Emerging Topics" value={emergingTopics.length} />
+        <GradientStatCard label="Topics Tracked" value={displayTopicCount} color="emerald" />
+        <GradientStatCard label="Insights" value={insightCount} color="amber" />
+        <GradientStatCard label="Emerging Topics" value={emergingTopics.length} color="violet" />
       </div>
 
       {/* Collection description banner */}
@@ -571,12 +571,20 @@ function FilterChip({
   );
 }
 
-function GradientStatCard({ label, value, clickable }: { label: string; value: number; clickable?: boolean }) {
+const STAT_COLORS = {
+  blue: 'from-blue-600/35 to-blue-500/10 border-blue-500/35 text-blue-300',
+  emerald: 'from-emerald-600/35 to-emerald-500/10 border-emerald-500/35 text-emerald-300',
+  amber: 'from-amber-600/35 to-amber-500/10 border-amber-500/35 text-amber-300',
+  violet: 'from-violet-600/35 to-violet-500/10 border-violet-500/35 text-violet-300',
+} as const;
+
+function GradientStatCard({ label, value, clickable, color = 'blue' }: { label: string; value: number; clickable?: boolean; color?: keyof typeof STAT_COLORS }) {
+  const c = STAT_COLORS[color];
   return (
-    <div className={`rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 p-4 ${clickable ? 'cursor-pointer hover:from-primary/30 hover:to-primary/10 transition-all motion-safe:active:scale-[0.98]' : ''} focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1`}>
+    <div className={`rounded-xl bg-gradient-to-br ${c} border p-4 ${clickable ? 'cursor-pointer hover:brightness-125 transition-all motion-safe:active:scale-[0.98]' : ''}`}>
       <div className="flex items-center gap-1.5">
-        <p className="text-3xl font-bold tabular-nums text-foreground">{value}</p>
-        {clickable && <span className="text-xs text-primary/60 mt-1">↗</span>}
+        <p className="text-3xl font-bold tabular-nums">{value}</p>
+        {clickable && <span className="text-xs opacity-70 mt-1">↗</span>}
       </div>
       <p className="text-xs text-muted-foreground mt-1">{label}</p>
     </div>
