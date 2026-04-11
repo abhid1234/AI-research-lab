@@ -95,7 +95,7 @@ export default function Home() {
         exportArtifacts={artifacts}
       >
         <main className="flex flex-1 flex-col overflow-hidden">
-          <div className="artifact-panel flex flex-col flex-1 overflow-hidden">
+          <div className="flex flex-col flex-1 overflow-hidden">
             {/* Topic selector toolbar */}
             <div className="flex items-center gap-3 border-b border-border px-4 h-12 shrink-0">
               <span className="text-xs text-muted-foreground font-medium">Topic</span>

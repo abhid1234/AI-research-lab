@@ -20,7 +20,7 @@ export function AppShell({ children, paperCount, topicCount, dateRange, selected
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground overflow-hidden">
-      <header className="flex h-12 items-center gap-3 border-b border-[oklch(0.25_0.02_260)] px-4 shrink-0 shadow-[0_1px_0_0_rgba(0,0,0,0.04),0_4px_12px_-4px_rgba(0,0,0,0.25)] relative z-10 bg-[oklch(0.145_0.014_260)] text-white">
+      <header className="flex h-12 items-center gap-3 border-b border-border px-4 shrink-0 shadow-[0_1px_0_0_rgba(0,0,0,0.04),0_4px_12px_-4px_rgba(0,0,0,0.25)] relative z-10">
         {/* Left: logo + title */}
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-primary text-base leading-none select-none" aria-hidden="true">✦</span>
