@@ -53,6 +53,13 @@ function safeString(val: any): string {
   return typeof val === 'string' ? val : val?.title ?? val?.id ?? '';
 }
 
+function paperLink(id: string | undefined, title?: string): string {
+  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
+  if (id.includes('arxiv.org')) return id;
+  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
+  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
+}
+
 export function FrontiersTab({ artifacts }: FrontiersTabProps) {
   const frontierArtifact = artifacts.find((a) => a.agentType === 'frontier-detector');
   const data = frontierArtifact?.data ?? {};
@@ -165,18 +172,14 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
                                 return (
                                   <div key={j} className="flex items-start gap-1.5">
                                     <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
-                                    {paperId ? (
-                                      <a
-                                        href={`https://www.semanticscholar.org/paper/${paperId}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs text-primary/70 hover:text-primary transition-colors"
-                                      >
-                                        {titleNode}
-                                      </a>
-                                    ) : (
-                                      <span className="text-xs text-muted-foreground">{titleNode}</span>
-                                    )}
+                                    <a
+                                      href={paperLink(paperId || undefined, title)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline"
+                                    >
+                                      {titleNode}
+                                    </a>
                                   </div>
                                 );
                               })}
@@ -313,10 +316,18 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
                         <div className="space-y-0.5">
                           {adjacent.map((a: any, j: number) => {
                             const title = typeof a === 'string' ? a : (typeof a?.title === 'string' ? a.title : safeString(a));
+                            const aId: string = typeof a?.paperId === 'string' ? a.paperId : typeof a?.id === 'string' ? a.id : '';
                             return (
                               <p key={j} className="text-xs text-muted-foreground flex items-start gap-1.5">
                                 <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
-                                {title}
+                                <a
+                                  href={paperLink(aId || undefined, title)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:text-primary transition-colors underline-offset-2 hover:underline"
+                                >
+                                  {title}
+                                </a>
                               </p>
                             );
                           })}

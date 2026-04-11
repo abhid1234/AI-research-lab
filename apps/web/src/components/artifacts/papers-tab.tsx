@@ -5,6 +5,13 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 
+function paperLink(id: string | undefined, title?: string): string {
+  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
+  if (id.includes('arxiv.org')) return id;
+  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
+  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
+}
+
 interface PapersTabProps {
   artifacts: { agentType: string; data: any }[];
 }
@@ -60,12 +67,24 @@ export function PapersTab({ artifacts }: PapersTabProps) {
 }
 
 function PaperCard({ paper }: { paper: any }) {
+  const displayTitle: string = typeof paper.title === 'string' && paper.title.trim()
+    ? paper.title
+    : (paper.paperId ?? 'Untitled Paper');
+  const pid: string = typeof paper.paperId === 'string' ? paper.paperId : typeof paper.id === 'string' ? paper.id : '';
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-sm leading-snug">
-            {paper.paperId ?? 'Untitled Paper'}
+            <a
+              href={paperLink(pid || undefined, displayTitle)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors underline-offset-2 hover:underline"
+            >
+              {displayTitle}
+            </a>
           </CardTitle>
           {paper.methodology && (
             <Badge variant="outline" className="shrink-0 text-[10px]">

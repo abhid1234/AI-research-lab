@@ -52,6 +52,13 @@ const FINDING_COLORS = [
   'bg-purple-500',
 ] as const;
 
+function paperLink(id: string | undefined, title?: string): string {
+  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
+  if (id.includes('arxiv.org')) return id;
+  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
+  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
+}
+
 /** Derive a stable cluster label from a paper object (mirrors research-landscape logic) */
 function derivePaperCluster(paper: any): string {
   if (typeof paper.methodology === 'string' && paper.methodology.trim()) {
@@ -472,22 +479,16 @@ function ResultCard({
   );
 
   const citationEl = paperTitle
-    ? paperId
-      ? (
-        <a
-          href={`https://www.semanticscholar.org/paper/${paperId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1 ${hero ? 'mt-2' : 'mt-1.5 pl-4'}`}
-        >
-          {citationInner}
-        </a>
-      )
-      : (
-        <p className={`text-xs text-muted-foreground/80 flex items-center gap-1 ${hero ? 'mt-2' : 'mt-1.5 pl-4'}`}>
-          {citationInner}
-        </p>
-      )
+    ? (
+      <a
+        href={paperLink(paperId || undefined, paperTitle)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1 underline-offset-2 hover:underline ${hero ? 'mt-2' : 'mt-1.5 pl-4'}`}
+      >
+        {citationInner}
+      </a>
+    )
     : null;
 
   if (hero) {

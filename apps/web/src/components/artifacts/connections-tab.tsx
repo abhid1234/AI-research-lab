@@ -4,6 +4,13 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { CitationGraph } from '@/components/charts/citation-graph';
 
+function paperLink(id: string | undefined, title?: string): string {
+  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
+  if (id.includes('arxiv.org')) return id;
+  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
+  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
+}
+
 interface ConnectionsTabProps {
   artifacts: { agentType: string; data: any }[];
   dbPapers?: any[];
@@ -123,22 +130,33 @@ export function ConnectionsTab({ artifacts, dbPapers = [] }: ConnectionsTabProps
             Key Papers
           </h3>
           <div className="space-y-2">
-            {topPapers.map((p, i) => (
-              <Card key={i} size="sm">
-                <CardContent className="pt-3 flex items-start gap-3">
-                  <span className="shrink-0 tabular-nums text-xs text-muted-foreground mt-0.5 w-5">{i + 1}.</span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium leading-snug truncate">{p.paperId ?? `Paper ${i + 1}`}</p>
-                    {p.keyInnovation && (
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{p.keyInnovation}</p>
-                    )}
-                    {p.methodology && (
-                      <Badge variant="outline" className="mt-1.5 text-[10px]">{typeof p.methodology === 'string' ? p.methodology : p.methodology?.type ?? 'empirical'}</Badge>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {topPapers.map((p, i) => {
+              const title: string = typeof p.title === 'string' ? p.title : (p.paperId ?? `Paper ${i + 1}`);
+              const pid: string = typeof p.paperId === 'string' ? p.paperId : typeof p.id === 'string' ? p.id : '';
+              return (
+                <Card key={i} size="sm">
+                  <CardContent className="pt-3 flex items-start gap-3">
+                    <span className="shrink-0 tabular-nums text-xs text-muted-foreground mt-0.5 w-5">{i + 1}.</span>
+                    <div className="min-w-0">
+                      <a
+                        href={paperLink(pid || undefined, title)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium leading-snug truncate block hover:text-primary transition-colors underline-offset-2 hover:underline"
+                      >
+                        {title}
+                      </a>
+                      {p.keyInnovation && (
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{p.keyInnovation}</p>
+                      )}
+                      {p.methodology && (
+                        <Badge variant="outline" className="mt-1.5 text-[10px]">{typeof p.methodology === 'string' ? p.methodology : p.methodology?.type ?? 'empirical'}</Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </section>
       )}

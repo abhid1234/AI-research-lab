@@ -36,6 +36,13 @@ function safeString(val: any): string {
   return typeof val === 'string' ? val : val?.title ?? val?.id ?? '';
 }
 
+function paperLink(id: string | undefined, title?: string): string {
+  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
+  if (id.includes('arxiv.org')) return id;
+  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
+  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
+}
+
 function SummaryCard({ label, value, icon }: { label: string; value: number; icon: string }) {
   return (
     <div className="rounded-lg border border-border bg-card p-3 flex items-center gap-3">
@@ -144,19 +151,15 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                         <p className="text-xs text-rose-400 font-semibold">Claim A</p>
                         <p className="text-sm">{claim1Statement}</p>
                         {claim1Title && (
-                          claim1PaperId ? (
-                            <a
-                              href={`https://www.semanticscholar.org/paper/${claim1PaperId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1"
-                            >
-                              <span>↗</span>
-                              <span className="italic">{claim1Title}</span>
-                            </a>
-                          ) : (
-                            <p className="text-xs text-muted-foreground">— {claim1Title}</p>
-                          )
+                          <a
+                            href={paperLink(claim1PaperId || undefined, claim1Title)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1 hover:underline underline-offset-2"
+                          >
+                            <span>↗</span>
+                            <span className="italic">{claim1Title}</span>
+                          </a>
                         )}
                         {c.claim1?.evidence && (
                           <p className="text-[11px] text-muted-foreground/70 italic mt-1">
@@ -168,19 +171,15 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                         <p className="text-xs text-blue-400 font-semibold">Claim B</p>
                         <p className="text-sm">{claim2Statement}</p>
                         {claim2Title && (
-                          claim2PaperId ? (
-                            <a
-                              href={`https://www.semanticscholar.org/paper/${claim2PaperId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1"
-                            >
-                              <span>↗</span>
-                              <span className="italic">{claim2Title}</span>
-                            </a>
-                          ) : (
-                            <p className="text-xs text-muted-foreground">— {claim2Title}</p>
-                          )
+                          <a
+                            href={paperLink(claim2PaperId || undefined, claim2Title)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1 hover:underline underline-offset-2"
+                          >
+                            <span>↗</span>
+                            <span className="italic">{claim2Title}</span>
+                          </a>
                         )}
                         {c.claim2?.evidence && (
                           <p className="text-[11px] text-muted-foreground/70 italic mt-1">
@@ -245,10 +244,18 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                                 <div className="space-y-0.5 pt-1">
                                   {papers.map((p: any, k: number) => {
                                     const t = typeof p === 'string' ? p : (typeof p?.title === 'string' ? p.title : safeString(p));
+                                    const pId: string = typeof p?.paperId === 'string' ? p.paperId : typeof p?.id === 'string' ? p.id : '';
                                     return (
                                       <p key={k} className="text-[11px] text-muted-foreground/70 flex items-start gap-1">
                                         <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/30" />
-                                        {t}
+                                        <a
+                                          href={paperLink(pId || undefined, t)}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="hover:text-primary transition-colors underline-offset-2 hover:underline"
+                                        >
+                                          {t}
+                                        </a>
                                       </p>
                                     );
                                   })}
@@ -305,11 +312,20 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                           <div className="space-y-0.5 mt-1">
                             {supportingPapers.map((sp: any, j: number) => {
                               const title = typeof sp === 'string' ? sp : (typeof sp?.title === 'string' ? sp.title : safeString(sp));
+                              const spId: string = typeof sp?.paperId === 'string' ? sp.paperId : typeof sp?.id === 'string' ? sp.id : '';
                               const claim = typeof sp?.relevantClaim === 'string' ? sp.relevantClaim : '';
                               return (
                                 <p key={j} className="text-[11px] text-muted-foreground/70 flex items-start gap-1.5">
                                   <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-emerald-500/50" />
-                                  {title}{claim ? <span className="opacity-70"> — {claim}</span> : null}
+                                  <a
+                                    href={paperLink(spId || undefined, title)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-primary transition-colors underline-offset-2 hover:underline"
+                                  >
+                                    {title}
+                                  </a>
+                                  {claim ? <span className="opacity-70"> — {claim}</span> : null}
                                 </p>
                               );
                             })}
@@ -354,6 +370,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
               const issueType = typeof w?.issueType === 'string' ? w.issueType : '';
               const explanation = typeof w?.explanation === 'string' ? w.explanation : '';
               const paperRef = typeof w?.paper === 'string' ? w.paper : (typeof w?.paper?.title === 'string' ? w.paper.title : '');
+              const paperRefId: string = typeof w?.paper?.paperId === 'string' ? w.paper.paperId : typeof w?.paper?.id === 'string' ? w.paper.id : '';
               const issueLabel = warningIssueLabel[issueType] ?? (issueType ? issueType.replace(/_/g, ' ') : '');
 
               return (
@@ -376,7 +393,14 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                         <p className="text-xs text-muted-foreground">{explanation}</p>
                       )}
                       {paperRef && (
-                        <p className="text-[11px] text-muted-foreground/60">— {paperRef}</p>
+                        <a
+                          href={paperLink(paperRefId || undefined, paperRef)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-muted-foreground/60 hover:text-primary transition-colors underline-offset-2 hover:underline"
+                        >
+                          — {paperRef}
+                        </a>
                       )}
                     </div>
                   </div>
