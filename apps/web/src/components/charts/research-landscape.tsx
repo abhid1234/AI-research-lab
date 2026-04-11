@@ -44,7 +44,7 @@ function derivePaperCategory(p: any): string {
   return 'Agents'; // default
 }
 
-export function ResearchLandscape({ papers, activeFilter }: { papers: any[]; activeFilter?: string }) {
+export function ResearchLandscape({ papers }: { papers: any[] }) {
   if (!papers || papers.length === 0) {
     return (
       <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">
@@ -53,23 +53,10 @@ export function ResearchLandscape({ papers, activeFilter }: { papers: any[]; act
     );
   }
 
-  const filteredPapers =
-    activeFilter && activeFilter !== 'all'
-      ? papers.filter((p) => derivePaperCategory(p).toLowerCase() === activeFilter.toLowerCase())
-      : papers;
-
-  if (filteredPapers.length === 0) {
-    return (
-      <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">
-        No papers match the selected filter.
-      </div>
-    );
-  }
-
   const categoryCounts: Record<string, number> = {};
   for (const cat of CATEGORIES) categoryCounts[cat] = 0;
 
-  for (const p of filteredPapers) {
+  for (const p of papers) {
     const cat = derivePaperCategory(p);
     if (categoryCounts[cat] !== undefined) {
       categoryCounts[cat]++;
