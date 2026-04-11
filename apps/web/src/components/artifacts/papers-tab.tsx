@@ -78,6 +78,20 @@ function PaperCard({ paper }: { paper: any }) {
         )}
       </CardHeader>
       <CardContent className="space-y-3">
+        {/* Methodology details */}
+        {paper.methodology && typeof paper.methodology === 'object' && (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+            {paper.methodology.datasets?.length > 0 && (
+              <span>Datasets: <span className="text-foreground/80">{paper.methodology.datasets.join(', ')}</span></span>
+            )}
+            {paper.methodology.models?.length > 0 && (
+              <span>Models: <span className="text-foreground/80">{paper.methodology.models.join(', ')}</span></span>
+            )}
+            {paper.methodology.computeScale && (
+              <span>Compute: <span className="text-foreground/80">{paper.methodology.computeScale}</span></span>
+            )}
+          </div>
+        )}
         {paper.approach && (
           <Field label="Approach" value={paper.approach} />
         )}
@@ -98,11 +112,44 @@ function PaperCard({ paper }: { paper: any }) {
         )}
         {paper.claims && paper.claims.length > 0 && (
           <div>
-            <p className="text-xs text-muted-foreground font-medium mb-1.5">Claims</p>
-            <div className="flex flex-wrap gap-1.5">
-              {paper.claims.map((c: any, i: number) => (
-                <Badge key={i} variant="secondary" className="text-[10px]">{typeof c === 'string' ? c : c.statement ?? JSON.stringify(c)}</Badge>
-              ))}
+            <p className="text-xs text-muted-foreground font-medium mb-2">
+              Claims ({paper.claims.length})
+            </p>
+            <div className="space-y-2">
+              {paper.claims.map((c: any, i: number) => {
+                const statement = typeof c === 'string' ? c : c.statement ?? '';
+                const evidence = typeof c === 'string' ? '' : c.evidence ?? '';
+                const strength: string = typeof c === 'string' ? '' : c.strength ?? '';
+                const strengthColor =
+                  strength === 'strong' ? 'bg-emerald-500' :
+                  strength === 'moderate' ? 'bg-amber-500' :
+                  strength === 'weak' ? 'bg-rose-500' : 'bg-muted-foreground/30';
+                const strengthLabel =
+                  strength === 'strong' ? 'Strong' :
+                  strength === 'moderate' ? 'Moderate' :
+                  strength === 'weak' ? 'Weak' : '';
+
+                return (
+                  <div key={i} className="rounded-md border border-border bg-card p-2.5 space-y-1.5">
+                    <div className="flex items-start gap-2">
+                      {strengthLabel && (
+                        <span className="flex items-center gap-1 shrink-0 mt-0.5">
+                          <span className={`h-1.5 w-1.5 rounded-full ${strengthColor}`} />
+                          <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
+                            {strengthLabel}
+                          </span>
+                        </span>
+                      )}
+                      <p className="text-xs font-medium leading-snug flex-1">{statement}</p>
+                    </div>
+                    {evidence && (
+                      <p className="text-[11px] text-muted-foreground leading-relaxed pl-0 border-l-2 border-primary/20 ml-0.5 pl-2">
+                        {evidence}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
