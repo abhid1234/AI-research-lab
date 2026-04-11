@@ -152,7 +152,8 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
       : monthFilteredPapers.filter((p) => derivePaperCluster(p).toLowerCase() === activeFilter.toLowerCase());
 
   // Filtered benchmark tables (pass-through — filtering is paper-level only)
-  const visibleBenchmarkTables = benchmarkTables;
+  // Only show benchmark tables that have at least one entry
+  const visibleBenchmarkTables = benchmarkTables.filter((t: any) => t.entries && t.entries.length > 0);
 
   // Time-window filtered db papers (for landscape chart and drawer)
   const timeFilteredDbPapers = filterPapersByWindow(dbPapers ?? [], timeWindowMonths);
@@ -283,7 +284,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
             <h3 className="text-sm font-semibold text-foreground">Benchmark Highlights from Papers</h3>
             {visibleBenchmarkTables.length > 0 ? (
               <div className="space-y-4">
-                {visibleBenchmarkTables.slice(0, 2).map((table, i) => (
+                {visibleBenchmarkTables.slice(0, 4).map((table: any, i: number) => (
                   <BenchmarkTable key={i} table={table} />
                 ))}
               </div>
