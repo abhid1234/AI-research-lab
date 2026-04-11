@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import dynamic from 'next/dynamic';
 import { BenchmarkTable } from '@/components/charts/benchmark-table';
+import { SOTATable } from '@/components/charts/sota-table';
 import { TimelineScrubber } from '@/components/charts/timeline-scrubber';
 import { TemporalSlider, filterPapersByWindow } from '@/components/charts/temporal-slider';
 
@@ -96,6 +97,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
   const methodShifts: any[] = trendData.methodShifts ?? [];
   const benchmarkTables: any[] = benchmarkData.benchmarkTables ?? [];
   const newBenchmarks: any[] = benchmarkData.newBenchmarks ?? [];
+  const stateOfTheArt: any[] = benchmarkData.stateOfTheArt ?? [];
 
   const insightCount =
     (trendData.emergingTopics?.length ?? 0) +
@@ -308,6 +310,11 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
             )}
           </div>
         </div>
+      )}
+
+      {/* State of the Art leaderboard */}
+      {stateOfTheArt.length > 0 && (
+        <SOTATable entries={stateOfTheArt} />
       )}
 
       {/* Method adoption */}
