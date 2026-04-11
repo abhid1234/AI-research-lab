@@ -1,0 +1,14 @@
+{
+  "name": "@research-lab/worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@ai-sdk/google": "^3.0.60",
+    "@ai-sdk/openai": "^3.0.52",
+    "@research-lab/db": "workspace:*",
+    "ai": "^6",
+    "dotenv": "^16",
+    "zod": "^4.3.6"
+  }
+}
