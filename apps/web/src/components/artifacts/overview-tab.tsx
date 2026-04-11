@@ -193,9 +193,15 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         <button onClick={onOpenDrawer} className="text-left rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
           <GradientStatCard label="Papers" value={displayPaperCount} clickable />
         </button>
-        <GradientStatCard label="Topics Tracked" value={displayTopicCount} />
-        <GradientStatCard label="Insights" value={insightCount} />
-        <GradientStatCard label="Emerging Topics" value={emergingTopics.length} />
+        <button onClick={() => document.getElementById('section-topics')?.scrollIntoView({ behavior: 'smooth' })} className="text-left rounded-xl">
+          <GradientStatCard label="Topics Tracked" value={displayTopicCount} clickable />
+        </button>
+        <button onClick={() => document.getElementById('section-methods')?.scrollIntoView({ behavior: 'smooth' })} className="text-left rounded-xl">
+          <GradientStatCard label="Insights" value={insightCount} clickable />
+        </button>
+        <button onClick={() => document.getElementById('section-benchmarks')?.scrollIntoView({ behavior: 'smooth' })} className="text-left rounded-xl">
+          <GradientStatCard label="Emerging Topics" value={emergingTopics.length} clickable />
+        </button>
       </div>
 
       {/* Collection description banner */}
@@ -274,7 +280,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         {/* Topic Evolution chart */}
         <Card className="animate-chart-in" style={{ animationDelay: '100ms' }}>
           <CardHeader>
-            <CardTitle>Topic Evolution Over Time</CardTitle>
+            <CardTitle id="section-topics">Topic Evolution Over Time</CardTitle>
             <CardDescription>Tracked data showing research intensity across key topics</CardDescription>
           </CardHeader>
           <CardContent>
@@ -332,7 +338,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
       {methodShifts.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Method Shifts</CardTitle>
+            <CardTitle id="section-methods">Method Shifts</CardTitle>
             <CardDescription>How methodologies are evolving</CardDescription>
           </CardHeader>
           <CardContent>
@@ -395,7 +401,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
       {newBenchmarks.length > 0 && (
         <div className="space-y-3">
           <div>
-            <h3 className="text-sm font-semibold text-foreground">New Benchmarks Introduced in This Collection</h3>
+            <h3 id="section-benchmarks" className="text-sm font-semibold text-foreground">New Benchmarks Introduced in This Collection</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               These papers introduce new evaluation frameworks and datasets for the research community.
             </p>
@@ -412,8 +418,15 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
                   className="rounded-lg border border-border bg-card p-3 space-y-1.5"
                 >
                   <div className="flex items-center gap-1">
-                    <span className="text-sm font-bold text-foreground">{name}</span>
-                    <span className="text-muted-foreground text-xs" aria-hidden="true">↗</span>
+                    <a
+                      href={paperLink(b.paper?.id ?? b.paper?.paperId ?? undefined, name)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-bold text-foreground hover:text-primary transition-colors underline-offset-2 hover:underline"
+                    >
+                      {name}
+                    </a>
+                    <span className="text-primary/50 text-xs" aria-hidden="true">↗</span>
                   </div>
                   {measures && (
                     <p className="text-xs text-muted-foreground leading-relaxed">{measures}</p>

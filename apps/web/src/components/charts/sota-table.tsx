@@ -17,6 +17,13 @@ interface SOTAEntry {
   improvement: string;
 }
 
+function paperLink(id: string | undefined, title?: string): string {
+  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
+  if (id.includes('arxiv.org')) return id;
+  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
+  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
+}
+
 export function SOTATable({ entries }: { entries: SOTAEntry[] }) {
   if (!entries || entries.length === 0) return null;
 
@@ -57,7 +64,14 @@ export function SOTATable({ entries }: { entries: SOTAEntry[] }) {
                     <TableCell>
                       <div className="flex items-center gap-1.5">
                         <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-                        <span className="text-xs font-medium">{entry.currentBest.model}</span>
+                        <a
+                          href={paperLink(currentPaperId || undefined, entry.currentBest.model)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-medium hover:text-primary transition-colors underline-offset-2 hover:underline"
+                        >
+                          {entry.currentBest.model}
+                        </a>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
@@ -71,12 +85,17 @@ export function SOTATable({ entries }: { entries: SOTAEntry[] }) {
                       {entry.previousBest ? (
                         <div className="flex items-center gap-1.5">
                           <span className="h-2 w-2 rounded-full bg-muted-foreground/40 shrink-0" />
-                          <span className="text-xs text-muted-foreground">
+                          <a
+                            href={paperLink(previousPaperId || undefined, entry.previousBest.model)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-muted-foreground hover:text-primary transition-colors underline-offset-2 hover:underline"
+                          >
                             {entry.previousBest.model}
                             {typeof entry.previousBest.score === 'number' && (
                               <span className="ml-1 tabular-nums">({entry.previousBest.score.toFixed(1)})</span>
                             )}
-                          </span>
+                          </a>
                         </div>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
