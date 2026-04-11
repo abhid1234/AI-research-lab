@@ -86,7 +86,7 @@ function getTabCount(tab: TabId, artifacts: ArtifactItem[]): number {
 export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName, lastSyncAt, onOpenDrawer }: ArtifactViewerProps) {
   // Some tabs aggregate multiple agent outputs — pass all artifacts and let each tab pick what it needs
   return (
-    <Tabs defaultValue="overview" className="h-full flex flex-col">
+    <Tabs defaultValue="overview" className="flex flex-col min-h-0 flex-1">
       <div className="border-b border-border">
         <div className="overflow-x-auto scrollbar-none px-4 pt-3 pb-0.5">
           <TabsList className="min-w-max">
@@ -104,7 +104,7 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <TabsContent value="overview" className="p-4 h-full">
+        <TabsContent value="overview" className="p-4">
           <OverviewTab
             artifacts={artifacts}
             totalPaperCount={totalPaperCount}
@@ -115,19 +115,19 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName
           />
         </TabsContent>
 
-        <TabsContent value="insights" className="p-4 h-full">
+        <TabsContent value="insights" className="p-4">
           <InsightsTab artifacts={artifacts} />
         </TabsContent>
 
-        <TabsContent value="connections" className="p-4 h-full">
+        <TabsContent value="connections" className="p-4">
           <ConnectionsTab artifacts={artifacts} dbPapers={dbPapers} />
         </TabsContent>
 
-        <TabsContent value="papers" className="p-4 h-full">
+        <TabsContent value="papers" className="p-4">
           <PapersTab artifacts={artifacts} />
         </TabsContent>
 
-        <TabsContent value="frontiers" className="p-4 h-full">
+        <TabsContent value="frontiers" className="p-4">
           <FrontiersTab artifacts={artifacts} />
         </TabsContent>
       </div>
