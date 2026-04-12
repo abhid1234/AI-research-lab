@@ -55,6 +55,17 @@ function ImportanceDot({ importance }: { importance: any }) {
   );
 }
 
+function SectionDivider({ label, count }: { label: string; count?: number }) {
+  return (
+    <div className="flex items-center gap-2 mb-2">
+      <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+        {label}{count != null ? ` (${count})` : ''}
+      </h3>
+      <div className="flex-1 h-px bg-border" />
+    </div>
+  );
+}
+
 function ContradictionCard({ c }: { c: any }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -211,6 +222,9 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
   const benchmarkTables: any[] = benchmarkData.benchmarkTables ?? [];
   const warnings: any[] = benchmarkData.warnings ?? [];
 
+  const featuredTable = benchmarkTables[0] ?? null;
+  const otherBenchmarks = benchmarkTables.slice(1);
+
   const hasData =
     contradictions.length > 0 ||
     consensus.length > 0 ||
@@ -229,8 +243,8 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Summary bar — compact horizontal */}
+    <div className="space-y-3">
+      {/* Row 1: Summary bar */}
       <div className="flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-2">
         {[
           { label: 'Contradictions', value: contradictions.length, icon: '⚡' },
@@ -247,31 +261,26 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
         ))}
       </div>
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Left column: Contradictions + Open Debates */}
-        <div className="space-y-4">
-          {contradictions.length > 0 && (
-            <section>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
-                Contradictions ({contradictions.length})
-              </h3>
-              <p className="text-[10px] text-muted-foreground mb-2">Click a card to expand full analysis.</p>
+      {/* Row 2: Disagreement */}
+      {(contradictions.length > 0 || openDebates.length > 0) && (
+        <section>
+          <SectionDivider label="Disagreement" count={contradictions.length + openDebates.length} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-2">
+                ⚡ {contradictions.length} contradiction{contradictions.length !== 1 ? 's' : ''} · click to expand
+              </p>
               <div className="space-y-2">
                 {contradictions.map((c, i) => (
                   <ContradictionCard key={i} c={c} />
                 ))}
               </div>
-            </section>
-          )}
-
-          {openDebates.length > 0 && (
-            <section>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
-                Open Debates ({openDebates.length})
-              </h3>
-              <p className="text-[10px] text-muted-foreground mb-2">Unresolved questions where the community is actively split.</p>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-2">
+                ? {openDebates.length} open debate{openDebates.length !== 1 ? 's' : ''} · community split
+              </p>
+              <div className="space-y-2">
                 {openDebates.map((d, i) => {
                   const question = typeof d.question === 'string' ? d.question : safeString(d.question);
                   const significance = typeof d.significance === 'string' ? d.significance : '';
@@ -293,7 +302,6 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                               const sideLabel = j === 0 ? 'A' : j === 1 ? 'B' : `${j + 1}`;
                               const labelColor = j === 0 ? 'text-violet-400' : 'text-sky-400';
                               const borderColor = j === 0 ? 'border-violet-500/20 bg-violet-500/5' : 'border-sky-500/20 bg-sky-500/5';
-                              // Get first paper for this side
                               const sidePapers: any[] = Array.isArray(side?.papers) ? side.papers : [];
                               const firstSidePaper = sidePapers.length > 0 ? sidePapers[0] : null;
                               const sidePaperId: string = firstSidePaper
@@ -343,18 +351,20 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   );
                 })}
               </div>
-            </section>
-          )}
-        </div>
+            </div>
+          </div>
+        </section>
+      )}
 
-        {/* Right column: Consensus + Benchmark Warnings */}
-        <div className="space-y-4">
-          {consensus.length > 0 && (
-            <section>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
-                Consensus Findings ({consensus.length})
-              </h3>
-              <p className="text-[10px] text-muted-foreground mb-2">Confirmed independently by multiple research groups.</p>
+      {/* Row 3: Confirmed Knowledge */}
+      {(consensus.length > 0 || warnings.length > 0) && (
+        <section>
+          <SectionDivider label="Confirmed Knowledge" count={consensus.length + warnings.length} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-2">
+                ✓ {consensus.length} consensus finding{consensus.length !== 1 ? 's' : ''}
+              </p>
               <div className="space-y-1.5">
                 {consensus.map((c, i) => {
                   const finding = typeof c.finding === 'string' ? c.finding : safeString(c.finding);
@@ -362,7 +372,6 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   const caveats: any[] = Array.isArray(c.caveats) ? c.caveats : [];
                   const strength = typeof c.strength === 'string' ? c.strength : '';
 
-                  // First supporting paper for linking
                   const firstSP = supportingPapers.length > 0 ? supportingPapers[0] : null;
                   const firstSPId: string = firstSP
                     ? (typeof firstSP?.paperId === 'string' ? firstSP.paperId : typeof firstSP?.id === 'string' ? firstSP.id : '')
@@ -428,16 +437,12 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   );
                 })}
               </div>
-            </section>
-          )}
-
-          {warnings.length > 0 && (
-            <section>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
-                Benchmark Warnings ({warnings.length})
-              </h3>
-              <p className="text-[10px] text-muted-foreground mb-2">Papers whose reported results may need closer scrutiny.</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-2">
+                ⚠ {warnings.length} warning{warnings.length !== 1 ? 's' : ''}
+              </p>
+              <div className="space-y-1.5">
                 {warnings.map((w: any, i: number) => {
                   const issue = typeof w === 'string' ? w : (typeof w?.issue === 'string' ? w.issue : safeString(w));
                   const issueType = typeof w?.issueType === 'string' ? w.issueType : '';
@@ -447,10 +452,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   const issueLabel = warningIssueLabel[issueType] ?? (issueType ? issueType.replace(/_/g, ' ') : '');
 
                   return (
-                    <div
-                      key={i}
-                      className="rounded-md bg-amber-500/5 border border-amber-500/15 px-3 py-2 space-y-1"
-                    >
+                    <div key={i} className="rounded-md bg-amber-500/5 border border-amber-500/15 px-3 py-2 space-y-1">
                       <div className="flex items-start gap-1.5">
                         <span className="shrink-0 text-amber-400 mt-0.5 text-xs">⚠</span>
                         <div className="flex-1 min-w-0 space-y-0.5">
@@ -492,22 +494,28 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   );
                 })}
               </div>
-            </section>
-          )}
-        </div>
-      </div>
-
-      {/* Benchmark tables — full width below columns */}
-      {benchmarkTables.length > 0 && (
-        <section>
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-            Benchmarks
-          </h3>
-          <div className="space-y-3">
-            {benchmarkTables.map((t: any, i: number) => (
-              <BenchmarkTable key={i} table={t} />
-            ))}
+            </div>
           </div>
+        </section>
+      )}
+
+      {/* Row 4: Featured Benchmarks */}
+      {featuredTable && (
+        <section>
+          <SectionDivider label="Featured Benchmarks" count={benchmarkTables.length} />
+          <BenchmarkTable table={featuredTable} />
+          {otherBenchmarks.length > 0 && (
+            <details className="mt-2">
+              <summary className="text-[10px] text-primary/70 cursor-pointer hover:text-primary">
+                + {otherBenchmarks.length} more benchmark{otherBenchmarks.length === 1 ? '' : 's'}
+              </summary>
+              <div className="mt-2 space-y-3">
+                {otherBenchmarks.map((t: any, i: number) => (
+                  <BenchmarkTable key={i} table={t} />
+                ))}
+              </div>
+            </details>
+          )}
         </section>
       )}
     </div>
