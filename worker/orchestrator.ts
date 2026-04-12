@@ -10,9 +10,15 @@ import { runBenchmarkExtractor, type BenchmarkExtractorInput } from './agents/be
 import { runContradictionFinder, type ContradictionFinderInput } from './agents/contradiction-finder.js';
 import { runFrontierDetector, type FrontierDetectorInput } from './agents/frontier-detector.js';
 
-// Cap the number of papers fed to any single agent call to keep prompts manageable.
-// Larger context = higher chance of truncation / no output. 20 papers is a sweet spot.
-const MAX_PAPERS_PER_AGENT = 20;
+// Batch size: each agent call processes this many papers at a time.
+// Keeps prompt tokens manageable while still analyzing the entire collection.
+const BATCH_SIZE = 20;
+
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
 
 export async function runAnalysis(topicId: string, jobId: string): Promise<void> {
   // 1. Fetch all papers and chunks for this topic
@@ -22,31 +28,36 @@ export async function runAnalysis(topicId: string, jobId: string): Promise<void>
     throw new Error('No papers found for this topic. Run ingestion first.');
   }
 
-  // Take the most recent N papers (by publishedAt) so agents work with a focused set
-  const papers = [...allPapersForTopic]
-    .sort((a, b) => {
-      const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-      const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-      return db - da;
-    })
-    .slice(0, MAX_PAPERS_PER_AGENT);
+  // Sort by publishedAt (newest first) — deterministic order across agent calls
+  const papers = [...allPapersForTopic].sort((a, b) => {
+    const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+    const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+    return db - da;
+  });
 
   const paperIds = papers.map((p) => p.id);
   const allChunks = await getPaperChunksByPaperIds(paperIds);
+  const paperBatches = chunkArray(papers, BATCH_SIZE);
 
-  console.log(`[orchestrator] Analyzing ${papers.length} papers (from ${allPapersForTopic.length} in topic) with ${allChunks.length} chunks`);
+  console.log(
+    `[orchestrator] Analyzing ALL ${papers.length} papers in ${paperBatches.length} batch(es) of up to ${BATCH_SIZE} with ${allChunks.length} chunks`,
+  );
 
-  // ── Phase 1: Paper Analyzer + Trend Mapper + Benchmark Extractor (parallel) ──
+  // ── Phase 1: Paper Analyzer + Trend Mapper + Benchmark Extractor (batched) ──
 
   await updateJobProgress(jobId, {
     step: 'phase1',
     total: 3,
-    message: 'Phase 1: Running paper analyzer, trend mapper, benchmark extractor...',
+    message: `Phase 1: Analyzing ${papers.length} papers in ${paperBatches.length} batches...`,
   });
 
-  // Paper Analyzer — needs abstract + top 3 chunks per paper
-  const paperAnalyzerInput: PaperAnalyzerInput = {
-    papers: papers.map((p) => ({
+  const benchmarkChunks = allChunks.filter((c) =>
+    /benchmark|accuracy|score|f1|bleu|eval|performance|baseline|sota|state.of.the.art/i.test(c.content),
+  );
+
+  // Helpers to build per-batch inputs
+  const buildAnalyzerInput = (batch: typeof papers): PaperAnalyzerInput => ({
+    papers: batch.map((p) => ({
       id: p.id,
       title: p.title,
       abstract: p.abstract,
@@ -59,11 +70,10 @@ export async function runAnalysis(topicId: string, jobId: string): Promise<void>
         .slice(0, 3)
         .map((c) => ({ id: c.id, content: c.content, chunkIndex: c.chunkIndex })),
     })),
-  };
+  });
 
-  // Trend Mapper — needs abstract + author affiliations; no chunks
-  const trendMapperInput: TrendMapperInput = {
-    papers: papers.map((p) => ({
+  const buildTrendInput = (batch: typeof papers): TrendMapperInput => ({
+    papers: batch.map((p) => ({
       id: p.id,
       title: p.title,
       abstract: p.abstract,
@@ -75,27 +85,16 @@ export async function runAnalysis(topicId: string, jobId: string): Promise<void>
       publishedAt: p.publishedAt?.toISOString() ?? null,
       categories: (p.categories as string[]) ?? [],
     })),
-  };
+  });
 
-  // Benchmark Extractor — needs methodology + benchmark-heavy chunks
-  // We can't know methodology yet (it comes from Phase 1), so we pass placeholder
-  // methodology values and rely on the chunks to provide the raw numbers.
-  const benchmarkChunks = allChunks.filter((c) =>
-    /benchmark|accuracy|score|f1|bleu|eval|performance|baseline|sota|state.of.the.art/i.test(
-      c.content,
-    ),
-  );
-
-  const benchmarkInput: BenchmarkExtractorInput = {
-    papers: papers.map((p) => ({
+  const buildBenchmarkInput = (batch: typeof papers): BenchmarkExtractorInput => ({
+    papers: batch.map((p) => ({
       id: p.id,
       title: p.title,
       authors: ((p.authors as any[]) ?? []).map((a: any) =>
         typeof a === 'string' ? { name: a } : { name: a.name ?? String(a) },
       ),
       publishedAt: p.publishedAt?.toISOString() ?? null,
-      // Methodology is not available until Phase 1 completes; use defaults so
-      // the agent can still parse benchmark numbers from the provided chunks.
       methodology: {
         type: 'empirical',
         datasets: [],
@@ -106,15 +105,42 @@ export async function runAnalysis(topicId: string, jobId: string): Promise<void>
         .filter((c) => c.paperId === p.id)
         .map((c) => ({ id: c.id, content: c.content, chunkIndex: c.chunkIndex })),
     })),
+  });
+
+  // Run all 3 Phase-1 agents on each batch in parallel, then merge results
+  const batchResults = await Promise.all(
+    paperBatches.map(async (batch, i) => {
+      console.log(`[orchestrator]   batch ${i + 1}/${paperBatches.length} (${batch.length} papers)`);
+      const [a, t, b] = await Promise.all([
+        runPaperAnalyzer(buildAnalyzerInput(batch)),
+        runTrendMapper(buildTrendInput(batch)),
+        runBenchmarkExtractor(buildBenchmarkInput(batch)),
+      ]);
+      return { analyzer: a, trend: t, benchmark: b };
+    }),
+  );
+
+  // Merge analyzer outputs (simple concat of papers arrays)
+  const analyzerResult = {
+    papers: batchResults.flatMap((r) => r.analyzer.papers ?? []),
   };
 
-  const [analyzerResult, trendResult, benchmarkResult] = await Promise.all([
-    runPaperAnalyzer(paperAnalyzerInput),
-    runTrendMapper(trendMapperInput),
-    runBenchmarkExtractor(benchmarkInput),
-  ]);
+  // Merge trend outputs — concatenate arrays (topicEvolution, methodShifts, emergingTopics)
+  const trendResult = {
+    topicEvolution: batchResults.flatMap((r) => r.trend.topicEvolution ?? []),
+    methodShifts: batchResults.flatMap((r) => r.trend.methodShifts ?? []),
+    emergingTopics: batchResults.flatMap((r) => r.trend.emergingTopics ?? []),
+  };
 
-  console.log('[orchestrator] Phase 1 complete');
+  // Merge benchmark outputs — concat all arrays
+  const benchmarkResult = {
+    benchmarkTables: batchResults.flatMap((r) => r.benchmark.benchmarkTables ?? []),
+    newBenchmarks: batchResults.flatMap((r) => r.benchmark.newBenchmarks ?? []),
+    warnings: batchResults.flatMap((r) => r.benchmark.warnings ?? []),
+    stateOfTheArt: batchResults.flatMap((r) => r.benchmark.stateOfTheArt ?? []),
+  };
+
+  console.log(`[orchestrator] Phase 1 complete — ${analyzerResult.papers.length} papers analyzed`);
 
   // ── Phase 2: Contradiction Finder (needs Paper Analyzer claims) ──
 
@@ -132,31 +158,45 @@ export async function runAnalysis(topicId: string, jobId: string): Promise<void>
     chunksByPaperId.set(chunk.paperId, list);
   }
 
-  const contradictionInput: ContradictionFinderInput = {
-    papers: analyzerResult.papers.map((analyzed) => {
-      const paper = papers.find((p) => p.id === analyzed.paperId);
-      const paperChunks = chunksByPaperId.get(analyzed.paperId) ?? [];
-      return {
-        id: analyzed.paperId,
-        title: paper?.title ?? 'Unknown',
-        authors: ((paper?.authors as any[]) ?? []).map((a: any) =>
-          typeof a === 'string' ? { name: a } : { name: a.name ?? String(a) },
-        ),
-        publishedAt: paper?.publishedAt?.toISOString() ?? null,
-        claims: analyzed.claims,
-        chunks: paperChunks.map((c) => ({
-          id: c.id,
-          content: c.content,
-          chunkIndex: c.chunkIndex,
-        })),
+  // Batch Phase 2 — split analyzed papers into batches of BATCH_SIZE
+  const analyzedBatches = chunkArray(analyzerResult.papers, BATCH_SIZE);
+
+  const contradictionBatchResults = await Promise.all(
+    analyzedBatches.map(async (analyzedBatch, i) => {
+      console.log(`[orchestrator]   contradiction batch ${i + 1}/${analyzedBatches.length}`);
+      const contradictionInput: ContradictionFinderInput = {
+        papers: analyzedBatch.map((analyzed) => {
+          const paper = papers.find((p) => p.id === analyzed.paperId);
+          const paperChunks = chunksByPaperId.get(analyzed.paperId) ?? [];
+          return {
+            id: analyzed.paperId,
+            title: paper?.title ?? 'Unknown',
+            authors: ((paper?.authors as any[]) ?? []).map((a: any) =>
+              typeof a === 'string' ? { name: a } : { name: a.name ?? String(a) },
+            ),
+            publishedAt: paper?.publishedAt?.toISOString() ?? null,
+            claims: analyzed.claims,
+            chunks: paperChunks.map((c) => ({
+              id: c.id,
+              content: c.content,
+              chunkIndex: c.chunkIndex,
+            })),
+          };
+        }),
       };
+      return runContradictionFinder(contradictionInput);
     }),
+  );
+
+  const contradictionResult = {
+    contradictions: contradictionBatchResults.flatMap((r) => r.contradictions ?? []),
+    consensus: contradictionBatchResults.flatMap((r) => r.consensus ?? []),
+    openDebates: contradictionBatchResults.flatMap((r) => r.openDebates ?? []),
   };
 
-  const contradictionResult = await runContradictionFinder(contradictionInput);
-  console.log('[orchestrator] Phase 2 complete');
+  console.log(`[orchestrator] Phase 2 complete — ${contradictionResult.contradictions.length} contradictions, ${contradictionResult.consensus.length} consensus findings`);
 
-  // ── Phase 3: Frontier Detector (needs all prior agent outputs) ──
+  // ── Phase 3: Frontier Detector (batched) ──
 
   await updateJobProgress(jobId, {
     step: 'phase3',
@@ -164,31 +204,45 @@ export async function runAnalysis(topicId: string, jobId: string): Promise<void>
     message: 'Phase 3: Detecting research frontiers...',
   });
 
-  const frontierInput: FrontierDetectorInput = {
-    papers: papers.map((p) => ({
-      id: p.id,
-      title: p.title,
-      authors: ((p.authors as any[]) ?? []).map((a: any) =>
-        typeof a === 'string' ? { name: a } : { name: a.name ?? String(a) },
-      ),
-      publishedAt: p.publishedAt?.toISOString() ?? null,
-      // Pass all chunks — frontier-detector filters internally by referenced chunk IDs
-      chunks: (chunksByPaperId.get(p.id) ?? []).map((c) => ({
-        id: c.id,
-        content: c.content,
-        chunkIndex: c.chunkIndex,
-      })),
-    })),
-    agentOutputs: {
-      paperAnalysis: analyzerResult,
-      trendMap: trendResult,
-      contradictions: contradictionResult,
-      benchmarks: benchmarkResult,
-    },
+  // Batch frontier detector over paper batches. It gets synthesized agent outputs
+  // scoped to each batch so it can find frontiers across the full collection.
+  const frontierBatchResults = await Promise.all(
+    paperBatches.map(async (batch, i) => {
+      console.log(`[orchestrator]   frontier batch ${i + 1}/${paperBatches.length}`);
+      const frontierInput: FrontierDetectorInput = {
+        papers: batch.map((p) => ({
+          id: p.id,
+          title: p.title,
+          authors: ((p.authors as any[]) ?? []).map((a: any) =>
+            typeof a === 'string' ? { name: a } : { name: a.name ?? String(a) },
+          ),
+          publishedAt: p.publishedAt?.toISOString() ?? null,
+          chunks: (chunksByPaperId.get(p.id) ?? []).map((c) => ({
+            id: c.id,
+            content: c.content,
+            chunkIndex: c.chunkIndex,
+          })),
+        })),
+        agentOutputs: {
+          paperAnalysis: {
+            papers: analyzerResult.papers.filter((ap) => batch.some((p) => p.id === ap.paperId)),
+          },
+          trendMap: trendResult,
+          contradictions: contradictionResult,
+          benchmarks: benchmarkResult,
+        },
+      };
+      return runFrontierDetector(frontierInput);
+    }),
+  );
+
+  const frontierResult = {
+    frontiers: frontierBatchResults.flatMap((r) => r.frontiers ?? []),
+    pivotingTrends: frontierBatchResults.flatMap((r) => r.pivotingTrends ?? []),
+    gaps: frontierBatchResults.flatMap((r) => r.gaps ?? []),
   };
 
-  const frontierResult = await runFrontierDetector(frontierInput);
-  console.log('[orchestrator] Phase 3 complete');
+  console.log(`[orchestrator] Phase 3 complete — ${frontierResult.frontiers.length} frontiers`);
 
   // ── Write all artifacts to DB ──
 
