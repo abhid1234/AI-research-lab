@@ -11,15 +11,58 @@ const PAGE_SIZE = 20;
 
 interface PapersTabProps {
   artifacts: { agentType: string; data: any }[];
+  dbPapers?: any[];
 }
 
-export function PapersTab({ artifacts }: PapersTabProps) {
+export function PapersTab({ artifacts, dbPapers = [] }: PapersTabProps) {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(0);
   const [sortBy, setSortBy] = useState<'relevance' | 'date' | 'citations' | 'title'>('relevance');
 
   const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
-  const papers: any[] = paperArtifact?.data?.papers ?? [];
+  const analyzedPapers: any[] = paperArtifact?.data?.papers ?? [];
+
+  // Merge: start with all DB papers, enrich with analyzer data where available
+  const analyzerByTitle = new Map<string, any>();
+  const analyzerById = new Map<string, any>();
+  for (const ap of analyzedPapers) {
+    if (typeof ap.paperId === 'string') analyzerById.set(ap.paperId, ap);
+    if (typeof ap.title === 'string') analyzerByTitle.set(ap.title.toLowerCase(), ap);
+  }
+
+  const merged: any[] = dbPapers.length > 0
+    ? dbPapers.map((dbp) => {
+        const id = typeof dbp.id === 'string' ? dbp.id : '';
+        const title = typeof dbp.title === 'string' ? dbp.title : '';
+        const analyzer = analyzerById.get(id) ?? analyzerByTitle.get(title.toLowerCase());
+        return analyzer
+          ? {
+              // DB fields take precedence for identity, analyzer enriches the rest
+              ...analyzer,
+              id,
+              paperId: id,
+              title: title || analyzer.title,
+              abstract: dbp.abstract ?? analyzer.abstract,
+              authors: dbp.authors ?? analyzer.authors,
+              publishedAt: dbp.publishedAt ?? dbp.published_at,
+              citationCount: dbp.citationCount ?? 0,
+              arxivId: dbp.arxivId ?? dbp.arxiv_id,
+            }
+          : {
+              id,
+              paperId: id,
+              title,
+              abstract: dbp.abstract,
+              authors: dbp.authors,
+              publishedAt: dbp.publishedAt ?? dbp.published_at,
+              citationCount: dbp.citationCount ?? 0,
+              arxivId: dbp.arxivId ?? dbp.arxiv_id,
+              // No analyzer data — these fields will be empty/undefined
+            };
+      })
+    : analyzedPapers;
+
+  const papers = merged;
 
   const filtered = query.trim()
     ? papers.filter((p) => {

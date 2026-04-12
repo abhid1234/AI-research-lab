@@ -151,7 +151,7 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName
         </TabsContent>
 
         <TabsContent value="papers" className="p-4">
-          <PapersTab artifacts={artifacts} />
+          <PapersTab artifacts={artifacts} dbPapers={dbPapers} />
         </TabsContent>
 
         <TabsContent value="frontiers" className="p-4">
