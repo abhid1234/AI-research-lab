@@ -309,7 +309,18 @@ function ResultCard({
     <div className="rounded-lg border border-border bg-card p-3 space-y-1.5">
       <div className="flex items-start gap-2">
         <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${accent}`} aria-hidden="true" />
-        <p className="text-sm font-semibold leading-snug">{title}</p>
+        {paperTitle ? (
+          <a
+            href={paperLink(paperId || undefined, paperTitle)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold leading-snug hover:text-primary transition-colors hover:underline underline-offset-2"
+          >
+            {title}
+          </a>
+        ) : (
+          <p className="text-sm font-semibold leading-snug">{title}</p>
+        )}
       </div>
       {p.approach && (
         <p className="text-xs text-muted-foreground leading-relaxed pl-4 line-clamp-2">{p.approach}</p>
@@ -406,18 +417,30 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
   const gaps: any[] = frontierArtifact?.data?.gaps ?? [];
   const debates: any[] = contradictionArtifact?.data?.openDebates ?? [];
 
-  const questions: { text: string; type: string; detail: string }[] = [];
+  const questions: { text: string; type: string; detail: string; paperId?: string; paperTitle?: string }[] = [];
 
   for (const d of debates.slice(0, 3)) {
     const q = typeof d.question === 'string' ? d.question : '';
     const sig = typeof d.significance === 'string' ? d.significance : '';
-    if (q) questions.push({ text: q, type: 'debate', detail: sig });
+    // Grab a paper ID from the first side's papers if available
+    const sides: any[] = Array.isArray(d.sides) ? d.sides : [];
+    const firstSide = sides.length > 0 ? sides[0] : null;
+    const firstSidePapers: any[] = Array.isArray(firstSide?.papers) ? firstSide.papers : [];
+    const fp = firstSidePapers.length > 0 ? firstSidePapers[0] : null;
+    const debatePaperId: string = fp ? (typeof fp?.paperId === 'string' ? fp.paperId : typeof fp?.id === 'string' ? fp.id : '') : '';
+    const debatePaperTitle: string = fp ? (typeof fp === 'string' ? fp : fp?.title ?? '') : '';
+    if (q) questions.push({ text: q, type: 'debate', detail: sig, paperId: debatePaperId || undefined, paperTitle: debatePaperTitle || undefined });
   }
 
   for (const g of gaps.slice(0, 3)) {
     const area = typeof g.area === 'string' ? g.area : typeof g === 'string' ? g : '';
     const why = typeof g.whyItMatters === 'string' ? g.whyItMatters : '';
-    if (area) questions.push({ text: area, type: 'gap', detail: why });
+    // Adjacent work
+    const adjacent: any[] = Array.isArray(g.adjacentWork) ? g.adjacentWork : [];
+    const fa = adjacent.length > 0 ? adjacent[0] : null;
+    const gapPaperId: string = fa ? (typeof fa?.paperId === 'string' ? fa.paperId : typeof fa?.id === 'string' ? fa.id : '') : '';
+    const gapPaperTitle: string = fa ? (typeof fa === 'string' ? fa : fa?.title ?? fa?.name ?? '') : '';
+    if (area) questions.push({ text: area, type: 'gap', detail: why, paperId: gapPaperId || undefined, paperTitle: gapPaperTitle || undefined });
   }
 
   if (questions.length === 0) {
@@ -431,7 +454,18 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
           <div className="flex items-start gap-1.5">
             <span className="mt-0.5 text-xs shrink-0">{q.type === 'debate' ? '?' : '!'}</span>
             <div>
-              <p className="text-xs font-medium leading-snug">{q.text}</p>
+              {q.text && (q.paperId || q.paperTitle) ? (
+                <a
+                  href={paperLink(q.paperId, q.paperTitle || q.text)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-medium leading-snug hover:text-primary transition-colors hover:underline underline-offset-2 block"
+                >
+                  {q.text}
+                </a>
+              ) : (
+                <p className="text-xs font-medium leading-snug">{q.text}</p>
+              )}
               {q.detail && (
                 <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed line-clamp-2">{q.detail}</p>
               )}

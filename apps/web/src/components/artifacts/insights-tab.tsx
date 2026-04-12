@@ -90,8 +90,32 @@ function ContradictionCard({ c }: { c: any }) {
         {/* Collapsed view: claims side-by-side */}
         {!expanded && (
           <div className="grid grid-cols-2 gap-2">
-            <p className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-rose-500/30 pl-1.5">{claim1Statement}</p>
-            <p className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-blue-500/30 pl-1.5">{claim2Statement}</p>
+            {claim1Statement && (claim1PaperId || claim1Title) ? (
+              <a
+                href={paperLink(claim1PaperId || undefined, claim1Title)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-rose-500/30 pl-1.5 hover:text-primary transition-colors hover:underline underline-offset-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {claim1Statement}
+              </a>
+            ) : (
+              <p className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-rose-500/30 pl-1.5">{claim1Statement}</p>
+            )}
+            {claim2Statement && (claim2PaperId || claim2Title) ? (
+              <a
+                href={paperLink(claim2PaperId || undefined, claim2Title)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-blue-500/30 pl-1.5 hover:text-primary transition-colors hover:underline underline-offset-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {claim2Statement}
+              </a>
+            ) : (
+              <p className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-blue-500/30 pl-1.5">{claim2Statement}</p>
+            )}
           </div>
         )}
 
@@ -101,7 +125,19 @@ function ContradictionCard({ c }: { c: any }) {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div className="rounded-md bg-rose-500/5 border border-rose-500/15 p-2 space-y-1">
                 <p className="text-[10px] text-rose-400 font-semibold">Claim A</p>
-                <p className="text-xs">{claim1Statement}</p>
+                {claim1Statement && (claim1PaperId || claim1Title) ? (
+                  <a
+                    href={paperLink(claim1PaperId || undefined, claim1Title)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs hover:text-primary transition-colors hover:underline underline-offset-2 block"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {claim1Statement}
+                  </a>
+                ) : (
+                  <p className="text-xs">{claim1Statement}</p>
+                )}
                 {claim1Title && (
                   <a
                     href={paperLink(claim1PaperId || undefined, claim1Title)}
@@ -121,7 +157,19 @@ function ContradictionCard({ c }: { c: any }) {
               </div>
               <div className="rounded-md bg-blue-500/5 border border-blue-500/15 p-2 space-y-1">
                 <p className="text-[10px] text-blue-400 font-semibold">Claim B</p>
-                <p className="text-xs">{claim2Statement}</p>
+                {claim2Statement && (claim2PaperId || claim2Title) ? (
+                  <a
+                    href={paperLink(claim2PaperId || undefined, claim2Title)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs hover:text-primary transition-colors hover:underline underline-offset-2 block"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {claim2Statement}
+                  </a>
+                ) : (
+                  <p className="text-xs">{claim2Statement}</p>
+                )}
                 {claim2Title && (
                   <a
                     href={paperLink(claim2PaperId || undefined, claim2Title)}
@@ -245,11 +293,46 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                               const sideLabel = j === 0 ? 'A' : j === 1 ? 'B' : `${j + 1}`;
                               const labelColor = j === 0 ? 'text-violet-400' : 'text-sky-400';
                               const borderColor = j === 0 ? 'border-violet-500/20 bg-violet-500/5' : 'border-sky-500/20 bg-sky-500/5';
+                              // Get first paper for this side
+                              const sidePapers: any[] = Array.isArray(side?.papers) ? side.papers : [];
+                              const firstSidePaper = sidePapers.length > 0 ? sidePapers[0] : null;
+                              const sidePaperId: string = firstSidePaper
+                                ? (typeof firstSidePaper?.paperId === 'string' ? firstSidePaper.paperId : typeof firstSidePaper?.id === 'string' ? firstSidePaper.id : typeof firstSidePaper === 'string' ? firstSidePaper : '')
+                                : '';
+                              const sidePaperTitle: string = firstSidePaper
+                                ? (typeof firstSidePaper === 'string' ? firstSidePaper : firstSidePaper?.title ?? '')
+                                : '';
 
                               return (
                                 <div key={j} className={`rounded border p-1.5 ${borderColor}`}>
                                   <p className={`text-[9px] font-semibold uppercase tracking-wide ${labelColor} mb-0.5`}>Side {sideLabel}</p>
-                                  <p className="text-[10px] font-medium leading-snug line-clamp-2">{position}</p>
+                                  {position && (sidePaperId || sidePaperTitle) ? (
+                                    <a
+                                      href={paperLink(sidePaperId || undefined, sidePaperTitle || position)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-[10px] font-medium leading-snug line-clamp-2 hover:text-primary transition-colors hover:underline underline-offset-2 block"
+                                    >
+                                      {position}
+                                    </a>
+                                  ) : (
+                                    <p className="text-[10px] font-medium leading-snug line-clamp-2">{position}</p>
+                                  )}
+                                  {sidePapers.slice(0, 2).map((sp: any, si: number) => {
+                                    const spTitle: string = typeof sp === 'string' ? sp : (sp?.title ?? '');
+                                    const spId: string = typeof sp?.paperId === 'string' ? sp.paperId : typeof sp?.id === 'string' ? sp.id : '';
+                                    return spTitle ? (
+                                      <a
+                                        key={si}
+                                        href={paperLink(spId || undefined, spTitle)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[9px] text-primary/60 hover:text-primary transition-colors hover:underline underline-offset-2 block mt-0.5 line-clamp-1"
+                                      >
+                                        ↗ {spTitle}
+                                      </a>
+                                    ) : null;
+                                  })}
                                 </div>
                               );
                             })}
@@ -279,18 +362,58 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   const caveats: any[] = Array.isArray(c.caveats) ? c.caveats : [];
                   const strength = typeof c.strength === 'string' ? c.strength : '';
 
+                  // First supporting paper for linking
+                  const firstSP = supportingPapers.length > 0 ? supportingPapers[0] : null;
+                  const firstSPId: string = firstSP
+                    ? (typeof firstSP?.paperId === 'string' ? firstSP.paperId : typeof firstSP?.id === 'string' ? firstSP.id : '')
+                    : '';
+                  const firstSPTitle: string = firstSP
+                    ? (typeof firstSP === 'string' ? firstSP : firstSP?.title ?? '')
+                    : '';
+
                   return (
                     <div key={i} className="rounded-md border border-border bg-card px-3 py-2 space-y-1">
                       <div className="flex items-start gap-2">
                         <span className="shrink-0 mt-0.5 text-emerald-400 text-xs font-bold">✓</span>
                         <div className="space-y-0.5 flex-1 min-w-0">
-                          <p className="text-xs font-medium leading-snug">{finding}</p>
-                          <p className="text-[10px] text-muted-foreground">
-                            {supportingPapers.length > 0
-                              ? `${supportingPapers.length} paper${supportingPapers.length === 1 ? '' : 's'}`
-                              : ''}
-                            {strength ? ` · ${strength}` : ''}
-                          </p>
+                          {finding && (firstSPId || firstSPTitle) ? (
+                            <a
+                              href={paperLink(firstSPId || undefined, firstSPTitle || finding)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs font-medium leading-snug hover:text-primary transition-colors hover:underline underline-offset-2 block"
+                            >
+                              {finding}
+                            </a>
+                          ) : (
+                            <p className="text-xs font-medium leading-snug">{finding}</p>
+                          )}
+                          <div className="flex flex-wrap gap-x-1 gap-y-0.5">
+                            {supportingPapers.slice(0, 3).map((sp: any, si: number) => {
+                              const spTitle: string = typeof sp === 'string' ? sp : (sp?.title ?? '');
+                              const spId: string = typeof sp?.paperId === 'string' ? sp.paperId : typeof sp?.id === 'string' ? sp.id : '';
+                              return spTitle ? (
+                                <a
+                                  key={si}
+                                  href={paperLink(spId || undefined, spTitle)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[10px] text-primary/60 hover:text-primary transition-colors hover:underline underline-offset-2"
+                                >
+                                  {spTitle}{si < Math.min(supportingPapers.length, 3) - 1 ? ' ·' : ''}
+                                </a>
+                              ) : null;
+                            })}
+                            {supportingPapers.length > 3 && (
+                              <span className="text-[10px] text-muted-foreground">+{supportingPapers.length - 3} more</span>
+                            )}
+                            {supportingPapers.length > 0 && supportingPapers.every((sp: any) => !(typeof sp === 'string' ? sp : sp?.title ?? '')) && (
+                              <span className="text-[10px] text-muted-foreground">
+                                {supportingPapers.length} paper{supportingPapers.length === 1 ? '' : 's'}
+                              </span>
+                            )}
+                          </div>
+                          {strength && <p className="text-[10px] text-muted-foreground">{strength}</p>}
                           {caveats.length > 0 && (
                             <p className="text-[10px] text-amber-400/80">
                               ⚠ {caveats.slice(0, 1).map((caveat: any) =>
@@ -332,7 +455,18 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                         <span className="shrink-0 text-amber-400 mt-0.5 text-xs">⚠</span>
                         <div className="flex-1 min-w-0 space-y-0.5">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <p className="text-xs font-medium text-amber-300 line-clamp-1">{issue}</p>
+                            {issue && (paperRefId || paperRef) ? (
+                              <a
+                                href={paperLink(paperRefId || undefined, paperRef || issue)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-medium text-amber-300 line-clamp-1 hover:text-amber-200 transition-colors hover:underline underline-offset-2"
+                              >
+                                {issue}
+                              </a>
+                            ) : (
+                              <p className="text-xs font-medium text-amber-300 line-clamp-1">{issue}</p>
+                            )}
                             {issueLabel && (
                               <span className="inline-flex items-center rounded border border-amber-500/30 bg-amber-500/10 px-1 py-0.5 text-[9px] text-amber-400 font-medium shrink-0">
                                 {issueLabel}

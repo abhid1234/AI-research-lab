@@ -16,18 +16,27 @@ interface ConnectionsTabProps {
   dbPapers?: any[];
 }
 
+interface ClusterPaper {
+  title: string;
+  paperId: string;
+  arxivId: string;
+}
+
 interface ClusterEntry {
   affiliation: string;
   paperCount: number;
   sampleTitles: string[];
+  samplePapers: ClusterPaper[];
 }
 
 function buildClustersFromDbPapers(dbPapers: any[]): ClusterEntry[] {
-  const map: Record<string, { count: number; titles: Set<string> }> = {};
+  const map: Record<string, { count: number; papers: Map<string, ClusterPaper> }> = {};
 
   for (const paper of dbPapers) {
     const authors: any[] = Array.isArray(paper.authors) ? paper.authors : [];
     const title: string = typeof paper.title === 'string' ? paper.title : '';
+    const paperId: string = typeof paper.paperId === 'string' ? paper.paperId : typeof paper.id === 'string' ? paper.id : '';
+    const arxivId: string = typeof paper.arxivId === 'string' ? paper.arxivId : typeof paper.arxiv_id === 'string' ? paper.arxiv_id : '';
 
     let affiliation = 'Independent';
     for (const author of authors) {
@@ -44,17 +53,21 @@ function buildClustersFromDbPapers(dbPapers: any[]): ClusterEntry[] {
       if (name) affiliation = name;
     }
 
-    if (!map[affiliation]) map[affiliation] = { count: 0, titles: new Set() };
+    if (!map[affiliation]) map[affiliation] = { count: 0, papers: new Map() };
     map[affiliation].count += 1;
-    if (title) map[affiliation].titles.add(title);
+    if (title) map[affiliation].papers.set(title, { title, paperId, arxivId });
   }
 
   return Object.entries(map)
-    .map(([affiliation, { count, titles }]) => ({
-      affiliation,
-      paperCount: count,
-      sampleTitles: Array.from(titles).slice(0, 3),
-    }))
+    .map(([affiliation, { count, papers }]) => {
+      const samplePapers = Array.from(papers.values()).slice(0, 3);
+      return {
+        affiliation,
+        paperCount: count,
+        sampleTitles: samplePapers.map(p => p.title),
+        samplePapers,
+      };
+    })
     .sort((a, b) => b.paperCount - a.paperCount)
     .slice(0, 10);
 }
@@ -161,21 +174,48 @@ export function ConnectionsTab({ artifacts, dbPapers = [] }: ConnectionsTabProps
             Emerging Topic Clusters
           </h3>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {emergingTopics.map((t: any, i: number) => (
-              <Card key={i}>
-                <CardHeader className="p-2 pb-1">
-                  <CardTitle className="text-xs font-semibold">{typeof t.topic === 'string' ? t.topic : ''}</CardTitle>
-                  <CardDescription className="text-[10px]">
-                    {t.paperCount != null ? `${t.paperCount} papers` : ''}
-                  </CardDescription>
-                </CardHeader>
-                {t.whyItMatters && (
-                  <CardContent className="px-2 pb-2 pt-0">
-                    <p className="text-[10px] text-muted-foreground line-clamp-2">{typeof t.whyItMatters === 'string' ? t.whyItMatters : ''}</p>
-                  </CardContent>
-                )}
-              </Card>
-            ))}
+            {emergingTopics.map((t: any, i: number) => {
+              const topicName: string = typeof t.topic === 'string' ? t.topic : '';
+              // Key papers for this topic
+              const topicPapers: any[] = Array.isArray(t.keyPapers) ? t.keyPapers : Array.isArray(t.papers) ? t.papers : [];
+              const firstTopicPaper = topicPapers.length > 0 ? topicPapers[0] : null;
+              const firstTopicPaperId: string = firstTopicPaper
+                ? (typeof firstTopicPaper?.paperId === 'string' ? firstTopicPaper.paperId : typeof firstTopicPaper?.id === 'string' ? firstTopicPaper.id : '')
+                : '';
+              const firstTopicPaperTitle: string = firstTopicPaper
+                ? (typeof firstTopicPaper === 'string' ? firstTopicPaper : firstTopicPaper?.title ?? '')
+                : '';
+              // Scholar search fallback for topic
+              const topicHref = firstTopicPaperId || firstTopicPaperTitle
+                ? paperLink(firstTopicPaperId || undefined, firstTopicPaperTitle)
+                : topicName
+                ? `https://scholar.google.com/scholar?q=${encodeURIComponent(topicName)}`
+                : '#';
+              return (
+                <Card key={i} className="hover:border-primary/30 transition-colors">
+                  <CardHeader className="p-2 pb-1">
+                    <CardTitle className="text-xs font-semibold">
+                      <a
+                        href={topicHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-primary transition-colors hover:underline underline-offset-2"
+                      >
+                        {topicName}
+                      </a>
+                    </CardTitle>
+                    <CardDescription className="text-[10px]">
+                      {t.paperCount != null ? `${t.paperCount} papers` : ''}
+                    </CardDescription>
+                  </CardHeader>
+                  {t.whyItMatters && (
+                    <CardContent className="px-2 pb-2 pt-0">
+                      <p className="text-[10px] text-muted-foreground line-clamp-2">{typeof t.whyItMatters === 'string' ? t.whyItMatters : ''}</p>
+                    </CardContent>
+                  )}
+                </Card>
+              );
+            })}
           </div>
         </section>
       )}
@@ -199,13 +239,23 @@ export function ConnectionsTab({ artifacts, dbPapers = [] }: ConnectionsTabProps
                       {cluster.paperCount}p
                     </Badge>
                   </div>
-                  {cluster.sampleTitles.length > 0 && (
+                  {cluster.samplePapers.length > 0 && (
                     <ul className="space-y-0.5">
-                      {cluster.sampleTitles.slice(0, 3).map((t, j) => (
-                        <li key={j} className="text-[10px] text-muted-foreground leading-snug line-clamp-1">
-                          · {t}
-                        </li>
-                      ))}
+                      {cluster.samplePapers.slice(0, 3).map((sp, j) => {
+                        const linkId = sp.arxivId || sp.paperId;
+                        return (
+                          <li key={j} className="text-[10px] text-muted-foreground leading-snug line-clamp-1">
+                            · <a
+                              href={paperLink(linkId || undefined, sp.title)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:text-primary transition-colors hover:underline underline-offset-2"
+                            >
+                              {sp.title}
+                            </a>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </CardContent>

@@ -89,7 +89,28 @@ function FrontierCard({ f }: { f: any }) {
           )}
         </div>
 
-        {finding && <p className="text-sm font-semibold leading-snug">{finding}</p>}
+        {finding && (() => {
+          const primaryPaper = sourcePapers.length > 0 ? sourcePapers[0] : null;
+          const primaryId: string = primaryPaper
+            ? (typeof primaryPaper?.paperId === 'string' ? primaryPaper.paperId : typeof primaryPaper?.id === 'string' ? primaryPaper.id : '')
+            : '';
+          const primaryTitle: string = primaryPaper
+            ? (typeof primaryPaper === 'string' ? primaryPaper : primaryPaper?.title ?? '')
+            : '';
+          return primaryId || primaryTitle ? (
+            <a
+              href={paperLink(primaryId || undefined, primaryTitle || finding)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold leading-snug hover:text-primary transition-colors hover:underline underline-offset-2 block"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {finding}
+            </a>
+          ) : (
+            <p className="text-sm font-semibold leading-snug">{finding}</p>
+          );
+        })()}
 
         {explanation && (
           <p className={`text-xs text-muted-foreground leading-relaxed ${expanded ? '' : 'line-clamp-2'}`}>
@@ -148,10 +169,32 @@ function FrontierCard({ f }: { f: any }) {
                 <ul className="space-y-0.5">
                   {implications.map((imp: any, j: number) => {
                     const impStr = typeof imp === 'string' ? imp : safeString(imp);
+                    const impPaperId: string = typeof imp?.paperId === 'string' ? imp.paperId : '';
+                    const impPaperTitle: string = typeof imp?.paperTitle === 'string' ? imp.paperTitle : '';
+                    // Fall back to first source paper
+                    const fallbackPaper = sourcePapers.length > 0 ? sourcePapers[0] : null;
+                    const fallbackId: string = fallbackPaper
+                      ? (typeof fallbackPaper?.paperId === 'string' ? fallbackPaper.paperId : typeof fallbackPaper?.id === 'string' ? fallbackPaper.id : '')
+                      : '';
+                    const fallbackTitle: string = fallbackPaper
+                      ? (typeof fallbackPaper === 'string' ? fallbackPaper : fallbackPaper?.title ?? '')
+                      : '';
+                    const linkId = impPaperId || fallbackId;
+                    const linkTitle = impPaperTitle || fallbackTitle;
                     return (
                       <li key={j} className="flex items-start gap-1 text-[10px] text-muted-foreground line-clamp-1">
                         <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-primary/50" />
-                        {impStr}
+                        {linkId || linkTitle ? (
+                          <a
+                            href={paperLink(linkId || undefined, linkTitle || impStr)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-primary transition-colors hover:underline underline-offset-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {impStr}
+                          </a>
+                        ) : impStr}
                       </li>
                     );
                   })}
@@ -164,10 +207,31 @@ function FrontierCard({ f }: { f: any }) {
                 <ul className="space-y-0.5">
                   {openQuestions.map((q: any, j: number) => {
                     const qStr = typeof q === 'string' ? q : safeString(q);
+                    const qPaperId: string = typeof q?.paperId === 'string' ? q.paperId : '';
+                    const qPaperTitle: string = typeof q?.paperTitle === 'string' ? q.paperTitle : '';
+                    const fallbackPaper = sourcePapers.length > 0 ? sourcePapers[0] : null;
+                    const fallbackId: string = fallbackPaper
+                      ? (typeof fallbackPaper?.paperId === 'string' ? fallbackPaper.paperId : typeof fallbackPaper?.id === 'string' ? fallbackPaper.id : '')
+                      : '';
+                    const fallbackTitle: string = fallbackPaper
+                      ? (typeof fallbackPaper === 'string' ? fallbackPaper : fallbackPaper?.title ?? '')
+                      : '';
+                    const linkId = qPaperId || fallbackId;
+                    const linkTitle = qPaperTitle || fallbackTitle;
                     return (
                       <li key={j} className="flex items-start gap-1 text-[10px] text-muted-foreground line-clamp-1">
                         <span className="shrink-0 text-muted-foreground/50 text-[9px] mt-0.5">?</span>
-                        {qStr}
+                        {linkId || linkTitle ? (
+                          <a
+                            href={paperLink(linkId || undefined, linkTitle || qStr)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-primary transition-colors hover:underline underline-offset-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {qStr}
+                          </a>
+                        ) : qStr}
                       </li>
                     );
                   })}
@@ -196,9 +260,19 @@ function PivotingTrendsList({ pivotingTrends }: { pivotingTrends: any[] }) {
         const firstEvidence = evidence.length > 0
           ? (typeof evidence[0] === 'string' ? evidence[0] : (typeof evidence[0]?.quote === 'string' ? evidence[0].quote : ''))
           : '';
+        // First evidence paper link
+        const firstEvidencePaperId: string = evidence.length > 0 && typeof evidence[0] === 'object'
+          ? (typeof evidence[0]?.paperId === 'string' ? evidence[0].paperId : typeof evidence[0]?.id === 'string' ? evidence[0].id : '')
+          : '';
+        const firstEvidencePaperTitle: string = evidence.length > 0 && typeof evidence[0] === 'object'
+          ? (typeof evidence[0]?.paperTitle === 'string' ? evidence[0].paperTitle : typeof evidence[0]?.title === 'string' ? evidence[0].title : '')
+          : '';
+        const trendHref = firstEvidencePaperId || firstEvidencePaperTitle
+          ? paperLink(firstEvidencePaperId || undefined, firstEvidencePaperTitle || `${from} → ${to}`)
+          : undefined;
 
-        return (
-          <div key={i} className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-xs">
+        const trendContent = (
+          <div className="flex items-center gap-2 text-xs w-full">
             <span className="rounded bg-muted/60 border border-border px-1.5 py-0.5 text-[10px] shrink-0 max-w-[120px] truncate" title={from}>{from}</span>
             <span className="text-muted-foreground shrink-0">→</span>
             <span className="rounded bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-[10px] text-primary/80 font-medium shrink-0 max-w-[120px] truncate" title={to}>{to}</span>
@@ -206,6 +280,22 @@ function PivotingTrendsList({ pivotingTrends }: { pivotingTrends: any[] }) {
               <span className="text-[10px] text-muted-foreground italic line-clamp-1 flex-1 min-w-0">{firstEvidence}</span>
             )}
             {timespan && <span className="text-[10px] text-muted-foreground shrink-0 ml-auto">{timespan}</span>}
+          </div>
+        );
+
+        return trendHref ? (
+          <a
+            key={i}
+            href={trendHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 hover:border-primary/30 hover:bg-primary/5 transition-colors"
+          >
+            {trendContent}
+          </a>
+        ) : (
+          <div key={i} className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-xs">
+            {trendContent}
           </div>
         );
       })}
@@ -218,6 +308,82 @@ function PivotingTrendsList({ pivotingTrends }: { pivotingTrends: any[] }) {
         </button>
       )}
     </div>
+  );
+}
+
+function GapCard({ g }: { g: any }) {
+  const [adjacentOpen, setAdjacentOpen] = useState(false);
+  const area = typeof g.area === 'string' ? g.area : safeString(g.area);
+  const why = typeof g.whyItMatters === 'string' ? g.whyItMatters : '';
+  const adjacent: any[] = Array.isArray(g.adjacentWork) ? g.adjacentWork : [];
+  // Try to link the gap title to a source paper if available
+  const sourcePaperId: string = typeof g.sourcePaperId === 'string' ? g.sourcePaperId : '';
+  const sourcePaperTitle: string = typeof g.sourcePaperTitle === 'string' ? g.sourcePaperTitle : '';
+  // Or use first adjacent work
+  const firstAdj = adjacent.length > 0 ? adjacent[0] : null;
+  const firstAdjId: string = firstAdj
+    ? (typeof firstAdj?.paperId === 'string' ? firstAdj.paperId : typeof firstAdj?.id === 'string' ? firstAdj.id : '')
+    : '';
+  const firstAdjTitle: string = firstAdj
+    ? (typeof firstAdj === 'string' ? firstAdj : firstAdj?.title ?? firstAdj?.name ?? '')
+    : '';
+  const gapLinkId = sourcePaperId || firstAdjId;
+  const gapLinkTitle = sourcePaperTitle || firstAdjTitle;
+
+  return (
+    <Card>
+      <CardContent className="p-2 space-y-1.5">
+        <div className="flex items-start gap-1.5">
+          <span className="shrink-0 mt-0.5 text-amber-400 text-sm">⬡</span>
+          {gapLinkId || gapLinkTitle ? (
+            <a
+              href={paperLink(gapLinkId || undefined, gapLinkTitle || area)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-semibold leading-snug hover:text-primary transition-colors hover:underline underline-offset-2"
+            >
+              {area}
+            </a>
+          ) : (
+            <p className="text-xs font-semibold leading-snug">{area}</p>
+          )}
+        </div>
+        {why && (
+          <p className="text-[10px] text-muted-foreground line-clamp-2">{why}</p>
+        )}
+        {adjacent.length > 0 && (
+          <div>
+            <button
+              onClick={() => setAdjacentOpen(!adjacentOpen)}
+              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {adjacentOpen ? '▾' : '▸'} {adjacent.length} adjacent work{adjacent.length !== 1 ? 's' : ''}
+            </button>
+            {adjacentOpen && (
+              <ul className="mt-1 space-y-0.5 pl-2">
+                {adjacent.map((adj: any, j: number) => {
+                  const adjTitle: string = typeof adj === 'string' ? adj : (adj?.title ?? adj?.name ?? adj?.id ?? '');
+                  const adjId: string = typeof adj?.paperId === 'string' ? adj.paperId : typeof adj?.id === 'string' ? adj.id : '';
+                  return (
+                    <li key={j} className="flex items-start gap-1">
+                      <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
+                      <a
+                        href={paperLink(adjId || undefined, adjTitle)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline line-clamp-1"
+                      >
+                        {adjTitle}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -299,30 +465,9 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
             Research Gaps ({gaps.length})
           </h3>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {gaps.map((g: any, i: number) => {
-              const area = typeof g.area === 'string' ? g.area : safeString(g.area);
-              const why = typeof g.whyItMatters === 'string' ? g.whyItMatters : '';
-              const adjacent: any[] = Array.isArray(g.adjacentWork) ? g.adjacentWork : [];
-
-              return (
-                <Card key={i}>
-                  <CardContent className="p-2 space-y-1.5">
-                    <div className="flex items-start gap-1.5">
-                      <span className="shrink-0 mt-0.5 text-amber-400 text-sm">⬡</span>
-                      <p className="text-xs font-semibold leading-snug">{area}</p>
-                    </div>
-                    {why && (
-                      <p className="text-[10px] text-muted-foreground line-clamp-2">{why}</p>
-                    )}
-                    {adjacent.length > 0 && (
-                      <p className="text-[10px] text-muted-foreground">
-                        {adjacent.length} adjacent work{adjacent.length !== 1 ? 's' : ''}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {gaps.map((g: any, i: number) => (
+              <GapCard key={i} g={g} />
+            ))}
           </div>
         </section>
       )}

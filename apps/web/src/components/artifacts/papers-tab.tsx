@@ -152,10 +152,15 @@ function PaperCard({ paper }: { paper: any }) {
               </div>
             )}
             {paper.takeaway && (
-              <div className="rounded bg-primary/5 border border-primary/20 px-2 py-1">
+              <a
+                href={paperLink(pid || undefined, displayTitle)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded bg-primary/5 border border-primary/20 px-2 py-1 block hover:border-primary/40 hover:bg-primary/10 transition-colors"
+              >
                 <p className="text-[10px] text-primary/80 font-medium mb-0.5">Takeaway</p>
                 <p className="text-xs line-clamp-2">{typeof paper.takeaway === 'string' ? paper.takeaway : ''}</p>
-              </div>
+              </a>
             )}
           </div>
 
@@ -165,10 +170,15 @@ function PaperCard({ paper }: { paper: any }) {
               <p className="text-[10px] text-muted-foreground line-clamp-3">{typeof paper.problem === 'string' ? paper.problem : ''}</p>
             )}
             {paper.approach && (
-              <div>
-                <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-wide">Approach</p>
-                <p className="text-[10px] text-muted-foreground line-clamp-2">{typeof paper.approach === 'string' ? paper.approach : ''}</p>
-              </div>
+              <a
+                href={paperLink(pid || undefined, displayTitle)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block hover:text-primary transition-colors group"
+              >
+                <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-wide group-hover:text-primary/60 transition-colors">Approach</p>
+                <p className="text-[10px] text-muted-foreground line-clamp-2 group-hover:underline underline-offset-2">{typeof paper.approach === 'string' ? paper.approach : ''}</p>
+              </a>
             )}
             {paper.keyInnovation && (
               <div>
