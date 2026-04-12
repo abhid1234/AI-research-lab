@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PaperDetailModal } from './paper-detail-modal';
 import { PaperComparisonModal } from './paper-comparison-modal';
 import { upvotePaper, getVoteCount } from '@/lib/votes';
+import { paperLink } from '@/lib/paper-utils';
 
 
 interface PaperDrawerProps {
@@ -154,13 +155,7 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
 
               // Build a valid URL — skip demo/fake IDs
               const isRealArxivId = arxivId && !arxivId.startsWith('demo-') && (arxivId.includes('.') || arxivId.includes('/'));
-              const paperUrl = arxivId.includes('arxiv.org')
-                ? arxivId
-                : isRealArxivId
-                  ? `https://arxiv.org/abs/${arxivId}`
-                  : title
-                    ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}`
-                    : '#';
+              const paperUrl = paperLink(isRealArxivId ? arxivId : undefined, title || undefined);
 
               const paperId = String(paper.id ?? i);
               const isChecked = compareIds.has(paperId);

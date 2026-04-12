@@ -3,13 +3,8 @@
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CitationGraph } from '@/components/charts/citation-graph';
-
-function paperLink(id: string | undefined, title?: string): string {
-  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
-  if (id.includes('arxiv.org')) return id;
-  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
-  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
-}
+import { EmptyState } from '@/components/ui/empty-state';
+import { paperLink } from '@/lib/paper-utils';
 
 interface ConnectionsTabProps {
   artifacts: { agentType: string; data: any }[];
@@ -72,12 +67,15 @@ export function ConnectionsTab({ dbPapers = [] }: ConnectionsTabProps) {
 
   if (dbPapers.length === 0 && dbClusters.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
-          <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-        </svg>
-        <p className="text-sm">No connections yet. Ingest papers to map relationships.</p>
-      </div>
+      <EmptyState
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+          </svg>
+        }
+        title="No connections yet"
+        description="Ingest papers to map relationships."
+      />
     );
   }
 

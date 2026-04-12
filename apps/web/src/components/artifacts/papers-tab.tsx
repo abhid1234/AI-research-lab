@@ -4,13 +4,8 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-
-function paperLink(id: string | undefined, title?: string): string {
-  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
-  if (id.includes('arxiv.org')) return id;
-  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
-  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
-}
+import { EmptyState } from '@/components/ui/empty-state';
+import { paperLink } from '@/lib/paper-utils';
 
 const PAGE_SIZE = 20;
 
@@ -21,6 +16,7 @@ interface PapersTabProps {
 export function PapersTab({ artifacts }: PapersTabProps) {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(0);
+  const [sortBy, setSortBy] = useState<'relevance' | 'date' | 'citations' | 'title'>('relevance');
 
   const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
   const papers: any[] = paperArtifact?.data?.papers ?? [];
@@ -39,8 +35,19 @@ export function PapersTab({ artifacts }: PapersTabProps) {
       })
     : papers;
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const pageItems = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'date') {
+      const ad = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+      const bd = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+      return bd - ad;
+    }
+    if (sortBy === 'citations') return (b.citationCount ?? 0) - (a.citationCount ?? 0);
+    if (sortBy === 'title') return (a.title ?? '').localeCompare(b.title ?? '');
+    return 0; // relevance = default order
+  });
+
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+  const pageItems = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   const handleQuery = (val: string) => {
     setQuery(val);
@@ -49,32 +56,41 @@ export function PapersTab({ artifacts }: PapersTabProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 flex-wrap">
         <Input
           placeholder="Search papers..."
           value={query}
           onChange={(e: { target: { value: string } }) => handleQuery(e.target.value)}
           className="max-w-sm h-8 text-xs"
         />
-        {filtered.length > 0 && (
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+          className="h-8 rounded-md border border-border bg-card px-2 text-xs"
+        >
+          <option value="relevance">Sort: Relevance</option>
+          <option value="date">Sort: Newest</option>
+          <option value="citations">Sort: Most Cited</option>
+          <option value="title">Sort: A-Z</option>
+        </select>
+        {sorted.length > 0 && (
           <span className="text-[10px] text-muted-foreground tabular-nums">
-            {filtered.length} paper{filtered.length !== 1 ? 's' : ''}
+            {sorted.length} paper{sorted.length !== 1 ? 's' : ''}
             {totalPages > 1 ? ` · page ${page + 1}/${totalPages}` : ''}
           </span>
         )}
       </div>
 
       {pageItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
-          </svg>
-          <p className="text-sm">
-            {papers.length === 0
-              ? 'No papers analyzed yet. Run an analysis to see results.'
-              : `No papers match "${query}"`}
-          </p>
-        </div>
+        <EmptyState
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+            </svg>
+          }
+          title={papers.length === 0 ? 'No papers analyzed yet' : `No papers match "${query}"`}
+          description={papers.length === 0 ? 'Run an analysis to see results.' : undefined}
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">

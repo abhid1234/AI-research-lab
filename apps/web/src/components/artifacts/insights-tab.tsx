@@ -3,45 +3,16 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BenchmarkTable } from '@/components/charts/benchmark-table';
+import { EmptyState } from '@/components/ui/empty-state';
+import { safeString, paperLink } from '@/lib/paper-utils';
+import {
+  contradictionNatureColors as natureBadgeClass,
+  importanceDotColors as importanceDot,
+  warningIssueLabels as warningIssueLabel,
+} from '@/lib/design-tokens';
 
 interface InsightsTabProps {
   artifacts: { agentType: string; data: any }[];
-}
-
-const natureBadgeClass: Record<string, string> = {
-  temporal_shift: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  direct_contradiction: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-  scope_difference: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  methodology_gap: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-  // legacy keys kept for backwards compat
-  direct: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-  indirect: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  methodological: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  contextual: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-};
-
-const importanceDot: Record<string, string> = {
-  high: 'bg-rose-500',
-  medium: 'bg-amber-400',
-  low: 'bg-muted-foreground/40',
-};
-
-const warningIssueLabel: Record<string, string> = {
-  cherry_picked_benchmarks: 'Cherry-Picked Benchmarks',
-  incomparable_conditions: 'Incomparable Conditions',
-  missing_baselines: 'Missing Baselines',
-  overfitted_metrics: 'Overfitted Metrics',
-};
-
-function safeString(val: any): string {
-  return typeof val === 'string' ? val : val?.title ?? val?.id ?? '';
-}
-
-function paperLink(id: string | undefined, title?: string): string {
-  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
-  if (id.includes('arxiv.org')) return id;
-  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
-  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
 }
 
 function ImportanceDot({ importance }: { importance: any }) {
@@ -58,7 +29,7 @@ function ImportanceDot({ importance }: { importance: any }) {
 function SectionDivider({ label, count }: { label: string; count?: number }) {
   return (
     <div className="flex items-center gap-2 mb-2">
-      <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+      <h3 className="text-caption text-muted-foreground whitespace-nowrap">
         {label}{count != null ? ` (${count})` : ''}
       </h3>
       <div className="flex-1 h-px bg-border" />
@@ -233,12 +204,15 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
 
   if (!hasData) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
-          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        <p className="text-sm">No insights yet. Run an analysis to discover contradictions and consensus.</p>
-      </div>
+      <EmptyState
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+        }
+        title="No insights yet"
+        description="Run an analysis to discover contradictions and consensus."
+      />
     );
   }
 

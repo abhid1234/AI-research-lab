@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic';
 
 import { PaperDrawer } from '@/components/layout/paper-drawer';
 import { useState } from 'react';
+import { EmptyState as SharedEmptyState } from '@/components/ui/empty-state';
+import { paperLink } from '@/lib/paper-utils';
 
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
@@ -48,13 +50,6 @@ const FINDING_COLORS = [
   'bg-blue-500',
   'bg-purple-500',
 ] as const;
-
-function paperLink(id: string | undefined, title?: string): string {
-  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
-  if (id.includes('arxiv.org')) return id;
-  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
-  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
-}
 
 type StatTone = 'primary' | 'amber' | 'emerald' | 'slate';
 
@@ -357,7 +352,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
       )}
 
       {papers.length === 0 && topicEvolution.length === 0 && (
-        <EmptyState message="Run an analysis to populate the overview." />
+        <SharedEmptyState title="Nothing here yet" description="Run an analysis to populate the overview." />
       )}
 
       {/* Paper drawer (hidden by default) */}
@@ -590,13 +585,3 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
   );
 }
 
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
-        <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-      </svg>
-      <p className="text-sm">{message}</p>
-    </div>
-  );
-}

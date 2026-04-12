@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { paperLink } from '@/lib/paper-utils';
 
 interface PaperDetailModalProps {
   paper: any | null;
@@ -51,13 +52,7 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
   // Build arxiv/scholar URL
   const isRealArxivId =
     arxivId && !arxivId.startsWith('demo-') && (arxivId.includes('.') || arxivId.includes('/'));
-  const paperUrl = arxivId.includes('arxiv.org')
-    ? arxivId
-    : isRealArxivId
-      ? `https://arxiv.org/abs/${arxivId}`
-      : title
-        ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}`
-        : '#';
+  const paperUrl = paperLink(isRealArxivId ? arxivId : undefined, title);
 
   const pdfLink = pdfUrl || (isRealArxivId ? `https://arxiv.org/pdf/${arxivId}` : '');
 
@@ -210,13 +205,7 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
                       spArxivId &&
                       !spArxivId.startsWith('demo-') &&
                       (spArxivId.includes('.') || spArxivId.includes('/'));
-                    const spUrl = spArxivId.includes('arxiv.org')
-                      ? spArxivId
-                      : spIsReal
-                        ? `https://arxiv.org/abs/${spArxivId}`
-                        : spTitle
-                          ? `https://scholar.google.com/scholar?q=${encodeURIComponent(spTitle)}`
-                          : '#';
+                    const spUrl = paperLink(spIsReal ? spArxivId : undefined, spTitle);
                     const spAuthors: string = Array.isArray(sp.authors)
                       ? sp.authors
                           .map((a: any) =>

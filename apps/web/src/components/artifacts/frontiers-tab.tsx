@@ -2,34 +2,17 @@
 
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { safeString, paperLink } from '@/lib/paper-utils';
+import {
+  frontierCategoryColors as categoryStyles,
+  frontierCategoryEmoji as categoryEmoji,
+  frontierCategoryLabel as categoryLabel,
+} from '@/lib/design-tokens';
 
 interface FrontiersTabProps {
   artifacts: { agentType: string; data: any }[];
 }
-
-const categoryEmoji: Record<string, string> = {
-  paradigm_shift: '🔴',
-  method_breakthrough: '🔵',
-  surprising_result: '🟡',
-  convergence: '🟢',
-  capability_unlock: '🟣',
-};
-
-const categoryLabel: Record<string, string> = {
-  paradigm_shift: 'Paradigm Shift',
-  method_breakthrough: 'Method Breakthrough',
-  surprising_result: 'Surprising Result',
-  convergence: 'Convergence',
-  capability_unlock: 'Capability Unlock',
-};
-
-const categoryStyles: Record<string, string> = {
-  paradigm_shift: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-  method_breakthrough: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  surprising_result: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  convergence: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  capability_unlock: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-};
 
 function ConfidenceInline({ value }: { value: number }) {
   const pct = Math.min(Math.max(Math.round(value * 100), 0), 100);
@@ -46,17 +29,6 @@ function ConfidenceInline({ value }: { value: number }) {
       <span className="text-[10px] text-muted-foreground tabular-nums">{pct}%</span>
     </span>
   );
-}
-
-function safeString(val: any): string {
-  return typeof val === 'string' ? val : val?.title ?? val?.id ?? '';
-}
-
-function paperLink(id: string | undefined, title?: string): string {
-  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
-  if (id.includes('arxiv.org')) return id;
-  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
-  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
 }
 
 function FrontierCard({ f }: { f: any }) {
@@ -165,7 +137,7 @@ function FrontierCard({ f }: { f: any }) {
           <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border">
             {implications.length > 0 && (
               <div>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">Implications</p>
+                <p className="text-caption text-muted-foreground mb-1">Implications</p>
                 <ul className="space-y-0.5">
                   {implications.map((imp: any, j: number) => {
                     const impStr = typeof imp === 'string' ? imp : safeString(imp);
@@ -203,7 +175,7 @@ function FrontierCard({ f }: { f: any }) {
             )}
             {openQuestions.length > 0 && (
               <div>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">Open Questions</p>
+                <p className="text-caption text-muted-foreground mb-1">Open Questions</p>
                 <ul className="space-y-0.5">
                   {openQuestions.map((q: any, j: number) => {
                     const qStr = typeof q === 'string' ? q : safeString(q);
@@ -399,12 +371,15 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
 
   if (!hasData) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>
-        <p className="text-sm">No frontiers yet. Run an analysis to detect emerging research directions.</p>
-      </div>
+      <EmptyState
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        }
+        title="No frontiers yet"
+        description="Run an analysis to detect emerging research directions."
+      />
     );
   }
 
@@ -437,7 +412,7 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
       {/* Frontier findings — 2-col grid on wide screens */}
       {frontiers.length > 0 && (
         <section>
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          <h3 className="text-caption text-muted-foreground mb-2">
             Findings ({frontiers.length})
           </h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -451,7 +426,7 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
       {/* Pivoting Trends */}
       {pivotingTrends.length > 0 && (
         <section>
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          <h3 className="text-caption text-muted-foreground mb-2">
             Pivoting Trends ({pivotingTrends.length})
           </h3>
           <PivotingTrendsList pivotingTrends={pivotingTrends} />
@@ -461,7 +436,7 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
       {/* Research Gaps — 3-column grid */}
       {gaps.length > 0 && (
         <section>
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          <h3 className="text-caption text-muted-foreground mb-2">
             Research Gaps ({gaps.length})
           </h3>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
