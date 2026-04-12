@@ -218,7 +218,7 @@ function PaperCard({ paper }: { paper: any }) {
                 className="rounded bg-primary/5 border border-primary/20 px-2 py-1 block hover:border-primary/40 hover:bg-primary/10 transition-colors"
               >
                 <p className="text-[10px] text-primary/80 font-medium mb-0.5">Takeaway</p>
-                <p className="text-xs line-clamp-2">{typeof paper.takeaway === 'string' ? paper.takeaway : ''}</p>
+                <p className="text-xs leading-relaxed">{typeof paper.takeaway === 'string' ? paper.takeaway : ''}</p>
               </a>
             )}
           </div>
