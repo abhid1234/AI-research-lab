@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BenchmarkTable } from '@/components/charts/benchmark-table';
 import { EmptyState } from '@/components/ui/empty-state';
 import { safeString, paperLink } from '@/lib/paper-utils';
 import {
@@ -190,17 +189,13 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
   const contradictions: any[] = contradictionData.contradictions ?? [];
   const consensus: any[] = contradictionData.consensus ?? [];
   const openDebates: any[] = contradictionData.openDebates ?? [];
-  const benchmarkTables: any[] = benchmarkData.benchmarkTables ?? [];
   const warnings: any[] = benchmarkData.warnings ?? [];
-
-  const featuredTable = benchmarkTables[0] ?? null;
-  const otherBenchmarks = benchmarkTables.slice(1);
 
   const hasData =
     contradictions.length > 0 ||
     consensus.length > 0 ||
     openDebates.length > 0 ||
-    benchmarkTables.length > 0;
+    warnings.length > 0;
 
   if (!hasData) {
     return (
@@ -330,17 +325,15 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
         </section>
       )}
 
-      {/* Row 3: Confirmed Knowledge */}
-      {(consensus.length > 0 || warnings.length > 0) && (
+      {/* Row 3: Consensus Findings (full width, CSS columns for balance) */}
+      {consensus.length > 0 && (
         <section>
-          <SectionDivider label="Confirmed Knowledge" count={consensus.length + warnings.length} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div>
-              <p className="text-[10px] text-muted-foreground mb-2">
-                ✓ {consensus.length} consensus finding{consensus.length !== 1 ? 's' : ''}
-              </p>
-              <div className="space-y-1.5">
-                {consensus.map((c, i) => {
+          <SectionDivider label="Consensus Findings" count={consensus.length} />
+          <p className="text-[10px] text-muted-foreground mb-2">
+            ✓ Findings confirmed independently by multiple research groups.
+          </p>
+          <div className="columns-1 lg:columns-2 gap-3 [&>*]:mb-1.5 [&>*]:break-inside-avoid">
+            {consensus.map((c, i) => {
                   const finding = typeof c.finding === 'string' ? c.finding : safeString(c.finding);
                   const supportingPapers: any[] = Array.isArray(c.supportingPapers) ? c.supportingPapers : [];
                   const caveats: any[] = Array.isArray(c.caveats) ? c.caveats : [];
@@ -410,13 +403,18 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                     </div>
                   );
                 })}
-              </div>
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground mb-2">
-                ⚠ {warnings.length} warning{warnings.length !== 1 ? 's' : ''}
-              </p>
-              <div className="space-y-1.5">
+          </div>
+        </section>
+      )}
+
+      {/* Row 4: Warnings (separate row, compact) */}
+      {warnings.length > 0 && (
+        <section>
+          <SectionDivider label="Benchmark Warnings" count={warnings.length} />
+          <p className="text-[10px] text-muted-foreground mb-2">
+            ⚠ Papers whose reported results may need closer scrutiny.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {warnings.map((w: any, i: number) => {
                   const issue = typeof w === 'string' ? w : (typeof w?.issue === 'string' ? w.issue : safeString(w));
                   const issueType = typeof w?.issueType === 'string' ? w.issueType : '';
@@ -467,31 +465,10 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                     </div>
                   );
                 })}
-              </div>
-            </div>
           </div>
         </section>
       )}
 
-      {/* Row 4: Featured Benchmarks */}
-      {featuredTable && (
-        <section>
-          <SectionDivider label="Featured Benchmarks" count={benchmarkTables.length} />
-          <BenchmarkTable table={featuredTable} />
-          {otherBenchmarks.length > 0 && (
-            <details className="mt-2">
-              <summary className="text-[10px] text-primary/70 cursor-pointer hover:text-primary">
-                + {otherBenchmarks.length} more benchmark{otherBenchmarks.length === 1 ? '' : 's'}
-              </summary>
-              <div className="mt-2 space-y-3">
-                {otherBenchmarks.map((t: any, i: number) => (
-                  <BenchmarkTable key={i} table={t} />
-                ))}
-              </div>
-            </details>
-          )}
-        </section>
-      )}
     </div>
   );
 }
