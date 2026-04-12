@@ -111,12 +111,12 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
   const relativeSync = formatRelativeTime(lastSyncAt);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Topic headline + analysis meta */}
       {(topicName || relativeSync || agentCount > 0) && (
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+        <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between">
           {topicName && (
-            <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            <h2 className="text-sm font-semibold tracking-tight text-foreground">
               {topicName}
             </h2>
           )}
@@ -132,14 +132,14 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
 
       {/* 1. Collection at a Glance card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Collection at a Glance</CardTitle>
-          <CardDescription>
-            {displayPaperCount} papers spanning research topics. Topics grouped by research clusters discovered in batch analysis.
+        <CardHeader className="pb-2 pt-3 px-4">
+          <CardTitle className="text-sm font-semibold">Collection at a Glance</CardTitle>
+          <CardDescription className="text-xs">
+            {displayPaperCount} papers spanning research topics.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-4 gap-4">
+        <CardContent className="px-4 pb-3">
+          <div className="grid grid-cols-4 gap-3">
             <StatItem label="Papers" value={displayPaperCount} onClick={onOpenDrawer} />
             <StatItem
               label="Topics"
@@ -157,23 +157,23 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
       {/* 2. Side-by-side charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="animate-chart-in">
-          <CardHeader>
-            <CardTitle>Research Landscape</CardTitle>
-            <CardDescription>
+          <CardHeader className="pb-2 pt-3 px-4">
+            <CardTitle className="text-sm font-semibold">Research Landscape</CardTitle>
+            <CardDescription className="text-xs">
               Topic distribution across research clusters
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 pb-3">
             <ResearchLandscape papers={dbPapers && dbPapers.length > 0 ? dbPapers : papers} />
           </CardContent>
         </Card>
 
         <Card id="topic-evolution-chart" className="animate-chart-in scroll-mt-4" style={{ animationDelay: '100ms' }}>
-          <CardHeader>
-            <CardTitle>Topic Evolution Over Time</CardTitle>
-            <CardDescription>Tracked data showing research intensity across key topics</CardDescription>
+          <CardHeader className="pb-2 pt-3 px-4">
+            <CardTitle className="text-sm font-semibold">Topic Evolution Over Time</CardTitle>
+            <CardDescription className="text-xs">Research intensity across key topics</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 pb-3">
             <TopicEvolutionChart data={dbTopicEvolution.length > 0 ? dbTopicEvolution : topicEvolution} />
           </CardContent>
         </Card>
@@ -183,19 +183,19 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
       {papers.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Left: Open Research Questions */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div>
               <h3 className="text-sm font-semibold text-foreground">Open Research Questions</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">What the field still doesn't know</p>
+              <p className="text-xs text-muted-foreground mt-0.5">What the field still doesn&apos;t know</p>
             </div>
             <OpenQuestionsSection artifacts={artifacts} />
           </div>
 
           {/* Right: Key Results */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h3 className="text-sm font-semibold text-foreground">Key Results Worth Knowing</h3>
             {papers.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {papers.slice(0, 5).map((p, i) => (
                   <ResultCard
                     key={i}
@@ -213,35 +213,35 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
 
       {/* 4. New Benchmarks grid */}
       {newBenchmarks.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div>
-            <h3 className="text-sm font-semibold text-foreground">New Benchmarks Introduced in This Collection</h3>
+            <h3 className="text-sm font-semibold text-foreground">New Benchmarks</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              These papers introduce new evaluation frameworks and datasets for the research community.
+              Papers introducing new evaluation frameworks.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {newBenchmarks.map((b, i) => {
-              const name: string = b.name ?? 'Untitled Benchmark';
-              const measures: string = b.measures ?? '';
+              const name: string = typeof b.name === 'string' ? b.name : 'Untitled Benchmark';
+              const measures: string = typeof b.measures === 'string' ? b.measures : '';
               return (
                 <div
                   key={i}
-                  className="rounded-lg border border-border bg-card p-3 space-y-1.5"
+                  className="rounded-lg border border-border bg-card p-2 space-y-1"
                 >
                   <div className="flex items-center gap-1">
                     <a
                       href={paperLink(b.paper?.id ?? b.paper?.paperId ?? undefined, name)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-bold text-foreground hover:text-primary transition-colors underline-offset-2 hover:underline"
+                      className="text-xs font-bold text-foreground hover:text-primary transition-colors underline-offset-2 hover:underline"
                     >
                       {name}
                     </a>
                     <span className="text-primary/50 text-xs" aria-hidden="true">↗</span>
                   </div>
                   {measures && (
-                    <p className="text-xs text-muted-foreground leading-relaxed">{measures}</p>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{measures}</p>
                   )}
                 </div>
               );
@@ -425,17 +425,17 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-1.5">
       {questions.slice(0, 5).map((q, i) => (
-        <div key={i} className="rounded-lg border border-border bg-card p-3 space-y-1">
-          <div className="flex items-start gap-2">
-            <span className="mt-0.5 text-sm shrink-0">{q.type === 'debate' ? '?' : '!'}</span>
+        <div key={i} className="rounded-lg border border-border bg-card px-3 py-2 space-y-0.5">
+          <div className="flex items-start gap-1.5">
+            <span className="mt-0.5 text-xs shrink-0">{q.type === 'debate' ? '?' : '!'}</span>
             <div>
-              <p className="text-sm font-medium leading-snug">{q.text}</p>
+              <p className="text-xs font-medium leading-snug">{q.text}</p>
               {q.detail && (
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{q.detail}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed line-clamp-2">{q.detail}</p>
               )}
-              <span className={`inline-block mt-1.5 text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded ${
+              <span className={`inline-block mt-1 text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded ${
                 q.type === 'debate'
                   ? 'bg-amber-500/10 text-amber-500'
                   : 'bg-blue-500/10 text-blue-500'
