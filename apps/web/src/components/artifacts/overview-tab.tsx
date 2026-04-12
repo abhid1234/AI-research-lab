@@ -56,17 +56,80 @@ function paperLink(id: string | undefined, title?: string): string {
   return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
 }
 
-function StatItem({ label, value, onClick }: { label: string; value: number; onClick?: () => void }) {
+type StatTone = 'primary' | 'amber' | 'emerald' | 'slate';
+
+const TONE_STYLES: Record<StatTone, { ring: string; bg: string; numText: string; iconBg: string; iconText: string; hoverBorder: string }> = {
+  primary: {
+    ring: 'ring-blue-500/20',
+    bg: 'bg-gradient-to-br from-blue-500/10 to-blue-500/5',
+    numText: 'text-blue-600 dark:text-blue-400',
+    iconBg: 'bg-blue-500/15',
+    iconText: 'text-blue-600 dark:text-blue-400',
+    hoverBorder: 'hover:ring-blue-500/40',
+  },
+  amber: {
+    ring: 'ring-amber-500/20',
+    bg: 'bg-gradient-to-br from-amber-500/10 to-amber-500/5',
+    numText: 'text-amber-600 dark:text-amber-400',
+    iconBg: 'bg-amber-500/15',
+    iconText: 'text-amber-600 dark:text-amber-400',
+    hoverBorder: 'hover:ring-amber-500/40',
+  },
+  emerald: {
+    ring: 'ring-emerald-500/20',
+    bg: 'bg-gradient-to-br from-emerald-500/10 to-emerald-500/5',
+    numText: 'text-emerald-600 dark:text-emerald-400',
+    iconBg: 'bg-emerald-500/15',
+    iconText: 'text-emerald-600 dark:text-emerald-400',
+    hoverBorder: 'hover:ring-emerald-500/40',
+  },
+  slate: {
+    ring: 'ring-slate-400/20',
+    bg: 'bg-gradient-to-br from-slate-400/10 to-slate-400/5',
+    numText: 'text-slate-600 dark:text-slate-300',
+    iconBg: 'bg-slate-400/15',
+    iconText: 'text-slate-600 dark:text-slate-400',
+    hoverBorder: 'hover:ring-slate-400/40',
+  },
+};
+
+function StatItem({
+  label,
+  value,
+  icon,
+  tone = 'primary',
+  onClick,
+}: {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+  tone?: StatTone;
+  onClick?: () => void;
+}) {
+  const styles = TONE_STYLES[tone];
+  const baseClass = `relative rounded-lg ring-1 ${styles.ring} ${styles.bg} px-3 py-2.5 transition-all`;
+  const interactiveClass = onClick ? `cursor-pointer ${styles.hoverBorder} hover:scale-[1.02]` : '';
+  const inner = (
+    <div className="flex items-center gap-3">
+      <div className={`shrink-0 w-8 h-8 rounded-md ${styles.iconBg} ${styles.iconText} flex items-center justify-center`}>
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className={`text-2xl font-bold leading-none tabular-nums ${styles.numText}`}>{value}</p>
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{label}</p>
+      </div>
+      {onClick && (
+        <span className="text-[10px] text-muted-foreground/40 absolute top-1.5 right-2">↗</span>
+      )}
+    </div>
+  );
+
   return onClick ? (
-    <button onClick={onClick} className="text-left cursor-pointer">
-      <p className="text-3xl font-bold text-primary tabular-nums">{value}</p>
-      <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
+    <button onClick={onClick} className={`${baseClass} ${interactiveClass} text-left w-full`}>
+      {inner}
     </button>
   ) : (
-    <div>
-      <p className="text-3xl font-bold text-primary tabular-nums">{value}</p>
-      <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
-    </div>
+    <div className={baseClass}>{inner}</div>
   );
 }
 
@@ -139,17 +202,60 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
           </CardDescription>
         </CardHeader>
         <CardContent className="px-4 pb-3">
-          <div className="grid grid-cols-4 gap-3">
-            <StatItem label="Papers" value={displayPaperCount} onClick={onOpenDrawer} />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* 1. Papers — primary, the dataset itself */}
+            <StatItem
+              label="Papers"
+              value={displayPaperCount}
+              tone="primary"
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+              }
+              onClick={onOpenDrawer}
+            />
+            {/* 2. Insights — actionable findings */}
+            <StatItem
+              label="Insights"
+              value={insightCount}
+              tone="amber"
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.663 17h4.673M12 3v1M3 12H2M22 12h-1M5.6 5.6l-.7-.7M18.4 5.6l.7-.7M12 17a5 5 0 1 0-3-9.5" />
+                  <path d="M9 17v3a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-3" />
+                </svg>
+              }
+              onClick={() => onSwitchTab?.('insights')}
+            />
+            {/* 3. Reports — frontier findings */}
+            <StatItem
+              label="Reports"
+              value={reportsCount}
+              tone="emerald"
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              }
+              onClick={() => onSwitchTab?.('frontiers')}
+            />
+            {/* 4. Topics — metadata */}
             <StatItem
               label="Topics"
               value={dbTopicEvolution.length || topicEvolution.length}
+              tone="slate"
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                  <line x1="7" y1="7" x2="7.01" y2="7" />
+                </svg>
+              }
               onClick={() => {
                 document.getElementById('topic-evolution-chart')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
             />
-            <StatItem label="Insights" value={insightCount} onClick={() => onSwitchTab?.('insights')} />
-            <StatItem label="Reports" value={reportsCount} onClick={() => onSwitchTab?.('frontiers')} />
           </div>
         </CardContent>
       </Card>

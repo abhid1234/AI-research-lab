@@ -73,22 +73,31 @@ function getTabCount(
   }
 
   if (tab === 'connections') {
-    // Prefer real DB papers for affiliation count
+    // Match ConnectionsTab.buildClustersFromDbPapers — group by affiliation,
+    // falling back to first author's name when affiliation is missing.
     const sourcePapers = dbPapers && dbPapers.length > 0
       ? dbPapers
       : (artifacts.find((a) => a.agentType === 'paper-analyzer')?.data?.papers ?? []);
     const affiliations = new Set<string>();
     for (const p of sourcePapers) {
-      if (Array.isArray(p.authors)) {
-        for (const author of p.authors) {
-          const aff = typeof author === 'object' && author?.affiliation
-            ? author.affiliation
-            : 'Unknown';
-          affiliations.add(aff);
+      const authors: any[] = Array.isArray(p.authors) ? p.authors : [];
+      let affiliation = '';
+      for (const author of authors) {
+        if (typeof author === 'object' && author !== null && typeof author.affiliation === 'string' && author.affiliation.trim()) {
+          affiliation = author.affiliation.trim();
+          break;
         }
       }
+      if (!affiliation && authors.length > 0) {
+        const first = authors[0];
+        const name = typeof first === 'string' ? first : (typeof first?.name === 'string' ? first.name : '');
+        if (name) affiliation = name;
+      }
+      if (!affiliation) affiliation = 'Independent';
+      affiliations.add(affiliation);
     }
-    return affiliations.size;
+    // Cap at 12 to match the ConnectionsTab display
+    return Math.min(affiliations.size, 12);
   }
 
   if (tab === 'frontiers') {
