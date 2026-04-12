@@ -43,13 +43,24 @@ function CountBadge({ count }: { count: number }) {
   );
 }
 
-function getTabCount(tab: TabId, artifacts: ArtifactItem[]): number {
-  if (artifacts.length === 0) return 0;
-
-  if (tab === 'overview' || tab === 'papers') {
+function getTabCount(
+  tab: TabId,
+  artifacts: ArtifactItem[],
+  dbPapers?: any[],
+  totalPaperCount?: number,
+): number {
+  // Papers tab — use real DB count, not the analyzer subset
+  if (tab === 'papers') {
+    if (typeof totalPaperCount === 'number') return totalPaperCount;
+    if (dbPapers && dbPapers.length > 0) return dbPapers.length;
     const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
     return paperArtifact?.data?.papers?.length ?? 0;
   }
+
+  // Overview tab — no badge (it's the default tab)
+  if (tab === 'overview') return 0;
+
+  if (artifacts.length === 0) return 0;
 
   if (tab === 'insights') {
     const contradictionArtifact = artifacts.find((a) => a.agentType === 'contradiction-finder');
@@ -62,14 +73,18 @@ function getTabCount(tab: TabId, artifacts: ArtifactItem[]): number {
   }
 
   if (tab === 'connections') {
-    const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
-    const papers: any[] = paperArtifact?.data?.papers ?? [];
-    // Count unique author affiliations (clusters)
+    // Prefer real DB papers for affiliation count
+    const sourcePapers = dbPapers && dbPapers.length > 0
+      ? dbPapers
+      : (artifacts.find((a) => a.agentType === 'paper-analyzer')?.data?.papers ?? []);
     const affiliations = new Set<string>();
-    for (const p of papers) {
+    for (const p of sourcePapers) {
       if (Array.isArray(p.authors)) {
         for (const author of p.authors) {
-          affiliations.add(author.affiliation ?? 'Unknown');
+          const aff = typeof author === 'object' && author?.affiliation
+            ? author.affiliation
+            : 'Unknown';
+          affiliations.add(aff);
         }
       }
     }
@@ -93,7 +108,7 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName
         <div className="overflow-x-auto scrollbar-none px-4 pt-3 pb-0.5">
           <TabsList className="min-w-max">
             {TAB_IDS.map((id) => {
-              const count = getTabCount(id, artifacts);
+              const count = getTabCount(id, artifacts, dbPapers, totalPaperCount);
               return (
                 <TabsTrigger key={id} value={id}>
                   {TAB_LABELS[id]}

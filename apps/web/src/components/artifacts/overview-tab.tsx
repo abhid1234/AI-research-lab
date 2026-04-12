@@ -86,9 +86,18 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
   const emergingTopics: any[] = trendData.emergingTopics ?? [];
   const newBenchmarks: any[] = benchmarkData.newBenchmarks ?? [];
 
-  const insightCount =
-    (trendData.emergingTopics?.length ?? 0) +
-    (trendData.methodShifts?.length ?? 0);
+  // Insights count — match the Insights tab exactly
+  const contradictionArtifact = artifacts.find((a) => a.agentType === 'contradiction-finder');
+  const contradictions: any[] = contradictionArtifact?.data?.contradictions ?? [];
+  const consensus: any[] = contradictionArtifact?.data?.consensus ?? [];
+  const openDebates: any[] = contradictionArtifact?.data?.openDebates ?? [];
+  const benchmarkWarnings: any[] = benchmarkData.warnings ?? [];
+  const insightCount = contradictions.length + consensus.length + openDebates.length + benchmarkWarnings.length;
+
+  // Reports count — match the Research Frontiers tab exactly
+  const frontierArtifact = artifacts.find((a) => a.agentType === 'frontier-detector');
+  const frontiers: any[] = frontierArtifact?.data?.frontiers ?? [];
+  const reportsCount = frontiers.length;
 
   // Build topic evolution from REAL paper dates (not agent-generated topics)
   const dbTopicEvolution = buildTimelineFromPapers(dbPapers ?? []);
@@ -134,13 +143,13 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
             <StatItem label="Papers" value={displayPaperCount} onClick={onOpenDrawer} />
             <StatItem
               label="Topics"
-              value={topicEvolution.length || 8}
+              value={dbTopicEvolution.length || topicEvolution.length}
               onClick={() => {
                 document.getElementById('topic-evolution-chart')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
             />
             <StatItem label="Insights" value={insightCount} onClick={() => onSwitchTab?.('insights')} />
-            <StatItem label="Reports" value={emergingTopics.length} onClick={() => onSwitchTab?.('frontiers')} />
+            <StatItem label="Reports" value={reportsCount} onClick={() => onSwitchTab?.('frontiers')} />
           </div>
         </CardContent>
       </Card>
