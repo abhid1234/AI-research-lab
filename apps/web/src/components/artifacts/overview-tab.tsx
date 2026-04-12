@@ -23,6 +23,7 @@ interface OverviewTabProps {
   topicName?: string;
   lastSyncAt?: string | null;
   onOpenDrawer?: () => void;
+  onSwitchTab?: (tab: 'overview' | 'insights' | 'connections' | 'papers' | 'frontiers') => void;
 }
 
 /** Render an ISO timestamp as a human-relative string ("2 hours ago"). */
@@ -69,7 +70,7 @@ function StatItem({ label, value, onClick }: { label: string; value: number; onC
   );
 }
 
-export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, lastSyncAt, onOpenDrawer }: OverviewTabProps) {
+export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, lastSyncAt, onOpenDrawer, onSwitchTab }: OverviewTabProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const trendArtifact = artifacts.find((a) => a.agentType === 'trend-mapper');
@@ -131,9 +132,15 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         <CardContent>
           <div className="grid grid-cols-4 gap-4">
             <StatItem label="Papers" value={displayPaperCount} onClick={onOpenDrawer} />
-            <StatItem label="Topics" value={topicEvolution.length || 8} />
-            <StatItem label="Insights" value={insightCount} />
-            <StatItem label="Reports" value={emergingTopics.length} />
+            <StatItem
+              label="Topics"
+              value={topicEvolution.length || 8}
+              onClick={() => {
+                document.getElementById('topic-evolution-chart')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+            />
+            <StatItem label="Insights" value={insightCount} onClick={() => onSwitchTab?.('insights')} />
+            <StatItem label="Reports" value={emergingTopics.length} onClick={() => onSwitchTab?.('frontiers')} />
           </div>
         </CardContent>
       </Card>
@@ -152,7 +159,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
           </CardContent>
         </Card>
 
-        <Card className="animate-chart-in" style={{ animationDelay: '100ms' }}>
+        <Card id="topic-evolution-chart" className="animate-chart-in scroll-mt-4" style={{ animationDelay: '100ms' }}>
           <CardHeader>
             <CardTitle>Topic Evolution Over Time</CardTitle>
             <CardDescription>Tracked data showing research intensity across key topics</CardDescription>
