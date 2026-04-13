@@ -37,7 +37,7 @@ function SectionDivider({ label, count }: { label: string; count?: number }) {
 }
 
 function ContradictionCard({ c }: { c: any }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   const nature = typeof c.nature === 'string' ? c.nature : '';
   const badgeClass = natureBadgeClass[nature] ?? 'bg-muted text-muted-foreground border-border';
@@ -230,26 +230,29 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
         ))}
       </div>
 
-      {/* Row 2: Disagreement */}
-      {(contradictions.length > 0 || openDebates.length > 0) && (
+      {/* Row 2: Contradictions — full width, masonry flow */}
+      {contradictions.length > 0 && (
         <section>
-          <SectionDivider label="Disagreement" count={contradictions.length + openDebates.length} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div>
-              <p className="text-[10px] text-muted-foreground mb-2">
-                ⚡ {contradictions.length} contradiction{contradictions.length !== 1 ? 's' : ''} · click to expand
-              </p>
-              <div className="space-y-2">
-                {contradictions.map((c, i) => (
-                  <ContradictionCard key={i} c={c} />
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-[10px] text-muted-foreground mb-2">
-                ? {openDebates.length} open debate{openDebates.length !== 1 ? 's' : ''} · community split
-              </p>
-              <div className="space-y-2">
+          <SectionDivider label="Contradictions" count={contradictions.length} />
+          <p className="text-[10px] text-muted-foreground mb-2">
+            ⚡ Claims where papers disagree — revealing where the field is still uncertain.
+          </p>
+          <div className="columns-1 lg:columns-2 gap-3 [&>*]:mb-3 [&>*]:break-inside-avoid">
+            {contradictions.map((c, i) => (
+              <ContradictionCard key={i} c={c} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Row 3: Open Debates */}
+      {openDebates.length > 0 && (
+        <section>
+          <SectionDivider label="Open Debates" count={openDebates.length} />
+          <p className="text-[10px] text-muted-foreground mb-2">
+            ? Community is actively split on these unresolved questions.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {openDebates.map((d, i) => {
                   const question = typeof d.question === 'string' ? d.question : safeString(d.question);
                   const significance = typeof d.significance === 'string' ? d.significance : '';
@@ -319,13 +322,11 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                     </Card>
                   );
                 })}
-              </div>
-            </div>
           </div>
         </section>
       )}
 
-      {/* Row 3: Consensus Findings (full width, CSS columns for balance) */}
+      {/* Row 4: Consensus Findings (full width, CSS columns for balance) */}
       {consensus.length > 0 && (
         <section>
           <SectionDivider label="Consensus Findings" count={consensus.length} />
