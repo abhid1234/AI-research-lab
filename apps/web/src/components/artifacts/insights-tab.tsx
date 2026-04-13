@@ -237,7 +237,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
           <p className="text-[10px] text-muted-foreground mb-2">
             ⚡ Claims where papers disagree — revealing where the field is still uncertain.
           </p>
-          <div className="columns-1 lg:columns-2 gap-3 [&>*]:mb-3 [&>*]:break-inside-avoid">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
             {contradictions.map((c, i) => (
               <ContradictionCard key={i} c={c} />
             ))}
@@ -266,59 +266,67 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                           <CardDescription className="text-[10px] line-clamp-2">{significance}</CardDescription>
                         )}
                       </CardHeader>
-                      {sides.length > 0 && (
-                        <CardContent className="px-3 pb-3 pt-0">
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {sides.map((side: any, j: number) => {
-                              const position = typeof side === 'string' ? side : (typeof side?.position === 'string' ? side.position : '');
-                              const sideLabel = j === 0 ? 'A' : j === 1 ? 'B' : `${j + 1}`;
-                              const labelColor = j === 0 ? 'text-violet-400' : 'text-sky-400';
-                              const borderColor = j === 0 ? 'border-violet-500/20 bg-violet-500/5' : 'border-sky-500/20 bg-sky-500/5';
-                              const sidePapers: any[] = Array.isArray(side?.papers) ? side.papers : [];
-                              const firstSidePaper = sidePapers.length > 0 ? sidePapers[0] : null;
-                              const sidePaperId: string = firstSidePaper
-                                ? (typeof firstSidePaper?.paperId === 'string' ? firstSidePaper.paperId : typeof firstSidePaper?.id === 'string' ? firstSidePaper.id : typeof firstSidePaper === 'string' ? firstSidePaper : '')
-                                : '';
-                              const sidePaperTitle: string = firstSidePaper
-                                ? (typeof firstSidePaper === 'string' ? firstSidePaper : firstSidePaper?.title ?? '')
-                                : '';
+                      <CardContent className="px-3 pb-3 pt-0">
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {[sides[0] ?? null, sides[1] ?? null].map((side: any, j: number) => {
+                            const sideLabel = j === 0 ? 'A' : 'B';
+                            const labelColor = j === 0 ? 'text-violet-400' : 'text-sky-400';
+                            const borderColor = j === 0 ? 'border-violet-500/20 bg-violet-500/5' : 'border-sky-500/20 bg-sky-500/5';
 
+                            if (!side) {
                               return (
-                                <div key={j} className={`rounded border p-1.5 ${borderColor}`}>
+                                <div key={j} className={`rounded border border-dashed border-border p-1.5 opacity-60`}>
                                   <p className={`text-[9px] font-semibold uppercase tracking-wide ${labelColor} mb-0.5`}>Side {sideLabel}</p>
-                                  {position && (sidePaperId || sidePaperTitle) ? (
-                                    <a
-                                      href={paperLink(sidePaperId || undefined, sidePaperTitle || position)}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-[10px] font-medium leading-snug line-clamp-2 hover:text-primary transition-colors hover:underline underline-offset-2 block"
-                                    >
-                                      {position}
-                                    </a>
-                                  ) : (
-                                    <p className="text-[10px] font-medium leading-snug line-clamp-2">{position}</p>
-                                  )}
-                                  {sidePapers.slice(0, 2).map((sp: any, si: number) => {
-                                    const spTitle: string = typeof sp === 'string' ? sp : (sp?.title ?? '');
-                                    const spId: string = typeof sp?.paperId === 'string' ? sp.paperId : typeof sp?.id === 'string' ? sp.id : '';
-                                    return spTitle ? (
-                                      <a
-                                        key={si}
-                                        href={paperLink(spId || undefined, spTitle)}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-[9px] text-primary/60 hover:text-primary transition-colors hover:underline underline-offset-2 block mt-0.5 line-clamp-1"
-                                      >
-                                        ↗ {spTitle}
-                                      </a>
-                                    ) : null;
-                                  })}
+                                  <p className="text-[10px] text-muted-foreground italic">No data available</p>
                                 </div>
                               );
-                            })}
-                          </div>
-                        </CardContent>
-                      )}
+                            }
+
+                            const position = typeof side === 'string' ? side : (typeof side?.position === 'string' ? side.position : '');
+                            const sidePapers: any[] = Array.isArray(side?.papers) ? side.papers : [];
+                            const firstSidePaper = sidePapers.length > 0 ? sidePapers[0] : null;
+                            const sidePaperId: string = firstSidePaper
+                              ? (typeof firstSidePaper?.paperId === 'string' ? firstSidePaper.paperId : typeof firstSidePaper?.id === 'string' ? firstSidePaper.id : typeof firstSidePaper === 'string' ? firstSidePaper : '')
+                              : '';
+                            const sidePaperTitle: string = firstSidePaper
+                              ? (typeof firstSidePaper === 'string' ? firstSidePaper : firstSidePaper?.title ?? '')
+                              : '';
+
+                            return (
+                              <div key={j} className={`rounded border p-1.5 ${borderColor}`}>
+                                <p className={`text-[9px] font-semibold uppercase tracking-wide ${labelColor} mb-0.5`}>Side {sideLabel}</p>
+                                {position && (sidePaperId || sidePaperTitle) ? (
+                                  <a
+                                    href={paperLink(sidePaperId || undefined, sidePaperTitle || position)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[10px] font-medium leading-snug line-clamp-2 hover:text-primary transition-colors hover:underline underline-offset-2 block"
+                                  >
+                                    {position}
+                                  </a>
+                                ) : (
+                                  <p className="text-[10px] font-medium leading-snug line-clamp-2">{position || <span className="italic text-muted-foreground">No position stated</span>}</p>
+                                )}
+                                {sidePapers.slice(0, 2).map((sp: any, si: number) => {
+                                  const spTitle: string = typeof sp === 'string' ? sp : (sp?.title ?? '');
+                                  const spId: string = typeof sp?.paperId === 'string' ? sp.paperId : typeof sp?.id === 'string' ? sp.id : '';
+                                  return spTitle ? (
+                                    <a
+                                      key={si}
+                                      href={paperLink(spId || undefined, spTitle)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-[9px] text-primary/60 hover:text-primary transition-colors hover:underline underline-offset-2 block mt-0.5 line-clamp-1"
+                                    >
+                                      ↗ {spTitle}
+                                    </a>
+                                  ) : null;
+                                })}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
                     </Card>
                   );
                 })}
@@ -333,7 +341,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
           <p className="text-[10px] text-muted-foreground mb-2">
             ✓ Findings confirmed independently by multiple research groups.
           </p>
-          <div className="columns-1 lg:columns-2 gap-3 [&>*]:mb-1.5 [&>*]:break-inside-avoid">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
             {consensus.map((c, i) => {
                   const finding = typeof c.finding === 'string' ? c.finding : safeString(c.finding);
                   const supportingPapers: any[] = Array.isArray(c.supportingPapers) ? c.supportingPapers : [];
@@ -392,7 +400,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                           </div>
                           {strength && <p className="text-[10px] text-muted-foreground">{strength}</p>}
                           {caveats.length > 0 && (
-                            <p className="text-[10px] text-amber-400/80">
+                            <p className="text-[10px] text-muted-foreground/80">
                               ⚠ {caveats.slice(0, 1).map((caveat: any) =>
                                 typeof caveat === 'string' ? caveat : safeString(caveat)
                               ).join('')}
@@ -425,9 +433,9 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   const issueLabel = warningIssueLabel[issueType] ?? (issueType ? issueType.replace(/_/g, ' ') : '');
 
                   return (
-                    <div key={i} className="rounded-md bg-amber-500/5 border border-amber-500/15 px-3 py-2 space-y-1">
+                    <div key={i} className="rounded-md bg-orange-100/40 dark:bg-amber-950/20 border border-orange-300/40 dark:border-amber-800/30 px-3 py-2 space-y-1">
                       <div className="flex items-start gap-1.5">
-                        <span className="shrink-0 text-amber-400 mt-0.5 text-xs">⚠</span>
+                        <span className="shrink-0 text-orange-700 dark:text-amber-500 mt-0.5 text-xs">⚠</span>
                         <div className="flex-1 min-w-0 space-y-0.5">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {issue && (paperRefId || paperRef) ? (
@@ -435,15 +443,15 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                                 href={paperLink(paperRefId || undefined, paperRef || issue)}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs font-medium text-amber-300 line-clamp-1 hover:text-amber-200 transition-colors hover:underline underline-offset-2"
+                                className="text-xs font-semibold text-orange-900 dark:text-amber-300 line-clamp-1 hover:text-orange-700 dark:hover:text-amber-200 transition-colors hover:underline underline-offset-2"
                               >
                                 {issue}
                               </a>
                             ) : (
-                              <p className="text-xs font-medium text-amber-300 line-clamp-1">{issue}</p>
+                              <p className="text-xs font-semibold text-orange-900 dark:text-amber-300 line-clamp-1">{issue}</p>
                             )}
                             {issueLabel && (
-                              <span className="inline-flex items-center rounded border border-amber-500/30 bg-amber-500/10 px-1 py-0.5 text-[9px] text-amber-400 font-medium shrink-0">
+                              <span className="inline-flex items-center rounded border border-orange-500/40 bg-orange-100/60 dark:bg-amber-900/20 px-1 py-0.5 text-[9px] text-orange-800 dark:text-amber-400 font-medium shrink-0">
                                 {issueLabel}
                               </span>
                             )}
