@@ -7,6 +7,8 @@ import {
   jsonb,
   primaryKey,
   index,
+  boolean,
+  real,
 } from 'drizzle-orm/pg-core';
 import { vector } from 'drizzle-orm/pg-core';
 
@@ -33,6 +35,13 @@ export const papers = pgTable('papers', {
   venue: text('venue'),
   citationCount: integer('citation_count').notNull().default(0),
   pdfUrl: text('pdf_url'),
+  influentialCitationCount: integer('influential_citation_count').notNull().default(0),
+  isOpenAccess: boolean('is_open_access').notNull().default(false),
+  hfUpvotes: integer('hf_upvotes').notNull().default(0),
+  hasCode: boolean('has_code').notNull().default(false),
+  openreviewDecision: text('openreview_decision'),
+  qualityScore: real('quality_score').notNull().default(0),
+  publicationTypes: text('publication_types').array(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
