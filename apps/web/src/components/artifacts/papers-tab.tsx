@@ -51,7 +51,7 @@ interface PapersTabProps {
 export function PapersTab({ artifacts, dbPapers = [] }: PapersTabProps) {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(0);
-  const [sortBy, setSortBy] = useState<'relevance' | 'date' | 'citations' | 'title'>('date');
+  const [sortBy, setSortBy] = useState<'quality' | 'relevance' | 'date' | 'citations' | 'title'>('quality');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
   const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
@@ -119,6 +119,7 @@ export function PapersTab({ artifacts, dbPapers = [] }: PapersTabProps) {
     });
 
   const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'quality') return (b.qualityScore ?? 0) - (a.qualityScore ?? 0);
     if (sortBy === 'date') {
       const ad = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
       const bd = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
@@ -149,6 +150,7 @@ export function PapersTab({ artifacts, dbPapers = [] }: PapersTabProps) {
           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
           className="h-8 rounded-md border border-border bg-card px-2 text-xs"
         >
+          <option value="quality">Sort: Quality Score</option>
           <option value="date">Sort: Newest</option>
           <option value="citations">Sort: Most Cited</option>
           <option value="title">Sort: A-Z</option>
@@ -271,6 +273,21 @@ function PaperCard({ paper }: { paper: any }) {
   // arxiv categories from DB
   const dbCats: string[] = Array.isArray(paper.dbCategories) ? paper.dbCategories.slice(0, 3) : [];
 
+  // Quality signals
+  const citationCount: number = typeof paper.citationCount === 'number' ? paper.citationCount : 0;
+  const influentialCitations: number = typeof paper.influentialCitationCount === 'number' ? paper.influentialCitationCount : 0;
+  const hfUpvotes: number = typeof paper.hfUpvotes === 'number' ? paper.hfUpvotes : 0;
+  const hasCode: boolean = paper.hasCode === true;
+  const orDecision: string = typeof paper.openreviewDecision === 'string' ? paper.openreviewDecision : '';
+  const venue: string = typeof paper.venue === 'string' ? paper.venue : '';
+
+  // Citation tier
+  const citationTier =
+    citationCount >= 100 ? { label: '🥇', color: '#ca8a04', bg: '#fef9c3', text: '#a16207' } :
+    citationCount >= 20  ? { label: '🥈', color: '#9ca3af', bg: '#f3f4f6', text: '#4b5563' } :
+    citationCount >= 5   ? { label: '🥉', color: '#b45309', bg: '#fed7aa', text: '#9a3412' } :
+    null;
+
   // URL — only use arxiv if we have a real ID
   const isRealArxiv = arxivId && !arxivId.startsWith('demo-') && (arxivId.includes('.') || arxivId.includes('/'));
   const url = isRealArxiv
@@ -306,6 +323,62 @@ function PaperCard({ paper }: { paper: any }) {
         </div>
       </div>
 
+      {/* Quality badges row */}
+      {(citationTier || influentialCitations > 0 || hfUpvotes >= 50 || hasCode || orDecision || venue) && (
+        <div className="flex items-center gap-1.5 flex-wrap px-3 pb-1.5">
+          {citationTier && (
+            <span
+              className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded"
+              style={{ background: citationTier.bg, color: citationTier.text }}
+              title={`${citationCount} citations`}
+            >
+              <span>{citationTier.label}</span>
+              <span>{citationCount} cites</span>
+            </span>
+          )}
+          {influentialCitations > 0 && (
+            <span
+              className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700"
+              title={`${influentialCitations} influential citations`}
+            >
+              ✓ Influential
+            </span>
+          )}
+          {hfUpvotes >= 50 && (
+            <span
+              className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-orange-100 text-orange-700"
+              title={`${hfUpvotes} HuggingFace upvotes`}
+            >
+              🔥 {hfUpvotes}
+            </span>
+          )}
+          {orDecision && (
+            <span
+              className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-violet-100 text-violet-700"
+              title={`${orDecision} acceptance`}
+            >
+              🏆 {orDecision}
+            </span>
+          )}
+          {hasCode && (
+            <span
+              className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700"
+              title="Has reproducible code"
+            >
+              📄 Code
+            </span>
+          )}
+          {venue && !orDecision && (
+            <span
+              className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700"
+              title={`Published in ${venue}`}
+            >
+              {venue.length > 15 ? venue.slice(0, 15) + '…' : venue}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Title */}
       <div className="px-3 pb-1.5">
         <h3
@@ -335,8 +408,8 @@ function PaperCard({ paper }: { paper: any }) {
         )}
       </div>
 
-      {/* Bottom meta strip */}
-      {(paper.citationCount > 0 || paper.takeaway) && (
+      {/* Bottom meta strip — only show if takeaway exists */}
+      {paper.takeaway && (
         <div
           className="flex items-start gap-2 px-3 py-2 border-t text-[10.5px]"
           style={{ background: colors?.bg, borderTopColor: `${colors?.border}30` }}
@@ -345,11 +418,6 @@ function PaperCard({ paper }: { paper: any }) {
             <p className="flex-1 text-gray-700 italic leading-relaxed">
               <span className="font-semibold not-italic" style={{ color: colors?.text }}>Takeaway:</span> {paper.takeaway}
             </p>
-          )}
-          {paper.citationCount > 0 && (
-            <span className="shrink-0 text-gray-500 tabular-nums whitespace-nowrap mt-0.5">
-              {paper.citationCount} cites
-            </span>
           )}
         </div>
       )}
