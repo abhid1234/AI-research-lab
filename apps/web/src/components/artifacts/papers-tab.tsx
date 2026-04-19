@@ -209,7 +209,7 @@ export function PapersTab({ artifacts, dbPapers = [] }: PapersTabProps) {
         />
       ) : (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr">
             {pageItems.map((p, i) => (
               <PaperCard key={page * PAGE_SIZE + i} paper={p} />
             ))}
@@ -282,7 +282,7 @@ function PaperCard({ paper }: { paper: any }) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden relative"
+      className="group flex h-full flex-col rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden relative"
       style={{ borderLeftWidth: '4px', borderLeftColor: colors?.border ?? '#6366f1' }}
     >
       {/* Header strip with category + date */}
@@ -326,14 +326,14 @@ function PaperCard({ paper }: { paper: any }) {
         </div>
       )}
 
-      {/* Abstract snippet */}
-      {abstract && (
-        <div className="px-3 pb-3">
+      {/* Abstract snippet — flex-1 fills remaining space so bottom strip pins to bottom */}
+      <div className="px-3 pb-3 flex-1">
+        {abstract && (
           <p className="text-[11px] text-gray-600 leading-relaxed line-clamp-3">
             {abstract}
           </p>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Bottom meta strip */}
       {(paper.citationCount > 0 || paper.takeaway) && (
