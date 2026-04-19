@@ -338,16 +338,16 @@ function PaperCard({ paper }: { paper: any }) {
       {/* Bottom meta strip */}
       {(paper.citationCount > 0 || paper.takeaway) && (
         <div
-          className="flex items-center gap-2 px-3 py-1.5 border-t text-[10px]"
+          className="flex items-start gap-2 px-3 py-2 border-t text-[10.5px]"
           style={{ background: colors?.bg, borderTopColor: `${colors?.border}30` }}
         >
           {typeof paper.takeaway === 'string' && paper.takeaway && (
-            <p className="flex-1 text-gray-700 italic line-clamp-1">
+            <p className="flex-1 text-gray-700 italic leading-relaxed">
               <span className="font-semibold not-italic" style={{ color: colors?.text }}>Takeaway:</span> {paper.takeaway}
             </p>
           )}
           {paper.citationCount > 0 && (
-            <span className="shrink-0 text-gray-500 tabular-nums">
+            <span className="shrink-0 text-gray-500 tabular-nums whitespace-nowrap mt-0.5">
               {paper.citationCount} cites
             </span>
           )}
