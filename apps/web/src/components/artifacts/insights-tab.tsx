@@ -50,8 +50,8 @@ function ContradictionCard({ c }: { c: any }) {
   const analysis = typeof c.analysis === 'string' ? c.analysis : '';
 
   return (
-    <Card>
-      <CardContent className="p-3 space-y-2">
+    <Card className="h-full flex flex-col" style={{ borderLeftWidth: '4px', borderLeftColor: '#f43f5e' }}>
+      <CardContent className="p-3 space-y-2 flex flex-col flex-1">
         {/* Collapsed header — badge + importance + toggle */}
         <div
           className="flex items-center justify-between gap-2 cursor-pointer"
@@ -213,20 +213,25 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
 
   return (
     <div className="space-y-3">
-      {/* Row 1: Summary bar */}
-      <div className="flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-2">
+      {/* Row 1: Summary bar — color-coded stat tiles */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {[
-          { label: 'Contradictions', value: contradictions.length, icon: '⚡' },
-          { label: 'Consensus', value: consensus.length, icon: '✓' },
-          { label: 'Open Debates', value: openDebates.length, icon: '?' },
-          { label: 'Warnings', value: warnings.length, icon: '⚠' },
+          { label: 'Contradictions', value: contradictions.length, icon: '⚡', color: '#f43f5e', bg: '#fff1f2', text: '#be123c' },
+          { label: 'Consensus', value: consensus.length, icon: '✓', color: '#10b981', bg: '#ecfdf5', text: '#047857' },
+          { label: 'Open Debates', value: openDebates.length, icon: '?', color: '#8b5cf6', bg: '#f5f3ff', text: '#6d28d9' },
+          { label: 'Warnings', value: warnings.length, icon: '⚠', color: '#f59e0b', bg: '#fffbeb', text: '#b45309' },
         ].map((s, i) => (
-          <span key={i} className="flex items-center gap-1.5">
-            <span className="text-sm">{s.icon}</span>
-            <span className="text-sm font-bold tabular-nums">{s.value}</span>
-            <span className="text-[10px] text-muted-foreground">{s.label}</span>
-            {i < 3 && <span className="text-muted-foreground/30 ml-2">·</span>}
-          </span>
+          <div
+            key={i}
+            className="rounded-lg px-3 py-2 flex items-center gap-3"
+            style={{ background: s.bg, borderLeft: `3px solid ${s.color}` }}
+          >
+            <span className="text-lg">{s.icon}</span>
+            <div className="flex-1 min-w-0">
+              <div className="text-lg font-bold tabular-nums leading-none" style={{ color: s.text }}>{s.value}</div>
+              <div className="text-[10px] mt-0.5" style={{ color: s.text, opacity: 0.7 }}>{s.label}</div>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -237,7 +242,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
           <p className="text-[10px] text-muted-foreground mb-2">
             ⚡ Claims where papers disagree — revealing where the field is still uncertain.
           </p>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr">
             {contradictions.map((c, i) => (
               <ContradictionCard key={i} c={c} />
             ))}
@@ -252,21 +257,21 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
           <p className="text-[10px] text-muted-foreground mb-2">
             ? Community is actively split on these unresolved questions.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 auto-rows-fr">
                 {openDebates.map((d, i) => {
                   const question = typeof d.question === 'string' ? d.question : safeString(d.question);
                   const significance = typeof d.significance === 'string' ? d.significance : '';
                   const sides: any[] = Array.isArray(d.sides) ? d.sides : [];
 
                   return (
-                    <Card key={i}>
+                    <Card key={i} className="h-full flex flex-col" style={{ borderLeftWidth: '4px', borderLeftColor: '#8b5cf6' }}>
                       <CardHeader className="p-3 pb-1">
                         <CardTitle className="text-xs font-semibold leading-snug">{question}</CardTitle>
                         {significance && (
                           <CardDescription className="text-[10px] line-clamp-2">{significance}</CardDescription>
                         )}
                       </CardHeader>
-                      <CardContent className="px-3 pb-3 pt-0">
+                      <CardContent className="px-3 pb-3 pt-0 mt-auto">
                         <div className="grid grid-cols-2 gap-1.5">
                           {[sides[0] ?? null, sides[1] ?? null].map((side: any, j: number) => {
                             const sideLabel = j === 0 ? 'A' : 'B';
@@ -341,7 +346,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
           <p className="text-[10px] text-muted-foreground mb-2">
             ✓ Findings confirmed independently by multiple research groups.
           </p>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 auto-rows-fr">
             {consensus.map((c, i) => {
                   const finding = typeof c.finding === 'string' ? c.finding : safeString(c.finding);
                   const supportingPapers: any[] = Array.isArray(c.supportingPapers) ? c.supportingPapers : [];
@@ -357,9 +362,13 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                     : '';
 
                   return (
-                    <div key={i} className="rounded-md border border-border bg-card px-3 py-2 space-y-1">
-                      <div className="flex items-start gap-2">
-                        <span className="shrink-0 mt-0.5 text-emerald-400 text-xs font-bold">✓</span>
+                    <div
+                      key={i}
+                      className="rounded-md border border-border bg-emerald-50/30 dark:bg-emerald-950/10 px-3 py-2 space-y-1 h-full flex flex-col"
+                      style={{ borderLeftWidth: '4px', borderLeftColor: '#10b981' }}
+                    >
+                      <div className="flex items-start gap-2 flex-1">
+                        <span className="shrink-0 mt-0.5 text-emerald-500 text-xs font-bold">✓</span>
                         <div className="space-y-0.5 flex-1 min-w-0">
                           {finding && (firstSPId || firstSPTitle) ? (
                             <a
@@ -423,7 +432,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
           <p className="text-[10px] text-muted-foreground mb-2">
             ⚠ Papers whose reported results may need closer scrutiny.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 auto-rows-fr">
                 {warnings.map((w: any, i: number) => {
                   const issue = typeof w === 'string' ? w : (typeof w?.issue === 'string' ? w.issue : safeString(w));
                   const issueType = typeof w?.issueType === 'string' ? w.issueType : '';
@@ -433,9 +442,13 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   const issueLabel = warningIssueLabel[issueType] ?? (issueType ? issueType.replace(/_/g, ' ') : '');
 
                   return (
-                    <div key={i} className="rounded-md bg-orange-100/40 dark:bg-amber-950/20 border border-orange-300/40 dark:border-amber-800/30 px-3 py-2 space-y-1">
-                      <div className="flex items-start gap-1.5">
-                        <span className="shrink-0 text-orange-700 dark:text-amber-500 mt-0.5 text-xs">⚠</span>
+                    <div
+                      key={i}
+                      className="rounded-md bg-amber-50/60 dark:bg-amber-950/20 border border-amber-300/40 dark:border-amber-800/30 px-3 py-2 space-y-1 h-full flex flex-col"
+                      style={{ borderLeftWidth: '4px', borderLeftColor: '#f59e0b' }}
+                    >
+                      <div className="flex items-start gap-1.5 flex-1">
+                        <span className="shrink-0 text-amber-600 dark:text-amber-500 mt-0.5 text-xs">⚠</span>
                         <div className="flex-1 min-w-0 space-y-0.5">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {issue && (paperRefId || paperRef) ? (
