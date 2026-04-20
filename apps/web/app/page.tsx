@@ -33,6 +33,16 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
+  // Listen for topic-change events dispatched by the TopicRecommendations widget
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const id = (e as CustomEvent<{ id: string }>).detail?.id;
+      if (typeof id === 'string') handleTopicChange(id);
+    };
+    window.addEventListener('topic-change', handler);
+    return () => window.removeEventListener('topic-change', handler);
+  }, []);
+
   const fetchArtifacts = useCallback(async (topicId: string) => {
     setLoadingArtifacts(true);
     try {

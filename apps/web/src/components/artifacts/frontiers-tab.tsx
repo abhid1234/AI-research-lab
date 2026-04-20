@@ -9,6 +9,7 @@ import {
   frontierCategoryEmoji as categoryEmoji,
   frontierCategoryLabel as categoryLabel,
 } from '@/lib/design-tokens';
+import { SurprisingFindings } from '@/components/layout/surprising-findings';
 
 interface FrontiersTabProps {
   artifacts: { agentType: string; data: any }[];
@@ -385,6 +386,9 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
 
   return (
     <div className="space-y-4">
+      {/* Surprising / Controversial findings widget */}
+      <SurprisingFindings frontiers={frontiers} />
+
       {/* Summary stats — single horizontal bar */}
       <div className="flex items-center gap-4 rounded-lg border border-blue-500/20 bg-gradient-to-r from-blue-600/10 to-indigo-600/5 px-4 py-2">
         <p className="text-xs font-semibold text-foreground mr-2">Research Frontiers</p>
