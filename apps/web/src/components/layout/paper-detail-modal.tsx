@@ -1,8 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { paperLink } from '@/lib/paper-utils';
+import {
+  getAnnotations,
+  addAnnotation,
+  removeAnnotation,
+  type Annotation,
+} from '@/lib/annotations';
+import {
+  getReadingLists,
+  addPaperToList,
+  removePaperFromList,
+  getListsContainingPaper,
+  createReadingList,
+  type ReadingList,
+} from '@/lib/reading-lists';
 
 interface PaperDetailModalProps {
   paper: any | null;
@@ -23,6 +37,93 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
+
+  // Annotations state
+  const [annotations, setAnnotations] = useState<Annotation[]>([]);
+  const [noteText, setNoteText] = useState('');
+
+  // Reading lists state
+  const [readingLists, setReadingLists] = useState<ReadingList[]>([]);
+  const [listsOpen, setListsOpen] = useState(false);
+  const [newListName, setNewListName] = useState('');
+  const [creatingList, setCreatingList] = useState(false);
+  const listsDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Load annotations when paper changes
+  useEffect(() => {
+    if (paper?.id) {
+      setAnnotations(getAnnotations(paper.id));
+      setNoteText('');
+    }
+  }, [paper?.id]);
+
+  // Load reading lists when paper changes
+  useEffect(() => {
+    if (paper?.id) {
+      setReadingLists(getReadingLists());
+    }
+  }, [paper?.id]);
+
+  // Close reading lists dropdown on outside click
+  useEffect(() => {
+    if (!listsOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (listsDropdownRef.current && !listsDropdownRef.current.contains(e.target as Node)) {
+        setListsOpen(false);
+        setCreatingList(false);
+        setNewListName('');
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [listsOpen]);
+
+  const handleAddAnnotation = () => {
+    const trimmed = noteText.trim();
+    if (!trimmed || !paper?.id) return;
+    addAnnotation(paper.id, trimmed);
+    setAnnotations(getAnnotations(paper.id));
+    setNoteText('');
+  };
+
+  const handleRemoveAnnotation = (annotationId: string) => {
+    if (!paper?.id) return;
+    removeAnnotation(paper.id, annotationId);
+    setAnnotations(getAnnotations(paper.id));
+  };
+
+  const handleToggleList = (listId: string) => {
+    if (!paper?.id) return;
+    const list = readingLists.find(l => l.id === listId);
+    if (!list) return;
+    if (list.paperIds.includes(paper.id)) {
+      removePaperFromList(listId, paper.id);
+    } else {
+      addPaperToList(listId, paper.id);
+    }
+    setReadingLists(getReadingLists());
+  };
+
+  const handleCreateList = () => {
+    const trimmed = newListName.trim();
+    if (!trimmed) return;
+    const created = createReadingList(trimmed);
+    if (paper?.id) addPaperToList(created.id, paper.id);
+    setReadingLists(getReadingLists());
+    setNewListName('');
+    setCreatingList(false);
+  };
+
+  const relativeTime = (iso: string): string => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  };
 
   if (!paper || !mounted) return null;
 
@@ -153,8 +254,8 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
               </div>
             )}
 
-            {/* PDF / paper link button */}
-            <div className="mt-6 flex gap-3">
+            {/* PDF / paper link button + Save to list */}
+            <div className="mt-6 flex flex-wrap gap-3 items-center">
               {pdfLink && (
                 <a
                   href={pdfLink}
@@ -187,6 +288,83 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
               >
                 View on arxiv ↗
               </a>
+
+              {/* Save to reading list */}
+              <div className="relative ml-auto" ref={listsDropdownRef}>
+                <button
+                  onClick={() => { setListsOpen(v => !v); setReadingLists(getReadingLists()); }}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-muted text-foreground/90 text-sm font-medium hover:bg-muted/80 transition-colors border border-border"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  </svg>
+                  Save to list
+                </button>
+
+                {listsOpen && (
+                  <div
+                    className="absolute right-0 bottom-full mb-2 z-20 w-56 rounded-xl border border-border bg-card shadow-xl"
+                    style={{ animation: 'chartFadeIn 150ms ease-out both' }}
+                  >
+                    <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+                      <span className="text-xs font-semibold text-foreground">Reading Lists</span>
+                      <button
+                        onClick={() => { setCreatingList(v => !v); setNewListName(''); }}
+                        className="text-[10px] text-primary hover:underline"
+                      >
+                        + New
+                      </button>
+                    </div>
+
+                    {creatingList && (
+                      <div className="px-3 py-2 border-b border-border flex gap-2">
+                        <input
+                          autoFocus
+                          type="text"
+                          value={newListName}
+                          onChange={e => setNewListName(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') handleCreateList(); if (e.key === 'Escape') { setCreatingList(false); setNewListName(''); } }}
+                          placeholder="List name…"
+                          className="flex-1 text-xs rounded-md border border-border bg-background px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
+                        />
+                        <button
+                          onClick={handleCreateList}
+                          className="text-xs px-2 py-1 rounded-md bg-primary text-white font-medium hover:bg-primary/80 transition-colors"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="max-h-48 overflow-y-auto">
+                      {readingLists.length === 0 ? (
+                        <p className="px-3 py-3 text-xs text-muted-foreground text-center">No lists yet.</p>
+                      ) : (
+                        readingLists.map(list => {
+                          const inList = paper?.id ? list.paperIds.includes(paper.id) : false;
+                          return (
+                            <label
+                              key={list.id}
+                              className="flex items-center gap-2.5 px-3 py-2 hover:bg-muted/50 transition-colors cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={inList}
+                                onChange={() => handleToggleList(list.id)}
+                                className="h-3.5 w-3.5 accent-primary rounded"
+                              />
+                              <span className="flex-1 text-xs text-foreground truncate">{list.name}</span>
+                              <span className="text-[10px] text-muted-foreground shrink-0">
+                                {list.paperIds.length}
+                              </span>
+                            </label>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Similar papers */}
@@ -236,6 +414,59 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
                   })}
                 </div>
               )}
+            </div>
+            {/* Annotations */}
+            <div className="mt-7">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                Annotations
+              </h3>
+
+              {/* Existing annotations */}
+              {annotations.length > 0 && (
+                <div className="space-y-2 mb-3">
+                  {annotations.map(ann => (
+                    <div
+                      key={ann.id}
+                      className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/50 border border-border group"
+                    >
+                      <p className="flex-1 text-xs text-foreground/90 leading-relaxed">{ann.text}</p>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          {relativeTime(ann.createdAt)}
+                        </span>
+                        <button
+                          onClick={() => handleRemoveAnnotation(ann.id)}
+                          className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-muted-foreground hover:text-destructive transition-all"
+                          title="Delete annotation"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add new annotation */}
+              <div className="flex flex-col gap-2">
+                <textarea
+                  value={noteText}
+                  onChange={e => setNoteText(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleAddAnnotation(); }}
+                  placeholder="Add a note… (Cmd+Enter to save)"
+                  rows={2}
+                  className="w-full text-xs rounded-lg border border-border bg-background px-3 py-2 resize-none outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
+                />
+                <button
+                  onClick={handleAddAnnotation}
+                  disabled={!noteText.trim()}
+                  className="self-end text-xs px-3 py-1.5 rounded-md bg-primary text-white font-medium hover:bg-primary/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Add note
+                </button>
+              </div>
             </div>
           </div>
         </div>

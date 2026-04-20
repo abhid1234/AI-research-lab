@@ -3,6 +3,8 @@
 import { ExportButton } from './export-button';
 import { GlobalSearch } from './global-search';
 import { ThemeToggle } from './theme-toggle';
+import { ShareButton } from './share-button';
+import { ReadingListsButton } from './reading-lists-button';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -49,6 +51,8 @@ export function AppShell({ children, paperCount, topicCount, dateRange, selected
             <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_1px_rgba(52,211,153,0.5)]" aria-hidden="true" />
             <span className="text-xs text-muted-foreground">Connected</span>
           </div>
+          <ReadingListsButton />
+          <ShareButton />
           <ExportButton topic={exportTopic} papers={exportPapers} artifacts={exportArtifacts} />
           <ThemeToggle />
         </div>
