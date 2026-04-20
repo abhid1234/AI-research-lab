@@ -4,44 +4,9 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/ui/empty-state';
 import { paperLink } from '@/lib/paper-utils';
+import { CATEGORY_COLORS, derivePaperCategory } from '@/lib/categories';
 
 const PAGE_SIZE = 20;
-
-const CATEGORY_COLORS: Record<string, { border: string; bg: string; text: string; pill: string }> = {
-  'Agents':       { border: '#6366f1', bg: '#eef2ff', text: '#4338ca', pill: '#e0e7ff' },
-  'Safety':       { border: '#ef4444', bg: '#fef2f2', text: '#b91c1c', pill: '#fee2e2' },
-  'Reasoning':    { border: '#f59e0b', bg: '#fffbeb', text: '#b45309', pill: '#fef3c7' },
-  'Scaling':      { border: '#10b981', bg: '#ecfdf5', text: '#047857', pill: '#d1fae5' },
-  'Training':     { border: '#3b82f6', bg: '#eff6ff', text: '#1d4ed8', pill: '#dbeafe' },
-  'Architecture': { border: '#8b5cf6', bg: '#f5f3ff', text: '#6d28d9', pill: '#ede9fe' },
-  'Retrieval':    { border: '#06b6d4', bg: '#ecfeff', text: '#0e7490', pill: '#cffafe' },
-  'Multi-Agent':  { border: '#ec4899', bg: '#fdf2f8', text: '#be185d', pill: '#fce7f3' },
-  'Benchmarks':   { border: '#84cc16', bg: '#f7fee7', text: '#4d7c0f', pill: '#ecfccb' },
-};
-
-function derivePaperCategory(p: any): string {
-  const text = [
-    p.title ?? '',
-    p.abstract ?? '',
-    p.category ?? '',
-    p.topic ?? '',
-    ...(Array.isArray(p.categories) ? p.categories : []),
-    typeof p.methodology === 'string' ? p.methodology : (p.methodology?.type ?? ''),
-    p.problem ?? '',
-    p.approach ?? '',
-  ].join(' ').toLowerCase();
-
-  if (text.includes('multi-agent') || text.includes('collaborat')) return 'Multi-Agent';
-  if (text.includes('agent')) return 'Agents';
-  if (text.includes('safe') || text.includes('align')) return 'Safety';
-  if (text.includes('reason') || text.includes('chain') || text.includes('cot')) return 'Reasoning';
-  if (text.includes('scal')) return 'Scaling';
-  if (text.includes('train') || text.includes('fine-tun') || text.includes('rlhf')) return 'Training';
-  if (text.includes('architect') || text.includes('transform') || text.includes('attention')) return 'Architecture';
-  if (text.includes('retriev') || text.includes('rag') || text.includes('search')) return 'Retrieval';
-  if (text.includes('bench') || text.includes('eval') || text.includes('metric')) return 'Benchmarks';
-  return 'Agents';
-}
 
 interface PapersTabProps {
   artifacts: { agentType: string; data: any }[];

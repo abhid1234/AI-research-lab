@@ -7,6 +7,7 @@ import { PaperDrawer } from '@/components/layout/paper-drawer';
 import { useState } from 'react';
 import { EmptyState as SharedEmptyState } from '@/components/ui/empty-state';
 import { paperLink } from '@/lib/paper-utils';
+import { derivePaperCategory } from '@/lib/categories';
 
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
@@ -438,33 +439,15 @@ function ResultCard({
 function buildTimelineFromPapers(dbPapers: any[]): { topic: string; timeline: { month: string; count: number }[]; momentum?: string }[] {
   if (!dbPapers || dbPapers.length === 0) return [];
 
-  const CATEGORIES = ['Agents', 'Safety', 'Reasoning', 'Scaling', 'Retrieval', 'Multi-Agent', 'Code', 'Vision'];
-
-  // Categorize each paper
-  function categorize(p: any): string {
-    const text = [
-      p.title ?? '', p.abstract ?? '',
-      ...(Array.isArray(p.categories) ? p.categories : []),
-    ].join(' ').toLowerCase();
-    if (text.includes('multi-agent') || text.includes('collaborat')) return 'Multi-Agent';
-    if (text.includes('agent') || text.includes('tool use') || text.includes('planning')) return 'Agents';
-    if (text.includes('safe') || text.includes('align') || text.includes('rlhf')) return 'Safety';
-    if (text.includes('reason') || text.includes('chain') || text.includes('cot') || text.includes('math')) return 'Reasoning';
-    if (text.includes('scal') || text.includes('architect') || text.includes('transform')) return 'Scaling';
-    if (text.includes('retriev') || text.includes('rag') || text.includes('search')) return 'Retrieval';
-    if (text.includes('code') || text.includes('program') || text.includes('software')) return 'Code';
-    if (text.includes('vision') || text.includes('image') || text.includes('visual') || text.includes('multimodal')) return 'Vision';
-    return 'Agents';
-  }
-
-  // Build month → category → count map
+  // Build month → category → count map using the shared categorizer
   const monthCatMap: Record<string, Record<string, number>> = {};
   for (const p of dbPapers) {
     const date = p.publishedAt ?? p.published_at;
     if (!date) continue;
     const d = new Date(date);
     const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const cat = categorize(p);
+    const cat = derivePaperCategory(p);
+    if (cat === 'Other') continue; // skip unclassified bucket in evolution chart
     if (!monthCatMap[month]) monthCatMap[month] = {};
     monthCatMap[month][cat] = (monthCatMap[month][cat] ?? 0) + 1;
   }

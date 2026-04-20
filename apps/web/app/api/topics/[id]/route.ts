@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getTopicById, getArtifactsByTopic, getPapersByTopic } from '@research-lab/db';
+import { getTopicById, getArtifactsByTopic, getPapersByTopicWithTopicMembership } from '@research-lab/db';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const [artifacts, papers] = await Promise.all([
     getArtifactsByTopic(id),
-    getPapersByTopic(id),
+    getPapersByTopicWithTopicMembership(id),
   ]);
 
   return NextResponse.json({ topic, artifacts, papers });

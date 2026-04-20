@@ -2,58 +2,12 @@
 
 import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { CATEGORIES, CATEGORY_COLORS as SHARED_COLORS, derivePaperCategory, type Category } from '@/lib/categories';
 
-const CATEGORIES = [
-  'Agents',
-  'Safety',
-  'Reasoning',
-  'Scaling',
-  'Training',
-  'Architecture',
-  'Retrieval',
-  'Multi-Agent',
-  'Benchmarks',
-] as const;
-
-type Category = (typeof CATEGORIES)[number];
-
-const CATEGORY_COLORS: Record<Category, string> = {
-  'Agents': '#6366f1',
-  'Safety': '#ef4444',
-  'Reasoning': '#f59e0b',
-  'Scaling': '#10b981',
-  'Training': '#3b82f6',
-  'Architecture': '#8b5cf6',
-  'Retrieval': '#06b6d4',
-  'Multi-Agent': '#ec4899',
-  'Benchmarks': '#84cc16',
-};
-
-function derivePaperCategory(p: any): Category {
-  const text = [
-    p.title ?? '',
-    p.abstract ?? '',
-    p.category ?? '',
-    p.topic ?? '',
-    ...(Array.isArray(p.categories) ? p.categories : []),
-    typeof p.methodology === 'string' ? p.methodology : (p.methodology?.type ?? ''),
-    p.problem ?? '',
-    p.approach ?? '',
-  ]
-    .join(' ')
-    .toLowerCase();
-
-  if (text.includes('multi-agent') || text.includes('collaborat')) return 'Multi-Agent';
-  if (text.includes('agent')) return 'Agents';
-  if (text.includes('safe') || text.includes('align')) return 'Safety';
-  if (text.includes('reason') || text.includes('chain') || text.includes('cot')) return 'Reasoning';
-  if (text.includes('scal')) return 'Scaling';
-  if (text.includes('train') || text.includes('fine-tun') || text.includes('rlhf')) return 'Training';
-  if (text.includes('architect') || text.includes('transform') || text.includes('attention')) return 'Architecture';
-  if (text.includes('retriev') || text.includes('rag') || text.includes('search')) return 'Retrieval';
-  if (text.includes('bench') || text.includes('eval') || text.includes('metric')) return 'Benchmarks';
-  return 'Agents';
-}
+// Bar chart needs just a single border color per category — flatten the shared map.
+const CATEGORY_COLORS: Record<Category, string> = Object.fromEntries(
+  CATEGORIES.map((c) => [c, SHARED_COLORS[c].border])
+) as Record<Category, string>;
 
 interface PaperRef {
   title: string;
