@@ -447,7 +447,6 @@ function buildTimelineFromPapers(dbPapers: any[]): { topic: string; timeline: { 
     const d = new Date(date);
     const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     const cat = derivePaperCategory(p);
-    if (cat === 'Other') continue; // skip unclassified bucket in evolution chart
     if (!monthCatMap[month]) monthCatMap[month] = {};
     monthCatMap[month][cat] = (monthCatMap[month][cat] ?? 0) + 1;
   }
