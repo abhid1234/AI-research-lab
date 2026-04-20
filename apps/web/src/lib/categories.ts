@@ -63,12 +63,60 @@ export const SHORT_LABELS: Record<Category, string> = {
 };
 
 /**
- * Bucket a paper into one of the canonical content categories.
+ * Detect ALL categories a paper could belong to. A paper genuinely
+ * spans multiple topics (e.g., an "agentic RAG vision-language" paper
+ * is in three buckets). The spider chart and any "by category" counts
+ * use this so the data isn't artificially flattened.
  *
- * Order of preference:
- *   1. paper.topics — explicit topic membership from ingestion (TRUTH)
- *   2. arXiv categories — strong structural signal
- *   3. Title/abstract keyword fallback
+ * Sources unioned:
+ *   1. paper.topics — explicit topic membership from ingestion
+ *   2. arXiv category mapping
+ *   3. Title/abstract keyword detection
+ */
+export function derivePaperCategories(p: any): Category[] {
+  const found = new Set<Category>();
+
+  // 1. Topic memberships (set during ingestion)
+  if (Array.isArray(p?.topics)) {
+    for (const t of p.topics) {
+      if (typeof t === 'string' && CATEGORY_SET.has(t)) found.add(t as Category);
+    }
+  }
+
+  const arxivCats: string[] = (Array.isArray(p?.categories) ? p.categories : [])
+    .map((c: any) => String(c).toLowerCase());
+
+  // 2. arXiv category mapping
+  if (arxivCats.some((c) => c === 'cs.cv' || c === 'cs.mm' || c === 'eess.iv')) found.add('Vision & Multimodal');
+  if (arxivCats.some((c) => c === 'cs.ma')) found.add('Multi-Agent Systems');
+  if (arxivCats.some((c) => c === 'cs.cr')) found.add('AI Safety & Alignment');
+  if (arxivCats.some((c) => c === 'cs.se' || c === 'cs.pl')) found.add('Code Generation');
+  if (arxivCats.some((c) => c === 'cs.ir')) found.add('RAG & Retrieval');
+
+  // 3. Keyword detection (additive — every match adds another category)
+  const text = [p?.title ?? '', p?.abstract ?? '', ...arxivCats].join(' ').toLowerCase();
+
+  if (text.includes('multimodal') || text.includes('vision-language') || text.includes(' vlm') || text.includes(' mllm') || text.includes(' lvlm') || text.includes('visual question')) found.add('Vision & Multimodal');
+  if (text.includes('multi-agent') || text.includes('multi agent')) found.add('Multi-Agent Systems');
+  if (text.includes('retriev') || text.includes(' rag ') || text.includes('rag-') || text.includes('retrieval-augmented') || text.includes('retrieval augmented')) found.add('RAG & Retrieval');
+  if (text.includes('code generation') || text.includes('code synthesis') || text.includes('program synthesis') || text.includes('codegen')) found.add('Code Generation');
+  if (text.includes('jailbreak') || text.includes('red team') || text.includes('adversarial') || text.includes('safety alignment') || text.includes('rlhf safety')) found.add('AI Safety & Alignment');
+  if (text.includes('benchmark') || text.includes('leaderboard') || text.includes('contamination')) found.add('Evaluation & Benchmarks');
+  if (text.includes('fine-tun') || text.includes('rlhf') || text.includes(' dpo ') || text.includes('lora') || text.includes('peft') || text.includes('instruction tuning')) found.add('Fine-tuning & PEFT');
+  if (text.includes('reason') || text.includes('chain-of-thought') || text.includes(' cot ') || text.includes('mathematical') || text.includes('theorem')) found.add('Reasoning & Chain-of-Thought');
+  if (text.includes('scaling law') || text.includes('mixture of experts') || text.includes(' moe ') || (text.includes('transformer') && (text.includes('architect') || text.includes('attention')))) found.add('Scaling & Architecture');
+  if (text.includes('agent') && !found.has('Multi-Agent Systems')) found.add('LLM Agents');
+
+  // If nothing matched, default to LLM Agents (most populous fallback)
+  if (found.size === 0) found.add('LLM Agents');
+
+  return Array.from(found);
+}
+
+/**
+ * Bucket a paper into ONE canonical category. Used where a single
+ * label is required (paper card pill, badge color). Picks the most
+ * specific category from the multi-category result.
  */
 export function derivePaperCategory(p: any): Category {
   // 1. Explicit topic membership (set by ingestion pipeline)

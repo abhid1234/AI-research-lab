@@ -16,7 +16,7 @@ interface RadarDataPoint {
   count: number;
 }
 
-import { CATEGORIES, SHORT_LABELS, derivePaperCategory } from '@/lib/categories';
+import { CATEGORIES, SHORT_LABELS, derivePaperCategories } from '@/lib/categories';
 
 interface TooltipPayload {
   payload: RadarDataPoint;
@@ -43,12 +43,20 @@ export function ResearchLandscape({ papers }: { papers: any[] }) {
     );
   }
 
-  // Count papers per canonical topic
+  // Count papers per canonical topic.
+  //
+  // A paper genuinely belongs to multiple topics — a "RAG agent" paper is
+  // in BOTH "LLM Agents" and "RAG & Retrieval". derivePaperCategories
+  // unions topic memberships + arxiv categories + keyword detection so the
+  // spider reflects the corpus honestly.
   const counts: Record<string, number> = {};
   for (const cat of CATEGORIES) counts[cat] = 0;
+
   for (const p of papers) {
-    const cat = derivePaperCategory(p);
-    counts[cat] = (counts[cat] ?? 0) + 1;
+    const cats = derivePaperCategories(p);
+    for (const cat of cats) {
+      counts[cat] = (counts[cat] ?? 0) + 1;
+    }
   }
 
   // Build data preserving canonical order so axes are always identical
