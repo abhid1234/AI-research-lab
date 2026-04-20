@@ -293,24 +293,48 @@ function PaperCard({ paper }: { paper: any }) {
   const url = isRealArxiv
     ? `https://arxiv.org/abs/${arxivId}`
     : paperLink(pid || undefined, displayTitle);
+  const pdfUrl = isRealArxiv ? `https://arxiv.org/pdf/${arxivId}` : null;
+
+  // Source attribution
+  const pubTypes: string[] = Array.isArray(paper.publicationTypes) ? paper.publicationTypes : [];
+  const sourceLabel = pubTypes.includes('Conference') || pubTypes.includes('JournalArticle')
+    ? '📄 Published'
+    : pubTypes.includes('Review')
+      ? '📚 Review'
+      : isRealArxiv
+        ? '📑 arXiv'
+        : '';
+
+  const openAbs = () => window.open(url, '_blank', 'noopener,noreferrer');
 
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex h-full flex-col rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden relative"
+    <div
+      onClick={openAbs}
+      role="link"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter') openAbs(); }}
+      className="group flex h-full flex-col rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden relative cursor-pointer"
       style={{ borderLeftWidth: '4px', borderLeftColor: colors?.border ?? '#6366f1' }}
     >
       {/* Header strip with category + date */}
       <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5">
-        <span
-          className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-          style={{ background: colors?.pill, color: colors?.text }}
-        >
-          {category}
-        </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span
+            className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+            style={{ background: colors?.pill, color: colors?.text }}
+          >
+            {category}
+          </span>
+          {sourceLabel && (
+            <span
+              className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0"
+              title={isRealArxiv ? 'Originally published on arXiv' : 'From source database'}
+            >
+              {sourceLabel}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
           {date && (
             <span className="text-[10px] text-gray-500 font-medium">{date}</span>
           )}
@@ -421,6 +445,37 @@ function PaperCard({ paper }: { paper: any }) {
           )}
         </div>
       )}
-    </a>
+
+      {/* Footer action bar — explicit links to abs + PDF */}
+      {isRealArxiv && (
+        <div className="flex items-center gap-3 px-3 py-1.5 border-t border-gray-100 text-[10px] text-gray-500 bg-gray-50/50">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-1 hover:text-blue-600 transition-colors font-medium"
+            title="Open arXiv abstract page"
+          >
+            <span>📑</span>
+            <span>arXiv abs</span>
+          </a>
+          {pdfUrl && (
+            <a
+              href={pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-1 hover:text-blue-600 transition-colors font-medium"
+              title="Download PDF directly"
+            >
+              <span>⬇</span>
+              <span>PDF</span>
+            </a>
+          )}
+          <span className="ml-auto text-gray-400 font-mono text-[9px]">{arxivId}</span>
+        </div>
+      )}
+    </div>
   );
 }
