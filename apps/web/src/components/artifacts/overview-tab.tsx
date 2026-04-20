@@ -7,7 +7,7 @@ import { PaperDrawer } from '@/components/layout/paper-drawer';
 import { useState } from 'react';
 import { EmptyState as SharedEmptyState } from '@/components/ui/empty-state';
 import { paperLink } from '@/lib/paper-utils';
-import { CATEGORIES, derivePaperCategory } from '@/lib/categories';
+import { CATEGORIES, CATEGORY_COLORS, derivePaperCategory } from '@/lib/categories';
 
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
@@ -43,14 +43,6 @@ function formatRelativeTime(iso: string | null | undefined): string | null {
   if (days < 30) return `${Math.floor(days / 7)} wk ago`;
   return `${Math.floor(days / 30)} mo ago`;
 }
-
-const FINDING_COLORS = [
-  'bg-rose-500',
-  'bg-emerald-500',
-  'bg-amber-500',
-  'bg-blue-500',
-  'bg-purple-500',
-] as const;
 
 type StatTone = 'primary' | 'amber' | 'emerald' | 'slate';
 
@@ -281,11 +273,11 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         </Card>
       </div>
 
-      {/* 3. Two-column: Open Questions + Key Results */}
+      {/* 3. Two-column: Open Questions + Key Results — equal-height columns */}
       {papers.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
           {/* Left: Open Research Questions */}
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <div>
               <h3 className="text-sm font-semibold text-foreground">Open Research Questions</h3>
               <p className="text-xs text-muted-foreground mt-0.5">What the field still doesn&apos;t know</p>
@@ -294,16 +286,15 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
           </div>
 
           {/* Right: Key Results */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground">Key Results Worth Knowing</h3>
+          <div className="flex flex-col gap-2">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Key Results Worth Knowing</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Important findings across the collection</p>
+            </div>
             {papers.length > 0 ? (
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 gap-2 auto-rows-fr">
                 {papers.slice(0, 5).map((p, i) => (
-                  <ResultCard
-                    key={i}
-                    paper={p}
-                    accent={FINDING_COLORS[i % FINDING_COLORS.length]}
-                  />
+                  <ResultCard key={i} paper={p} />
                 ))}
               </div>
             ) : (
@@ -366,68 +357,70 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
   );
 }
 
-function ResultCard({
-  paper: p,
-  accent,
-}: {
-  paper: any;
-  accent: string;
-}) {
-  const title: string = p.mainResult ?? p.takeaway ?? '—';
-  const paperTitle: string = p.title ?? p.paperId ?? '';
-  const authorName: string = p.authors ?? p.author ?? '';
-  const date: string = p.date ?? p.year ?? p.publishedAt ?? '';
-  const paperId: string = p.paperId ?? p.id ?? '';
+function ResultCard({ paper: p }: { paper: any }) {
+  const finding: string = typeof p.mainResult === 'string' && p.mainResult ? p.mainResult
+    : typeof p.takeaway === 'string' && p.takeaway ? p.takeaway : '—';
+  const paperTitle: string = typeof p.title === 'string' ? p.title : (typeof p.paperId === 'string' ? p.paperId : '');
+  const paperId: string = typeof p.paperId === 'string' ? p.paperId : (typeof p.id === 'string' ? p.id : '');
+  const authorName: string = typeof p.authors === 'string' ? p.authors : (typeof p.author === 'string' ? p.author : '');
+  const date: string = typeof p.date === 'string' ? p.date : (typeof p.year === 'string' || typeof p.year === 'number' ? String(p.year) : (typeof p.publishedAt === 'string' ? p.publishedAt : ''));
+  const approach: string = typeof p.approach === 'string' ? p.approach : '';
 
-  const citationInner = (
-    <>
-      <span>↗</span>
-      <span className="italic">{paperTitle}</span>
-      {(authorName || date) && (
-        <span className="text-muted-foreground">
-          {'— '}
-          {authorName ? authorName : ''}
-          {authorName && date ? ', ' : ''}
-          {date ? date : ''}
-        </span>
-      )}
-    </>
-  );
+  const category = derivePaperCategory(p);
+  const colors = CATEGORY_COLORS[category];
 
-  const citationEl = paperTitle
-    ? (
-      <a
-        href={paperLink(paperId || undefined, paperTitle)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1 underline-offset-2 hover:underline mt-1.5 pl-4"
-      >
-        {citationInner}
-      </a>
-    )
-    : null;
+  const isRealArxiv = paperId && !paperId.startsWith('demo-') && (paperId.includes('.') || paperId.includes('/'));
+  const url = isRealArxiv ? `https://arxiv.org/abs/${paperId}` : paperLink(paperId || undefined, paperTitle);
+  const openAbs = () => window.open(url, '_blank', 'noopener,noreferrer');
 
   return (
-    <div className="rounded-lg border border-border bg-card p-3 space-y-1.5">
-      <div className="flex items-start gap-2">
-        <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${accent}`} aria-hidden="true" />
-        {paperTitle ? (
-          <a
-            href={paperLink(paperId || undefined, paperTitle)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-semibold leading-snug hover:text-primary transition-colors hover:underline underline-offset-2"
-          >
-            {title}
-          </a>
-        ) : (
-          <p className="text-sm font-semibold leading-snug">{title}</p>
-        )}
+    <div
+      onClick={openAbs}
+      role="link"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter') openAbs(); }}
+      className="group flex h-full flex-col rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden cursor-pointer"
+      style={{ borderLeftWidth: '4px', borderLeftColor: colors.border }}
+    >
+      {/* Header strip — category pill + meta */}
+      <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5">
+        <span
+          className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+          style={{ background: colors.pill, color: colors.text }}
+        >
+          {category}
+        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          {date && <span className="text-[10px] text-gray-500 font-medium">{date}</span>}
+          <span className="text-[11px] text-gray-300 group-hover:text-blue-500 transition-colors">↗</span>
+        </div>
       </div>
-      {p.approach && (
-        <p className="text-xs text-muted-foreground leading-relaxed pl-4 line-clamp-2">{p.approach}</p>
+
+      {/* Finding (the headline result) */}
+      <div className="px-3 pb-1.5">
+        <h3 className="text-[13px] font-semibold leading-snug text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2">
+          {finding}
+        </h3>
+      </div>
+
+      {/* Approach / details */}
+      {approach && (
+        <div className="px-3 pb-3 flex-1">
+          <p className="text-[11px] text-gray-600 leading-relaxed line-clamp-3">{approach}</p>
+        </div>
       )}
-      {citationEl}
+
+      {/* Footer — paper attribution */}
+      {paperTitle && (
+        <div
+          className="flex items-center gap-2 px-3 py-1.5 border-t text-[10.5px] text-gray-700"
+          style={{ background: colors.bg, borderTopColor: `${colors.border}30` }}
+        >
+          <span className="font-semibold not-italic shrink-0" style={{ color: colors.text }}>From:</span>
+          <span className="italic line-clamp-1 flex-1">{paperTitle}</span>
+          {authorName && <span className="text-gray-500 shrink-0 truncate max-w-[40%]">— {authorName}</span>}
+        </div>
+      )}
     </div>
   );
 }
@@ -531,38 +524,70 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
   }
 
   return (
-    <div className="space-y-1.5">
-      {questions.slice(0, 5).map((q, i) => (
-        <div key={i} className="rounded-lg border border-border bg-card px-3 py-2 space-y-0.5">
-          <div className="flex items-start gap-1.5">
-            <span className="mt-0.5 text-xs shrink-0">{q.type === 'debate' ? '?' : '!'}</span>
-            <div>
-              {q.text && (q.paperId || q.paperTitle) ? (
-                <a
-                  href={paperLink(q.paperId, q.paperTitle || q.text)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-medium leading-snug hover:text-primary transition-colors hover:underline underline-offset-2 block"
-                >
-                  {q.text}
-                </a>
-              ) : (
-                <p className="text-xs font-medium leading-snug">{q.text}</p>
-              )}
-              {q.detail && (
-                <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed line-clamp-2">{q.detail}</p>
-              )}
-              <span className={`inline-block mt-1 text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                q.type === 'debate'
-                  ? 'bg-amber-500/10 text-amber-500'
-                  : 'bg-blue-500/10 text-blue-500'
-              }`}>
-                {q.type === 'debate' ? 'Open Debate' : 'Research Gap'}
+    <div className="grid grid-cols-1 gap-2 auto-rows-fr">
+      {questions.slice(0, 5).map((q, i) => {
+        const isDebate = q.type === 'debate';
+        const accent = isDebate
+          ? { border: '#f59e0b', bg: '#fffbeb', text: '#b45309', pill: '#fef3c7', icon: '?', label: 'Open Debate' }
+          : { border: '#3b82f6', bg: '#eff6ff', text: '#1d4ed8', pill: '#dbeafe', icon: '!', label: 'Research Gap' };
+
+        const isRealArxiv = q.paperId && !q.paperId.startsWith('demo-') && (q.paperId.includes('.') || q.paperId.includes('/'));
+        const url = isRealArxiv ? `https://arxiv.org/abs/${q.paperId}` : paperLink(q.paperId, q.paperTitle || q.text);
+        const clickable = !!(q.paperId || q.paperTitle);
+        const openAbs = clickable ? () => window.open(url, '_blank', 'noopener,noreferrer') : undefined;
+
+        return (
+          <div
+            key={i}
+            onClick={openAbs}
+            role={clickable ? 'link' : undefined}
+            tabIndex={clickable ? 0 : undefined}
+            onKeyDown={clickable ? (e) => { if (e.key === 'Enter') openAbs!(); } : undefined}
+            className={`group flex h-full flex-col rounded-lg bg-white border border-gray-200 transition-all overflow-hidden ${
+              clickable ? 'hover:border-gray-300 hover:shadow-md cursor-pointer' : ''
+            }`}
+            style={{ borderLeftWidth: '4px', borderLeftColor: accent.border }}
+          >
+            {/* Header strip — type pill */}
+            <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5">
+              <span
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+                style={{ background: accent.pill, color: accent.text }}
+              >
+                {accent.icon} {accent.label}
               </span>
+              {clickable && (
+                <span className="text-[11px] text-gray-300 group-hover:text-blue-500 transition-colors">↗</span>
+              )}
             </div>
+
+            {/* Question text */}
+            <div className="px-3 pb-1.5">
+              <h3 className={`text-[13px] font-semibold leading-snug text-gray-900 line-clamp-2 ${clickable ? 'group-hover:text-blue-700 transition-colors' : ''}`}>
+                {q.text}
+              </h3>
+            </div>
+
+            {/* Detail */}
+            <div className="px-3 pb-3 flex-1">
+              {q.detail && (
+                <p className="text-[11px] text-gray-600 leading-relaxed line-clamp-3">{q.detail}</p>
+              )}
+            </div>
+
+            {/* Footer — paper attribution if available */}
+            {q.paperTitle && (
+              <div
+                className="flex items-center gap-2 px-3 py-1.5 border-t text-[10.5px] text-gray-700"
+                style={{ background: accent.bg, borderTopColor: `${accent.border}30` }}
+              >
+                <span className="font-semibold not-italic shrink-0" style={{ color: accent.text }}>From:</span>
+                <span className="italic line-clamp-1 flex-1">{q.paperTitle}</span>
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
