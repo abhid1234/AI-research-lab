@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, desc } from 'drizzle-orm';
 import { type InferSelectModel, type InferInsertModel } from 'drizzle-orm';
 import { db } from '../client.js';
 import { jobs } from '../schema.js';
@@ -76,4 +76,8 @@ export async function failJob(jobId: string, error: string): Promise<void> {
 export async function getJobById(id: string): Promise<Job | undefined> {
   const [job] = await db.select().from(jobs).where(eq(jobs.id, id));
   return job;
+}
+
+export async function getJobsByTopic(topicId: string, limit = 10): Promise<Job[]> {
+  return db.select().from(jobs).where(eq(jobs.topicId, topicId)).orderBy(desc(jobs.createdAt)).limit(limit);
 }
