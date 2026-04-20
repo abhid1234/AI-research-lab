@@ -131,7 +131,7 @@ export function derivePaperCategory(p: any): Category {
 
   // 2. arXiv category mapping (most reliable structural signal)
   if (arxivCats.some((c) => c === 'cs.cv' || c === 'cs.mm' || c === 'eess.iv')) return 'Vision & Multimodal';
-  if (arxivCats.some((c) => c === 'cs.ma')) return 'Multi-Agent Systems';
+  if (arxivCats.some((c) => c === 'cs.ma')) return 'LLM Agents'; // multi-agent merged into agents
   if (arxivCats.some((c) => c === 'cs.cr')) return 'AI Safety & Alignment';
   if (arxivCats.some((c) => c === 'cs.se' || c === 'cs.pl')) return 'Code Generation';
   if (arxivCats.some((c) => c === 'cs.ir')) return 'RAG & Retrieval';
@@ -143,7 +143,7 @@ export function derivePaperCategory(p: any): Category {
   ].join(' ').toLowerCase();
 
   if (text.includes('multimodal') || text.includes('vision-language') || text.includes(' vlm') || text.includes(' mllm') || text.includes(' lvlm') || text.includes('visual question') || text.includes('image generation')) return 'Vision & Multimodal';
-  if (text.includes('multi-agent') || text.includes('multi agent')) return 'Multi-Agent Systems';
+  if (text.includes('multi-agent') || text.includes('multi agent')) return 'LLM Agents';
   if (text.includes('retriev') || text.includes(' rag ') || text.includes('rag-') || text.includes('retrieval-augmented') || text.includes('retrieval augmented')) return 'RAG & Retrieval';
   if (text.includes('code generation') || text.includes('code synthesis') || text.includes('program synthesis') || text.includes('codegen')) return 'Code Generation';
   if (text.includes('safe') || text.includes('align') || text.includes('jailbreak') || text.includes('red team') || text.includes('adversarial')) return 'AI Safety & Alignment';

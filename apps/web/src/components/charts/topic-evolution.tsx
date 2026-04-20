@@ -39,8 +39,7 @@ const COLORS = [
 // chart shows real signal instead of dozens of near-duplicate lines.
 function canonicalizeTopic(raw: string): string {
   const t = raw.toLowerCase();
-  if (t.includes('multi-agent') || (t.includes('agent') && t.includes('coordinat'))) return 'Multi-Agent Systems';
-  if (t.includes('agent') || t.includes('tool use')) return 'LLM Agents';
+  if (t.includes('multi-agent') || t.includes('agent') || t.includes('tool use') || (t.includes('agent') && t.includes('coordinat'))) return 'LLM Agents';
   if (t.includes('rag') || t.includes('retriev')) return 'RAG & Retrieval';
   if (t.includes('multimodal') || t.includes('vision') || t.includes('vlm') || t.includes('mllm') || t.includes('lvlm') || t.includes('image') || t.includes('video')) return 'Vision/Multimodal';
   if (t.includes('reason') || t.includes('chain-of-thought') || t.includes('cot') || t.includes('mathematical') || t.includes('math')) return 'Reasoning & CoT';
