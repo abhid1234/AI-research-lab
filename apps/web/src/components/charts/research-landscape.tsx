@@ -15,9 +15,21 @@ interface RadarDataPoint {
   count: number;
 }
 
+// Categories aligned with our actual ingested topics (and keep "Other" so we
+// can see what falls through the keyword classifier).
 const CATEGORIES = [
-  'Agents', 'Safety', 'Reasoning', 'Scaling', 'Training',
-  'Architecture', 'Retrieval', 'Multi-Agent', 'Benchmarks',
+  'Agents',
+  'Multi-Agent',
+  'Reasoning',
+  'Vision/Multimodal',
+  'Retrieval',
+  'Code',
+  'Safety',
+  'Training',
+  'Scaling',
+  'Architecture',
+  'Benchmarks',
+  'Other',
 ];
 
 function derivePaperCategory(p: any): string {
@@ -32,16 +44,26 @@ function derivePaperCategory(p: any): string {
     p.approach ?? '',
   ].join(' ').toLowerCase();
 
+  // arXiv categories (most reliable signal — check first)
+  const arxivCats = (Array.isArray(p.categories) ? p.categories : []).map((c: any) => String(c).toLowerCase());
+  if (arxivCats.some((c: string) => c === 'cs.cv' || c === 'cs.mm')) return 'Vision/Multimodal';
+  if (arxivCats.some((c: string) => c === 'cs.ma')) return 'Multi-Agent';
+  if (arxivCats.some((c: string) => c === 'cs.cr')) return 'Safety';
+  if (arxivCats.some((c: string) => c === 'cs.se' || c === 'cs.pl')) return 'Code';
+
+  // Keyword fallback (specific → general, multimodal/vision before generic agent)
+  if (text.includes('multimodal') || text.includes('vision-language') || text.includes(' vlm') || text.includes(' mllm') || text.includes('image') || text.includes('video')) return 'Vision/Multimodal';
   if (text.includes('multi-agent') || text.includes('collaborat')) return 'Multi-Agent';
+  if (text.includes('retriev') || text.includes(' rag ') || text.includes('rag-') || text.includes('-augmented gen')) return 'Retrieval';
+  if (text.includes('code generation') || text.includes('code synthesis') || text.includes('program synthesis') || text.includes(' coder ')) return 'Code';
+  if (text.includes('safe') || text.includes('align') || text.includes('jailbreak') || text.includes('red team')) return 'Safety';
+  if (text.includes('reason') || text.includes('chain-of-thought') || text.includes(' cot ') || text.includes('mathematical')) return 'Reasoning';
   if (text.includes('agent')) return 'Agents';
-  if (text.includes('safe') || text.includes('align')) return 'Safety';
-  if (text.includes('reason') || text.includes('chain') || text.includes('cot')) return 'Reasoning';
-  if (text.includes('scal')) return 'Scaling';
-  if (text.includes('train') || text.includes('fine-tun') || text.includes('rlhf')) return 'Training';
-  if (text.includes('architect') || text.includes('transform') || text.includes('attention')) return 'Architecture';
-  if (text.includes('retriev') || text.includes('rag') || text.includes('search')) return 'Retrieval';
-  if (text.includes('bench') || text.includes('eval') || text.includes('metric')) return 'Benchmarks';
-  return 'Agents'; // default
+  if (text.includes('scaling law') || text.includes(' scaling ') || text.includes('mixture of experts')) return 'Scaling';
+  if (text.includes('fine-tun') || text.includes('rlhf') || text.includes(' dpo ') || text.includes('lora') || text.includes('peft')) return 'Training';
+  if (text.includes('transformer') || text.includes('attention mechanism') || text.includes('architecture')) return 'Architecture';
+  if (text.includes('benchmark') || text.includes('evaluation') || text.includes('leaderboard')) return 'Benchmarks';
+  return 'Other';
 }
 
 export function ResearchLandscape({ papers }: { papers: any[] }) {
