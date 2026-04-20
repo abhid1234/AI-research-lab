@@ -16,7 +16,7 @@ interface RadarDataPoint {
   count: number;
 }
 
-import { CATEGORIES, SHORT_LABELS, derivePaperCategories } from '@/lib/categories';
+import { CATEGORIES, SHORT_LABELS, derivePaperCategory } from '@/lib/categories';
 
 const CATEGORY_SET: Set<string> = new Set(CATEGORIES);
 
@@ -68,9 +68,10 @@ export function ResearchLandscape({ papers }: { papers: any[] }) {
       // DB truth — count once per matched membership
       for (const t of explicitTopics) counts[t] = (counts[t] ?? 0) + 1;
     } else {
-      // No content-topic membership → use keyword detection as fallback
-      const cats = derivePaperCategories(p);
-      for (const cat of cats) counts[cat] = (counts[cat] ?? 0) + 1;
+      // No content-topic membership → fall back to single best-match category
+      // (NOT the multi-category union, which over-counts orphan papers)
+      const cat = derivePaperCategory(p);
+      counts[cat] = (counts[cat] ?? 0) + 1;
     }
   }
 
