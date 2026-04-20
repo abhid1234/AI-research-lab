@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/ui/empty-state';
 import { paperLink } from '@/lib/paper-utils';
-import { CATEGORY_COLORS, derivePaperCategory } from '@/lib/categories';
+import { CATEGORY_COLORS, derivePaperCategory, type Category } from '@/lib/categories';
 
 const PAGE_SIZE = 20;
 
@@ -62,7 +62,7 @@ export function PapersTab({ artifacts, dbPapers = [] }: PapersTabProps) {
     : analyzedPapers;
 
   // Compute available categories
-  const categoryCounts = new Map<string, number>();
+  const categoryCounts = new Map<Category, number>();
   for (const p of merged) {
     const cat = derivePaperCategory(p);
     categoryCounts.set(cat, (categoryCounts.get(cat) ?? 0) + 1);

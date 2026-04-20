@@ -7,7 +7,7 @@ import { PaperDrawer } from '@/components/layout/paper-drawer';
 import { useState } from 'react';
 import { EmptyState as SharedEmptyState } from '@/components/ui/empty-state';
 import { paperLink } from '@/lib/paper-utils';
-import { derivePaperCategory } from '@/lib/categories';
+import { CATEGORIES, derivePaperCategory } from '@/lib/categories';
 
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
