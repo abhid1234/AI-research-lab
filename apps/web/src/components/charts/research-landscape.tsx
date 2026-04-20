@@ -18,6 +18,8 @@ interface RadarDataPoint {
 
 import { CATEGORIES, SHORT_LABELS, derivePaperCategories } from '@/lib/categories';
 
+const CATEGORY_SET: Set<string> = new Set(CATEGORIES);
+
 interface TooltipPayload {
   payload: RadarDataPoint;
   value: number;
@@ -45,17 +47,30 @@ export function ResearchLandscape({ papers }: { papers: any[] }) {
 
   // Count papers per canonical topic.
   //
-  // A paper genuinely belongs to multiple topics — a "RAG agent" paper is
-  // in BOTH "LLM Agents" and "RAG & Retrieval". derivePaperCategories
-  // unions topic memberships + arxiv categories + keyword detection so the
-  // spider reflects the corpus honestly.
+  // Strategy:
+  //   1. Trust topic_papers membership FIRST — that's the DB truth from
+  //      the ingestion pipeline. A paper in N topics counts in N bars.
+  //   2. ONLY for papers without ANY content-topic membership (e.g., HF
+  //      backfill papers tagged only "All AI Papers" / "HuggingFace Trending")
+  //      fall back to keyword detection.
+  //
+  // This avoids the previous bug where keyword detection over-claimed
+  // ("reason" matches ~80% of all AI abstracts).
   const counts: Record<string, number> = {};
   for (const cat of CATEGORIES) counts[cat] = 0;
 
   for (const p of papers) {
-    const cats = derivePaperCategories(p);
-    for (const cat of cats) {
-      counts[cat] = (counts[cat] ?? 0) + 1;
+    const topics: string[] = Array.isArray(p?.topics) ? p.topics : [];
+    // Filter to canonical content topics only (skip "All AI Papers", "HuggingFace Trending")
+    const explicitTopics = topics.filter((t) => CATEGORY_SET.has(t));
+
+    if (explicitTopics.length > 0) {
+      // DB truth — count once per matched membership
+      for (const t of explicitTopics) counts[t] = (counts[t] ?? 0) + 1;
+    } else {
+      // No content-topic membership → use keyword detection as fallback
+      const cats = derivePaperCategories(p);
+      for (const cat of cats) counts[cat] = (counts[cat] ?? 0) + 1;
     }
   }
 
