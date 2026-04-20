@@ -12,7 +12,6 @@
 
 export const CATEGORIES = [
   'LLM Agents',
-  'Multi-Agent Systems',
   'Reasoning & Chain-of-Thought',
   'Vision & Multimodal',
   'RAG & Retrieval',
@@ -36,7 +35,6 @@ export interface CategoryColors {
 
 export const CATEGORY_COLORS: Record<Category, CategoryColors> = {
   'LLM Agents':                  { border: '#6366f1', bg: '#eef2ff', text: '#4338ca', pill: '#e0e7ff' },
-  'Multi-Agent Systems':         { border: '#ec4899', bg: '#fdf2f8', text: '#be185d', pill: '#fce7f3' },
   'Reasoning & Chain-of-Thought':{ border: '#f59e0b', bg: '#fffbeb', text: '#b45309', pill: '#fef3c7' },
   'Vision & Multimodal':         { border: '#a855f7', bg: '#faf5ff', text: '#7e22ce', pill: '#f3e8ff' },
   'RAG & Retrieval':             { border: '#06b6d4', bg: '#ecfeff', text: '#0e7490', pill: '#cffafe' },
@@ -51,7 +49,6 @@ export const CATEGORY_COLORS: Record<Category, CategoryColors> = {
 // Maps full topic name -> compact display.
 export const SHORT_LABELS: Record<Category, string> = {
   'LLM Agents': 'Agents',
-  'Multi-Agent Systems': 'Multi-Agent',
   'Reasoning & Chain-of-Thought': 'Reasoning',
   'Vision & Multimodal': 'Vision',
   'RAG & Retrieval': 'Retrieval',
@@ -76,10 +73,13 @@ export const SHORT_LABELS: Record<Category, string> = {
 export function derivePaperCategories(p: any): Category[] {
   const found = new Set<Category>();
 
-  // 1. Topic memberships (set during ingestion)
+  // 1. Topic memberships (set during ingestion).
+  //    Treat the legacy "Multi-Agent Systems" topic as LLM Agents — they're merged.
   if (Array.isArray(p?.topics)) {
     for (const t of p.topics) {
-      if (typeof t === 'string' && CATEGORY_SET.has(t)) found.add(t as Category);
+      if (typeof t !== 'string') continue;
+      if (t === 'Multi-Agent Systems') found.add('LLM Agents');
+      else if (CATEGORY_SET.has(t)) found.add(t as Category);
     }
   }
 
@@ -88,7 +88,7 @@ export function derivePaperCategories(p: any): Category[] {
 
   // 2. arXiv category mapping
   if (arxivCats.some((c) => c === 'cs.cv' || c === 'cs.mm' || c === 'eess.iv')) found.add('Vision & Multimodal');
-  if (arxivCats.some((c) => c === 'cs.ma')) found.add('Multi-Agent Systems');
+  if (arxivCats.some((c) => c === 'cs.ma')) found.add('LLM Agents'); // multi-agent merged into agents
   if (arxivCats.some((c) => c === 'cs.cr')) found.add('AI Safety & Alignment');
   if (arxivCats.some((c) => c === 'cs.se' || c === 'cs.pl')) found.add('Code Generation');
   if (arxivCats.some((c) => c === 'cs.ir')) found.add('RAG & Retrieval');
@@ -97,7 +97,7 @@ export function derivePaperCategories(p: any): Category[] {
   const text = [p?.title ?? '', p?.abstract ?? '', ...arxivCats].join(' ').toLowerCase();
 
   if (text.includes('multimodal') || text.includes('vision-language') || text.includes(' vlm') || text.includes(' mllm') || text.includes(' lvlm') || text.includes('visual question')) found.add('Vision & Multimodal');
-  if (text.includes('multi-agent') || text.includes('multi agent')) found.add('Multi-Agent Systems');
+  if (text.includes('multi-agent') || text.includes('multi agent') || text.includes('agent collaboration')) found.add('LLM Agents');
   if (text.includes('retriev') || text.includes(' rag ') || text.includes('rag-') || text.includes('retrieval-augmented') || text.includes('retrieval augmented')) found.add('RAG & Retrieval');
   if (text.includes('code generation') || text.includes('code synthesis') || text.includes('program synthesis') || text.includes('codegen')) found.add('Code Generation');
   if (text.includes('jailbreak') || text.includes('red team') || text.includes('adversarial') || text.includes('safety alignment') || text.includes('rlhf safety')) found.add('AI Safety & Alignment');
@@ -105,7 +105,7 @@ export function derivePaperCategories(p: any): Category[] {
   if (text.includes('fine-tun') || text.includes('rlhf') || text.includes(' dpo ') || text.includes('lora') || text.includes('peft') || text.includes('instruction tuning')) found.add('Fine-tuning & PEFT');
   if (text.includes('reason') || text.includes('chain-of-thought') || text.includes(' cot ') || text.includes('mathematical') || text.includes('theorem')) found.add('Reasoning & Chain-of-Thought');
   if (text.includes('scaling law') || text.includes('mixture of experts') || text.includes(' moe ') || (text.includes('transformer') && (text.includes('architect') || text.includes('attention')))) found.add('Scaling & Architecture');
-  if (text.includes('agent') && !found.has('Multi-Agent Systems')) found.add('LLM Agents');
+  if (text.includes('agent')) found.add('LLM Agents');
 
   // If nothing matched, default to LLM Agents (most populous fallback)
   if (found.size === 0) found.add('LLM Agents');
