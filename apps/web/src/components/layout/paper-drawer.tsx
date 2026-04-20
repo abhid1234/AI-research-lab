@@ -215,6 +215,24 @@ export function PaperDrawer({ papers, open, onClose }: PaperDrawerProps) {
                         {citationCount > 0 && <span>· {citationCount} citations</span>}
                       </div>
 
+                      {/* Provenance line */}
+                      {(() => {
+                        const ingestedAt = paper.createdAt
+                          ? new Date(paper.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                          : null;
+                        const primaryCategory: string = Array.isArray(paper.categories) && paper.categories.length > 0
+                          ? (typeof paper.categories[0] === 'string' ? paper.categories[0] : '')
+                          : '';
+                        if (!ingestedAt && !primaryCategory) return null;
+                        return (
+                          <p className="text-[9px] text-muted-foreground/70 italic mt-0.5">
+                            {ingestedAt ? `Ingested ${ingestedAt}` : 'Ingested'}
+                            {' from arxiv'}
+                            {primaryCategory ? ` ${primaryCategory}` : ''}
+                          </p>
+                        );
+                      })()}
+
                       {/* Abstract snippet */}
                       {abstract && (
                         <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">

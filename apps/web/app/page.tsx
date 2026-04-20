@@ -144,6 +144,7 @@ export default function Home() {
                   totalPaperCount={paperCount}
                   dbPapers={dbPapers}
                   topicName={topicName}
+                  topicId={selectedTopicId ?? undefined}
                   lastSyncAt={lastSyncAt}
                   onOpenDrawer={() => setDrawerOpen(true)}
                 />

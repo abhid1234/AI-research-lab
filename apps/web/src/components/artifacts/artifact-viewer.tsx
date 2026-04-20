@@ -19,6 +19,7 @@ interface ArtifactViewerProps {
   totalPaperCount?: number;
   dbPapers?: any[];
   topicName?: string;
+  topicId?: string;
   lastSyncAt?: string | null;
   onOpenDrawer?: () => void;
 }
@@ -108,7 +109,7 @@ function getTabCount(
   return 0;
 }
 
-export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName, lastSyncAt, onOpenDrawer }: ArtifactViewerProps) {
+export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName, topicId, lastSyncAt, onOpenDrawer }: ArtifactViewerProps) {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   // Some tabs aggregate multiple agent outputs — pass all artifacts and let each tab pick what it needs
   return (
@@ -136,6 +137,7 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName
             totalPaperCount={totalPaperCount}
             dbPapers={dbPapers}
             topicName={topicName}
+            topicId={topicId}
             lastSyncAt={lastSyncAt}
             onOpenDrawer={onOpenDrawer}
             onSwitchTab={(tab) => setActiveTab(tab as TabId)}

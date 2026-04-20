@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { EmptyState as SharedEmptyState } from '@/components/ui/empty-state';
 import { paperLink } from '@/lib/paper-utils';
 import { CATEGORIES, CATEGORY_COLORS, derivePaperCategory } from '@/lib/categories';
+import { ProvenanceBanner } from '@/components/layout/provenance-banner';
+import { RunHistory } from '@/components/layout/run-history';
 
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
@@ -24,6 +26,7 @@ interface OverviewTabProps {
   totalPaperCount?: number;
   dbPapers?: any[];
   topicName?: string;
+  topicId?: string;
   lastSyncAt?: string | null;
   onOpenDrawer?: () => void;
   onSwitchTab?: (tab: 'overview' | 'insights' | 'connections' | 'papers' | 'frontiers') => void;
@@ -121,7 +124,7 @@ function StatItem({
   );
 }
 
-export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, lastSyncAt, onOpenDrawer, onSwitchTab }: OverviewTabProps) {
+export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, topicId, lastSyncAt, onOpenDrawer, onSwitchTab }: OverviewTabProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const trendArtifact = artifacts.find((a) => a.agentType === 'trend-mapper');
@@ -248,7 +251,13 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         </CardContent>
       </Card>
 
-      {/* 2. Side-by-side charts */}
+      {/* 2. Collection Provenance Banner */}
+      <ProvenanceBanner
+        paperCount={displayPaperCount}
+        lastUpdated={lastSyncAt ?? undefined}
+      />
+
+      {/* 3. Side-by-side charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="animate-chart-in">
           <CardHeader className="pb-2 pt-3 px-4">
@@ -273,7 +282,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         </Card>
       </div>
 
-      {/* 3. Two-column: Open Questions + Key Results — equal-height columns */}
+      {/* 4. Two-column: Open Questions + Key Results — equal-height columns */}
       {papers.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
           {/* Left: Open Research Questions */}
@@ -304,7 +313,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
         </div>
       )}
 
-      {/* 4. New Benchmarks grid */}
+      {/* 5. New Benchmarks grid */}
       {newBenchmarks.length > 0 && (
         <div className="space-y-2">
           <div>
@@ -345,6 +354,17 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, l
 
       {papers.length === 0 && topicEvolution.length === 0 && (
         <SharedEmptyState title="Nothing here yet" description="Run an analysis to populate the overview." />
+      )}
+
+      {/* 6. Agent Run History */}
+      {topicId && (
+        <div className="space-y-2">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Agent Run History</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Last 5 ingestion and analysis jobs</p>
+          </div>
+          <RunHistory topicId={topicId} />
+        </div>
       )}
 
       {/* Paper drawer (hidden by default) */}
