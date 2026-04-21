@@ -1,12 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { CATEGORIES } from '@/lib/categories';
 
 interface Topic {
   id: string;
   name: string;
   query: string;
 }
+
+// Whitelist: canonical categories (from spider chart) + the All Papers aggregate.
+// Anything else (e.g. legacy topics, "HuggingFace Trending", source-of-papers tags)
+// is filtered out of the dropdown to keep the surface consistent with the radar.
+const ALLOWED_TOPIC_NAMES = new Set<string>(['All AI Papers', ...CATEGORIES]);
 
 interface TopicSelectorProps {
   selectedId: string | null;
@@ -21,7 +27,9 @@ export function TopicSelector({ selectedId, onChange }: TopicSelectorProps) {
     fetch('/api/topics')
       .then((r) => r.json())
       .then((data) => {
-        const list: Topic[] = Array.isArray(data) ? data : [];
+        const raw: Topic[] = Array.isArray(data) ? data : [];
+        // Only show canonical categories + "All AI Papers"
+        const list = raw.filter((t) => ALLOWED_TOPIC_NAMES.has(t.name));
         // Sort: "All AI Papers" first, then alphabetical
         list.sort((a, b) => {
           if (a.name === 'All AI Papers') return -1;

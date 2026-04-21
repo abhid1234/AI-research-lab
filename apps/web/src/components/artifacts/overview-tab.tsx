@@ -10,7 +10,6 @@ import { paperLink } from '@/lib/paper-utils';
 import { CATEGORIES, CATEGORY_COLORS, derivePaperCategory } from '@/lib/categories';
 import { ProvenanceBanner } from '@/components/layout/provenance-banner';
 import { RunHistory } from '@/components/layout/run-history';
-import { WeekDiff } from '@/components/layout/week-diff';
 import { TopicRecommendations } from '@/components/layout/topic-recommendations';
 
 const TopicEvolutionChart = dynamic(
@@ -259,14 +258,11 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
         lastUpdated={lastSyncAt ?? undefined}
       />
 
-      {/* 2b. Discovery row — week diff + topic recommendations */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <WeekDiff papers={dbPapers ?? []} />
-        <TopicRecommendations
-          currentTopicId={topicId ?? null}
-          currentTopicName={topicName ?? ''}
-        />
-      </div>
+      {/* 2b. Topic recommendations */}
+      <TopicRecommendations
+        currentTopicId={topicId ?? null}
+        currentTopicName={topicName ?? ''}
+      />
 
       {/* 3. Side-by-side charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
