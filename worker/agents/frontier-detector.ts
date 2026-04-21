@@ -1,6 +1,7 @@
 import { generateText, Output } from 'ai';
 import { getFastModel, getStrongModel } from '../lib/ai.js';
 import { FrontierDetectorOutput, type FrontierDetectorResult } from './schemas.js';
+import { throttle } from '../lib/throttle.js';
 import type { PaperAnalyzerResult } from './schemas.js';
 import type { TrendMapperResult } from './schemas.js';
 import type { ContradictionFinderResult } from './schemas.js';
@@ -30,16 +31,18 @@ export async function runFrontierDetector(
 ): Promise<FrontierDetectorResult> {
   const prompt = buildPrompt(input);
 
-  const { output } = await generateText({
-    model: workflow.model === 'strong' ? getStrongModel() : getFastModel(),
-    output: Output.object({ schema: FrontierDetectorOutput }),
-    maxOutputTokens: workflow.maxOutputTokens,
-    system: workflow.prompt,
-    prompt,
-    providerOptions: {
-      google: { thinkingConfig: { thinkingBudget: 0 } },
-    },
-  });
+  const { output } = await throttle(() =>
+    generateText({
+      model: workflow.model === 'strong' ? getStrongModel() : getFastModel(),
+      output: Output.object({ schema: FrontierDetectorOutput }),
+      maxOutputTokens: workflow.maxOutputTokens,
+      system: workflow.prompt,
+      prompt,
+      providerOptions: {
+        google: { thinkingConfig: { thinkingBudget: 0 } },
+      },
+    }),
+  );
 
   return output;
 }

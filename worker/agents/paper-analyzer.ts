@@ -2,6 +2,7 @@ import { generateText, Output } from 'ai';
 import { getFastModel, getStrongModel } from '../lib/ai.js';
 import { PaperAnalyzerOutput, type PaperAnalyzerResult } from './schemas.js';
 import { loadWorkflow } from '../lib/workflow-loader.js';
+import { throttle } from '../lib/throttle.js';
 
 export interface PaperAnalyzerInput {
   papers: {
@@ -21,16 +22,18 @@ export async function runPaperAnalyzer(
 ): Promise<PaperAnalyzerResult> {
   const prompt = buildPrompt(input);
 
-  const { output } = await generateText({
-    model: workflow.model === 'strong' ? getStrongModel() : getFastModel(),
-    output: Output.object({ schema: PaperAnalyzerOutput }),
-    maxOutputTokens: workflow.maxOutputTokens,
-    system: workflow.prompt,
-    prompt,
-    providerOptions: {
-      google: { thinkingConfig: { thinkingBudget: 0 } },
-    },
-  });
+  const { output } = await throttle(() =>
+    generateText({
+      model: workflow.model === 'strong' ? getStrongModel() : getFastModel(),
+      output: Output.object({ schema: PaperAnalyzerOutput }),
+      maxOutputTokens: workflow.maxOutputTokens,
+      system: workflow.prompt,
+      prompt,
+      providerOptions: {
+        google: { thinkingConfig: { thinkingBudget: 0 } },
+      },
+    }),
+  );
 
   return output;
 }
