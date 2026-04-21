@@ -229,20 +229,12 @@ function PivotingTrendsList({ pivotingTrends }: { pivotingTrends: any[] }) {
         const from = typeof t.from === 'string' ? t.from : safeString(t.from);
         const to = typeof t.to === 'string' ? t.to : safeString(t.to);
         const timespan = typeof t.timespan === 'string' ? t.timespan : '';
-        const evidence: any[] = Array.isArray(t.evidence) ? t.evidence : [];
-        const firstEvidence = evidence.length > 0
-          ? (typeof evidence[0] === 'string' ? evidence[0] : (typeof evidence[0]?.quote === 'string' ? evidence[0].quote : ''))
-          : '';
-        // First evidence paper link
-        const firstEvidencePaperId: string = evidence.length > 0 && typeof evidence[0] === 'object'
-          ? (typeof evidence[0]?.paperId === 'string' ? evidence[0].paperId : typeof evidence[0]?.id === 'string' ? evidence[0].id : '')
-          : '';
-        const firstEvidencePaperTitle: string = evidence.length > 0 && typeof evidence[0] === 'object'
-          ? (typeof evidence[0]?.paperTitle === 'string' ? evidence[0].paperTitle : typeof evidence[0]?.title === 'string' ? evidence[0].title : '')
-          : '';
-        const trendHref = firstEvidencePaperId || firstEvidencePaperTitle
-          ? paperLink(firstEvidencePaperId || undefined, firstEvidencePaperTitle || `${from} → ${to}`)
-          : undefined;
+        // evidence is now a flat string array (quotes)
+        const evidence: string[] = Array.isArray(t.evidence)
+          ? t.evidence.map((e: any) => (typeof e === 'string' ? e : typeof e?.quote === 'string' ? e.quote : safeString(e)))
+          : [];
+        const firstEvidence = evidence.length > 0 ? evidence[0] : '';
+        const trendHref = undefined; // evidence no longer carries paper IDs
 
         const trendContent = (
           <div className="flex items-center gap-2 text-xs w-full">
@@ -288,20 +280,13 @@ function GapCard({ g }: { g: any }) {
   const [adjacentOpen, setAdjacentOpen] = useState(false);
   const area = typeof g.area === 'string' ? g.area : safeString(g.area);
   const why = typeof g.whyItMatters === 'string' ? g.whyItMatters : '';
-  const adjacent: any[] = Array.isArray(g.adjacentWork) ? g.adjacentWork : [];
-  // Try to link the gap title to a source paper if available
-  const sourcePaperId: string = typeof g.sourcePaperId === 'string' ? g.sourcePaperId : '';
-  const sourcePaperTitle: string = typeof g.sourcePaperTitle === 'string' ? g.sourcePaperTitle : '';
-  // Or use first adjacent work
-  const firstAdj = adjacent.length > 0 ? adjacent[0] : null;
-  const firstAdjId: string = firstAdj
-    ? (typeof firstAdj?.paperId === 'string' ? firstAdj.paperId : typeof firstAdj?.id === 'string' ? firstAdj.id : '')
-    : '';
-  const firstAdjTitle: string = firstAdj
-    ? (typeof firstAdj === 'string' ? firstAdj : firstAdj?.title ?? firstAdj?.name ?? '')
-    : '';
-  const gapLinkId = sourcePaperId || firstAdjId;
-  const gapLinkTitle = sourcePaperTitle || firstAdjTitle;
+  // adjacentWork is now a flat string array (titles)
+  const adjacent: string[] = Array.isArray(g.adjacentWork)
+    ? g.adjacentWork.map((w: any) => (typeof w === 'string' ? w : (w?.title ?? w?.name ?? safeString(w))))
+    : [];
+  // Use first adjacent title for gap link (no paper IDs available)
+  const gapLinkId = '';
+  const gapLinkTitle = adjacent.length > 0 ? adjacent[0] : '';
 
   return (
     <Card>
@@ -334,23 +319,19 @@ function GapCard({ g }: { g: any }) {
             </button>
             {adjacentOpen && (
               <ul className="mt-1 space-y-0.5 pl-2">
-                {adjacent.map((adj: any, j: number) => {
-                  const adjTitle: string = typeof adj === 'string' ? adj : (adj?.title ?? adj?.name ?? adj?.id ?? '');
-                  const adjId: string = typeof adj?.paperId === 'string' ? adj.paperId : typeof adj?.id === 'string' ? adj.id : '';
-                  return (
-                    <li key={j} className="flex items-start gap-1">
-                      <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
-                      <a
-                        href={paperLink(adjId || undefined, adjTitle)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[10px] text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline line-clamp-1"
-                      >
-                        {adjTitle}
-                      </a>
-                    </li>
-                  );
-                })}
+                {adjacent.map((adjTitle: string, j: number) => (
+                  <li key={j} className="flex items-start gap-1">
+                    <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
+                    <a
+                      href={paperLink(undefined, adjTitle)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline line-clamp-1"
+                    >
+                      {adjTitle}
+                    </a>
+                  </li>
+                ))}
               </ul>
             )}
           </div>

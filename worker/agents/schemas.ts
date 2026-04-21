@@ -1,14 +1,5 @@
 import { z } from 'zod';
 
-// ── Shared sub-schemas ──────────────────────────────────────────────────────
-
-const paperRef = z.object({
-  id: z.string(),
-  title: z.string(),
-  authors: z.array(z.string()).optional(),
-  date: z.string().optional(),
-});
-
 // ── PaperAnalyzer ───────────────────────────────────────────────────────────
 
 export const PaperAnalyzerOutput = z.object({
@@ -87,15 +78,13 @@ export const ContradictionFinderOutput = z.object({
     z.object({
       claim1: z.object({
         statement: z.string(),
-        paper: paperRef,
+        paper: z.object({ id: z.string(), title: z.string() }),
         evidence: z.string(),
-        chunkIds: z.array(z.string()),
       }),
       claim2: z.object({
         statement: z.string(),
-        paper: paperRef,
+        paper: z.object({ id: z.string(), title: z.string() }),
         evidence: z.string(),
-        chunkIds: z.array(z.string()),
       }),
       nature: z.enum([
         'direct_contradiction',
@@ -128,7 +117,7 @@ export const ContradictionFinderOutput = z.object({
       sides: z.array(
         z.object({
           position: z.string(),
-          papers: z.array(paperRef),
+          papers: z.array(z.string()),
           strongestEvidence: z.string(),
         }),
       ),
@@ -139,6 +128,9 @@ export const ContradictionFinderOutput = z.object({
 
 // ── BenchmarkExtractor ──────────────────────────────────────────────────────
 
+// Inline paper reference used by BenchmarkExtractor (no optional fields)
+const benchmarkPaperRef = z.object({ id: z.string(), title: z.string() });
+
 export const BenchmarkExtractorOutput = z.object({
   benchmarkTables: z.array(
     z.object({
@@ -148,12 +140,11 @@ export const BenchmarkExtractorOutput = z.object({
       entries: z.array(
         z.object({
           model: z.string(),
-          paper: paperRef,
+          paper: benchmarkPaperRef,
           // Anthropic doesn't support `additionalProperties: number` style schemas;
           // model scores as an array of {metric, value} pairs instead of a record.
           scores: z.array(z.object({ metric: z.string(), value: z.number() })),
           conditions: z.string(),
-          chunkIds: z.array(z.string()),
         }),
       ),
       notes: z.array(z.string()),
@@ -162,7 +153,7 @@ export const BenchmarkExtractorOutput = z.object({
   newBenchmarks: z.array(
     z.object({
       name: z.string(),
-      paper: paperRef,
+      paper: benchmarkPaperRef,
       measures: z.string(),
       whyNeeded: z.string(),
       adoption: z.string(),
@@ -170,7 +161,7 @@ export const BenchmarkExtractorOutput = z.object({
   ),
   warnings: z.array(
     z.object({
-      paper: paperRef,
+      paper: benchmarkPaperRef,
       issue: z.enum([
         'cherry_picked_benchmarks',
         'incomparable_conditions',
@@ -178,7 +169,6 @@ export const BenchmarkExtractorOutput = z.object({
         'saturated_benchmark',
       ]),
       explanation: z.string(),
-      chunkIds: z.array(z.string()),
     }),
   ),
   stateOfTheArt: z.array(
@@ -188,13 +178,13 @@ export const BenchmarkExtractorOutput = z.object({
       currentBest: z.object({
         model: z.string(),
         score: z.number(),
-        paper: paperRef,
+        paper: benchmarkPaperRef,
       }),
       previousBest: z
         .object({
           model: z.string(),
           score: z.number(),
-          paper: paperRef,
+          paper: benchmarkPaperRef,
         })
         .nullable(),
       improvement: z.string(),
@@ -221,7 +211,6 @@ export const FrontierDetectorOutput = z.object({
           id: z.string(),
           title: z.string(),
           contribution: z.string(),
-          chunkIds: z.array(z.string()),
         }),
       ),
       relatedContradictions: z.array(z.string()),
@@ -237,13 +226,7 @@ export const FrontierDetectorOutput = z.object({
       from: z.string(),
       to: z.string(),
       timespan: z.string(),
-      evidence: z.array(
-        z.object({
-          paperId: z.string(),
-          quote: z.string(),
-          chunkId: z.string(),
-        }),
-      ),
+      evidence: z.array(z.string()),
       significance: z.string(),
     }),
   ),
@@ -251,12 +234,7 @@ export const FrontierDetectorOutput = z.object({
     z.object({
       area: z.string(),
       whyItMatters: z.string(),
-      adjacentWork: z.array(
-        z.object({
-          paperId: z.string(),
-          title: z.string(),
-        }),
-      ),
+      adjacentWork: z.array(z.string()),
     }),
   ),
 });
