@@ -33,9 +33,9 @@ export function AppShell({ children, paperCount, topicCount, dateRange, selected
         <GlobalSearch topicId={selectedTopicId} />
 
         {/* Right: stats + connected indicator */}
-        <div className="flex items-center gap-4 shrink-0 ml-auto">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0 ml-auto min-w-0">
           {hasStats && (
-            <span className="text-xs text-muted-foreground tabular-nums">
+            <span className="hidden md:inline text-xs text-muted-foreground tabular-nums">
               {paperCount !== undefined && (
                 <span>{paperCount} paper{paperCount !== 1 ? 's' : ''}</span>
               )}
@@ -49,7 +49,7 @@ export function AppShell({ children, paperCount, topicCount, dateRange, selected
           )}
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_1px_rgba(52,211,153,0.5)]" aria-hidden="true" />
-            <span className="text-xs text-muted-foreground">Connected</span>
+            <span className="hidden sm:inline text-xs text-muted-foreground">Connected</span>
           </div>
           <ReadingListsButton />
           <ShareButton />

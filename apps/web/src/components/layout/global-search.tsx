@@ -87,7 +87,7 @@ export function GlobalSearch({ topicId }: GlobalSearchProps) {
 
   return (
     <>
-      <div className="relative flex-1 max-w-xs">
+      <div className="relative flex-1 min-w-0 max-w-xs">
         <form onSubmit={handleSubmit} className="relative">
           <input
             ref={inputRef}
@@ -137,7 +137,7 @@ export function GlobalSearch({ topicId }: GlobalSearchProps) {
         {open && (
           <div
             ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-1 bg-white border border-[oklch(0.9_0_0)] rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-1 bg-white border border-[oklch(0.9_0_0)] rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto min-w-[200px]"
           >
             {results.length === 0 ? (
               <div className="px-3 py-2 text-xs text-[oklch(0.55_0_0)]">No results found.</div>

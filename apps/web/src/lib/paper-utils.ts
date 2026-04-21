@@ -1,17 +1,24 @@
 /**
  * Safely coerce any value to a string. Useful for rendering potentially-object values.
+ * Checks common text fields before falling back to JSON.
  */
 export function safeString(val: any): string {
   if (typeof val === 'string') return val;
   if (val == null) return '';
   if (typeof val === 'number' || typeof val === 'boolean') return String(val);
   if (typeof val === 'object') {
-    return typeof val.title === 'string' ? val.title
-      : typeof val.id === 'string' ? val.id
-      : typeof val.name === 'string' ? val.name
-      : '';
+    // Check common text-bearing fields in priority order
+    if (typeof val.text === 'string') return val.text;
+    if (typeof val.statement === 'string') return val.statement;
+    if (typeof val.title === 'string') return val.title;
+    if (typeof val.name === 'string') return val.name;
+    if (typeof val.finding === 'string') return val.finding;
+    if (typeof val.question === 'string') return val.question;
+    if (typeof val.id === 'string') return val.id;
+    // Last resort: truncated JSON so we never render "[object Object]"
+    try { return JSON.stringify(val).slice(0, 120); } catch { return ''; }
   }
-  return '';
+  return String(val);
 }
 
 /**

@@ -242,7 +242,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
           <p className="text-[10px] text-muted-foreground mb-2">
             ⚡ Claims where papers disagree — revealing where the field is still uncertain.
           </p>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 auto-rows-fr">
             {contradictions.map((c, i) => (
               <ContradictionCard key={i} c={c} />
             ))}

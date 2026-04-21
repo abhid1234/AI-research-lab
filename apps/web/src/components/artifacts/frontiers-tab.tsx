@@ -68,7 +68,7 @@ function FrontierCard({ f }: { f: any }) {
             ? (typeof primaryPaper?.paperId === 'string' ? primaryPaper.paperId : typeof primaryPaper?.id === 'string' ? primaryPaper.id : '')
             : '';
           const primaryTitle: string = primaryPaper
-            ? (typeof primaryPaper === 'string' ? primaryPaper : primaryPaper?.title ?? '')
+            ? (typeof primaryPaper === 'string' ? primaryPaper : safeString(primaryPaper?.title ?? primaryPaper))
             : '';
           return primaryId || primaryTitle ? (
             <a
@@ -111,9 +111,9 @@ function FrontierCard({ f }: { f: any }) {
             {sourcesOpen && (
               <div className="mt-1 space-y-0.5 pl-2">
                 {sourcePapers.map((sp: any, j: number) => {
-                  const title = typeof sp === 'string' ? sp : sp.title ?? sp.id ?? '';
+                  const title = typeof sp === 'string' ? sp : safeString(sp.title ?? sp.id ?? sp);
                   const paperId: string = typeof sp?.paperId === 'string' ? sp.paperId : typeof sp?.id === 'string' ? sp.id : '';
-                  const contribution = typeof sp?.contribution === 'string' ? sp.contribution : '';
+                  const contribution = typeof sp?.contribution === 'string' ? sp.contribution : safeString(sp?.contribution);
                   return (
                     <div key={j} className="flex items-start gap-1">
                       <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
@@ -150,7 +150,7 @@ function FrontierCard({ f }: { f: any }) {
                       ? (typeof fallbackPaper?.paperId === 'string' ? fallbackPaper.paperId : typeof fallbackPaper?.id === 'string' ? fallbackPaper.id : '')
                       : '';
                     const fallbackTitle: string = fallbackPaper
-                      ? (typeof fallbackPaper === 'string' ? fallbackPaper : fallbackPaper?.title ?? '')
+                      ? (typeof fallbackPaper === 'string' ? fallbackPaper : safeString(fallbackPaper?.title ?? fallbackPaper))
                       : '';
                     const linkId = impPaperId || fallbackId;
                     const linkTitle = impPaperTitle || fallbackTitle;
@@ -187,7 +187,7 @@ function FrontierCard({ f }: { f: any }) {
                       ? (typeof fallbackPaper?.paperId === 'string' ? fallbackPaper.paperId : typeof fallbackPaper?.id === 'string' ? fallbackPaper.id : '')
                       : '';
                     const fallbackTitle: string = fallbackPaper
-                      ? (typeof fallbackPaper === 'string' ? fallbackPaper : fallbackPaper?.title ?? '')
+                      ? (typeof fallbackPaper === 'string' ? fallbackPaper : safeString(fallbackPaper?.title ?? fallbackPaper))
                       : '';
                     const linkId = qPaperId || fallbackId;
                     const linkTitle = qPaperTitle || fallbackTitle;
@@ -389,8 +389,8 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
       {/* Surprising / Controversial findings widget */}
       <SurprisingFindings frontiers={frontiers} />
 
-      {/* Summary stats — single horizontal bar */}
-      <div className="flex items-center gap-4 rounded-lg border border-blue-500/20 bg-gradient-to-r from-blue-600/10 to-indigo-600/5 px-4 py-2">
+      {/* Summary stats — single horizontal bar (wraps on mobile) */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-blue-500/20 bg-gradient-to-r from-blue-600/10 to-indigo-600/5 px-4 py-2">
         <p className="text-xs font-semibold text-foreground mr-2">Research Frontiers</p>
         <div className="flex items-center gap-1">
           <span className="text-sm font-bold">{frontiers.length}</span>
@@ -401,12 +401,12 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
               : ''}
           </span>
         </div>
-        <span className="text-muted-foreground/30">·</span>
+        <span className="text-muted-foreground/30 hidden sm:inline">·</span>
         <div className="flex items-center gap-1">
           <span className="text-sm font-bold">{pivotingTrends.length}</span>
           <span className="text-[10px] text-muted-foreground">pivoting trends</span>
         </div>
-        <span className="text-muted-foreground/30">·</span>
+        <span className="text-muted-foreground/30 hidden sm:inline">·</span>
         <div className="flex items-center gap-1">
           <span className="text-sm font-bold">{gaps.length}</span>
           <span className="text-[10px] text-muted-foreground">research gaps</span>

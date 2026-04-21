@@ -88,19 +88,19 @@ export function ConnectionsTab({ dbPapers = [] }: ConnectionsTabProps) {
 
   return (
     <div className="space-y-4">
-      {/* Compact summary bar */}
-      <div className="flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-2">
+      {/* Compact summary bar (wraps on mobile) */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border bg-card px-4 py-2">
         <p className="text-xs font-semibold text-foreground mr-2">Connections</p>
         <span className="flex items-center gap-1.5">
           <span className="text-sm font-bold tabular-nums">{dbPapers.length}</span>
           <span className="text-[10px] text-muted-foreground">papers</span>
         </span>
-        <span className="text-muted-foreground/30">·</span>
+        <span className="text-muted-foreground/30 hidden sm:inline">·</span>
         <span className="flex items-center gap-1.5">
           <span className="text-sm font-bold tabular-nums">{dbClusters.length}</span>
           <span className="text-[10px] text-muted-foreground">research groups</span>
         </span>
-        <span className="text-muted-foreground/30">·</span>
+        <span className="text-muted-foreground/30 hidden sm:inline">·</span>
         <span className="flex items-center gap-1.5">
           <span className="text-sm font-bold tabular-nums">{uniqueCategories.size}</span>
           <span className="text-[10px] text-muted-foreground">categories</span>
