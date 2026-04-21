@@ -55,20 +55,11 @@ function buildPrompt(input: FrontierDetectorInput): string {
     )
     .join('\n');
 
-  // Include only high-signal chunks (those referenced in prior agent outputs)
-  const referencedChunkIds = new Set<string>([
-    ...paperAnalysis.papers.flatMap((p) =>
-      p.claims.flatMap((c) => c.chunkIds),
-    ),
-    ...contradictions.contradictions.flatMap((c) => [
-      ...c.claim1.chunkIds,
-      ...c.claim2.chunkIds,
-    ]),
-    ...benchmarks.benchmarkTables.flatMap((t) =>
-      t.entries.flatMap((e) => e.chunkIds),
-    ),
-    ...benchmarks.warnings.flatMap((w) => w.chunkIds),
-  ]);
+  // Schema simplification dropped chunkIds from claims/entries/warnings.
+  // Only paper-analyzer claims still carry chunk grounding.
+  const referencedChunkIds = new Set<string>(
+    paperAnalysis.papers.flatMap((p) => p.claims.flatMap((c) => c.chunkIds)),
+  );
 
   const relevantChunks = input.papers.flatMap((p) =>
     p.chunks
