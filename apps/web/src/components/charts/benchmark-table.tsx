@@ -76,14 +76,28 @@ export function BenchmarkTable({ table }: { table: BenchmarkTableData }) {
     return null; // Don't show empty tables
   }
 
+  // Normalize scores to a `Record<string, number>` regardless of source shape.
+  // Old shape: `scores: { metric: value }`. New shape: `scores: [{metric, value}]`.
+  function normalizeScores(s: any): Record<string, number | string> {
+    if (!s) return {};
+    if (Array.isArray(s)) {
+      const out: Record<string, number | string> = {};
+      for (const row of s) {
+        if (row && typeof row === 'object' && typeof row.metric === 'string') {
+          out[row.metric] = row.value;
+        }
+      }
+      return out;
+    }
+    if (typeof s === 'object') return s;
+    return {};
+  }
+
   // Collect ALL score keys across all entries (not just first)
   const scoreKeySet = new Set<string>();
   for (const entry of table.entries) {
-    if (entry.scores && typeof entry.scores === 'object') {
-      for (const k of Object.keys(entry.scores)) {
-        scoreKeySet.add(k);
-      }
-    }
+    const scores = normalizeScores(entry.scores);
+    for (const k of Object.keys(scores)) scoreKeySet.add(k);
   }
   const scoreKeys = Array.from(scoreKeySet);
   const hasScores = scoreKeys.length > 0;
@@ -114,15 +128,18 @@ export function BenchmarkTable({ table }: { table: BenchmarkTableData }) {
                 <ModelBadge name={entry.model} index={i} conditions={hasScores ? entry.conditions : undefined} />
               </TableCell>
               {hasScores ? (
-                scoreKeys.map((k) => (
-                  <TableCell key={k}>
-                    {entry.scores[k] != null ? (
-                      <ScoreCell value={entry.scores[k]} />
-                    ) : (
-                      <span className="text-muted-foreground text-xs">—</span>
-                    )}
-                  </TableCell>
-                ))
+                (() => {
+                  const norm = normalizeScores(entry.scores);
+                  return scoreKeys.map((k) => (
+                    <TableCell key={k}>
+                      {norm[k] != null ? (
+                        <ScoreCell value={norm[k]} />
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </TableCell>
+                  ));
+                })()
               ) : (
                 <TableCell>
                   <span className="text-xs text-muted-foreground">{entry.conditions ?? '—'}</span>

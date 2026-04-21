@@ -149,7 +149,9 @@ export const BenchmarkExtractorOutput = z.object({
         z.object({
           model: z.string(),
           paper: paperRef,
-          scores: z.record(z.string(), z.number()),
+          // Anthropic doesn't support `additionalProperties: number` style schemas;
+          // model scores as an array of {metric, value} pairs instead of a record.
+          scores: z.array(z.object({ metric: z.string(), value: z.number() })),
           conditions: z.string(),
           chunkIds: z.array(z.string()),
         }),
