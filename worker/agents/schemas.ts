@@ -218,7 +218,8 @@ export const FrontierDetectorOutput = z.object({
       trendContext: z.string(),
       implications: z.array(z.string()),
       openQuestions: z.array(z.string()),
-      confidence: z.number().min(0).max(1),
+      // Anthropic strict mode rejects min/max on number — clamp downstream if needed.
+      confidence: z.number(),
     }),
   ),
   pivotingTrends: z.array(
