@@ -62,12 +62,17 @@
   --ring: var(--c-warm-ink);
   --radius: 0.625rem;
 
-  /* Recharts color stops — warm-tuned for light mode */
-  --chart-1: oklch(0.55 0.16 240);  /* blue */
-  --chart-2: oklch(0.65 0.14 195);  /* cyan */
-  --chart-3: oklch(0.65 0.16 70);   /* warm orange */
-  --chart-4: oklch(0.60 0.14 160);  /* teal */
-  --chart-5: oklch(0.55 0.18 340);  /* magenta */
+  /* Chart series — warm-neutral editorial palette (10 distinct, none "AI-slop") */
+  --chart-1: oklch(0.50 0.18 325);  /* deep plum (echoes provenance accent) */
+  --chart-2: oklch(0.65 0.16 70);   /* warm amber */
+  --chart-3: oklch(0.60 0.12 195);  /* muted teal */
+  --chart-4: oklch(0.55 0.14 110);  /* deep chartreuse / olive */
+  --chart-5: oklch(0.55 0.18 20);   /* warm rose */
+  --chart-6: oklch(0.50 0.13 260);  /* muted indigo (desaturated, not the AI-slop one) */
+  --chart-7: oklch(0.55 0.13 90);   /* deep ochre */
+  --chart-8: oklch(0.50 0.12 150);  /* forest green */
+  --chart-9: oklch(0.55 0.16 40);   /* terracotta */
+  --chart-10: oklch(0.65 0.13 350); /* dusty mauve-pink */
 
   --sidebar: var(--c-warm-white);
   --sidebar-foreground: var(--c-warm-ink);
@@ -101,6 +106,11 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-chart-10: var(--chart-10);
+  --color-chart-9: var(--chart-9);
+  --color-chart-8: var(--chart-8);
+  --color-chart-7: var(--chart-7);
+  --color-chart-6: var(--chart-6);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -160,6 +170,11 @@
   --chart-3: oklch(0.6 0.15 290);
   --chart-4: oklch(0.65 0.12 160);
   --chart-5: oklch(0.6 0.14 340);
+  --chart-6: oklch(0.65 0.13 70);
+  --chart-7: oklch(0.65 0.13 110);
+  --chart-8: oklch(0.60 0.12 30);
+  --chart-9: oklch(0.65 0.13 230);
+  --chart-10: oklch(0.65 0.13 350);
   --sidebar: var(--c-navy-900);
   --sidebar-foreground: var(--c-foreground-on-dark);
   --sidebar-primary: var(--c-blue-bright);
@@ -178,12 +193,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply font-sans bg-background text-foreground;
+    color-scheme: light dark;
+  }
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "ss01", "cv11";
-  }
-  html {
-    @apply font-sans;
   }
 }
 

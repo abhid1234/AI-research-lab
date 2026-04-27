@@ -85,23 +85,23 @@ export function ResearchLandscape({ papers }: { papers: any[] }) {
   return (
     <ResponsiveContainer width="100%" height={320}>
       <RadarChart data={data} cx="50%" cy="50%" outerRadius="72%">
-        <PolarGrid stroke="oklch(0.85 0 0)" />
+        <PolarGrid stroke="var(--hairline)" />
         <PolarAngleAxis
           dataKey="axis"
-          tick={{ fontSize: 11, fill: 'oklch(0.4 0 0)' }}
+          tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
         />
         <PolarRadiusAxis
-          tick={{ fontSize: 9, fill: 'oklch(0.6 0 0)' }}
+          tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
           axisLine={false}
         />
         <Radar
           name="Papers"
           dataKey="count"
-          stroke="#6366f1"
-          fill="#6366f1"
+          stroke="var(--chart-1)"
+          fill="var(--chart-1)"
           fillOpacity={0.18}
           strokeWidth={2}
-          dot={{ r: 3, fill: '#6366f1', stroke: 'white', strokeWidth: 1.5 }}
+          dot={{ r: 3, fill: 'var(--chart-1)', stroke: 'var(--background)', strokeWidth: 1.5 }}
         />
         <Tooltip content={<CustomTooltip />} />
       </RadarChart>
