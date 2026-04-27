@@ -30,13 +30,18 @@ export default function Home() {
     }
   }, []);
 
-  // Fetch total topic count once
+  // Fetch total topic count once. Exclude meta-collections ("All AI Papers")
+  // so the header reads "9 topics" — same number as the dropdown's content
+  // categories and the Overview "Topics" stat.
   useEffect(() => {
     fetch('/api/topics')
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setTopicCount(data.length);
+          const contentTopics = data.filter(
+            (t: { name?: string }) => t.name !== 'All AI Papers',
+          );
+          setTopicCount(contentTopics.length);
         }
       })
       .catch(() => {});

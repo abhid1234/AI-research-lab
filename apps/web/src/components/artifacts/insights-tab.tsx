@@ -50,11 +50,11 @@ function ContradictionCard({ c }: { c: any }) {
   const analysis = typeof c.analysis === 'string' ? c.analysis : '';
 
   return (
-    <Card className="h-full flex flex-col" style={{ borderLeftWidth: '4px', borderLeftColor: '#f43f5e' }}>
-      <CardContent className="p-3 space-y-2 flex flex-col flex-1">
+    <Card className="h-[420px] flex flex-col" style={{ borderLeftWidth: '4px', borderLeftColor: '#f43f5e' }}>
+      <CardContent className="p-3 space-y-2 flex flex-col flex-1 min-h-0 overflow-hidden">
         {/* Collapsed header — badge + importance + toggle */}
         <div
-          className="flex items-center justify-between gap-2 cursor-pointer"
+          className="flex items-center justify-between gap-2 cursor-pointer shrink-0"
           onClick={() => setExpanded(!expanded)}
         >
           <div className="flex items-center gap-2 flex-wrap">
@@ -103,74 +103,74 @@ function ContradictionCard({ c }: { c: any }) {
         {/* Expanded full analysis */}
         {expanded && (
           <>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div className="rounded-md bg-rose-500/5 border border-rose-500/15 p-2 space-y-1">
-                <p className="text-[10px] text-rose-400 font-semibold">Claim A</p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 flex-1 min-h-0">
+              <div className="rounded-md bg-rose-500/5 border border-rose-500/15 p-2 space-y-1 overflow-hidden flex flex-col">
+                <p className="text-[10px] text-rose-400 font-semibold shrink-0">Claim A</p>
                 {claim1Statement && (claim1PaperId || claim1Title) ? (
                   <a
                     href={paperLink(claim1PaperId || undefined, claim1Title)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs hover:text-primary transition-colors hover:underline underline-offset-2 block"
+                    className="text-xs hover:text-primary transition-colors hover:underline underline-offset-2 block line-clamp-3"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {claim1Statement}
                   </a>
                 ) : (
-                  <p className="text-xs">{claim1Statement}</p>
+                  <p className="text-xs line-clamp-3">{claim1Statement}</p>
                 )}
                 {claim1Title && (
                   <a
                     href={paperLink(claim1PaperId || undefined, claim1Title)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[10px] text-primary/70 hover:text-primary transition-colors flex items-center gap-1 hover:underline underline-offset-2"
+                    className="text-[10px] text-primary/70 hover:text-primary transition-colors flex items-center gap-1 hover:underline underline-offset-2 shrink-0"
                   >
                     <span>↗</span>
                     <span className="italic line-clamp-1">{claim1Title}</span>
                   </a>
                 )}
                 {c.claim1?.evidence && (
-                  <p className="text-[10px] text-muted-foreground/70 italic">
+                  <p className="text-[10px] text-muted-foreground/70 italic line-clamp-3">
                     {typeof c.claim1.evidence === 'string' ? c.claim1.evidence : ''}
                   </p>
                 )}
               </div>
-              <div className="rounded-md bg-teal-500/5 border border-teal-500/15 p-2 space-y-1">
-                <p className="text-[10px] text-teal-700 dark:text-teal-400 font-semibold">Claim B</p>
+              <div className="rounded-md bg-teal-500/5 border border-teal-500/15 p-2 space-y-1 overflow-hidden flex flex-col">
+                <p className="text-[10px] text-teal-700 dark:text-teal-400 font-semibold shrink-0">Claim B</p>
                 {claim2Statement && (claim2PaperId || claim2Title) ? (
                   <a
                     href={paperLink(claim2PaperId || undefined, claim2Title)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs hover:text-primary transition-colors hover:underline underline-offset-2 block"
+                    className="text-xs hover:text-primary transition-colors hover:underline underline-offset-2 block line-clamp-3"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {claim2Statement}
                   </a>
                 ) : (
-                  <p className="text-xs">{claim2Statement}</p>
+                  <p className="text-xs line-clamp-3">{claim2Statement}</p>
                 )}
                 {claim2Title && (
                   <a
                     href={paperLink(claim2PaperId || undefined, claim2Title)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[10px] text-primary/70 hover:text-primary transition-colors flex items-center gap-1 hover:underline underline-offset-2"
+                    className="text-[10px] text-primary/70 hover:text-primary transition-colors flex items-center gap-1 hover:underline underline-offset-2 shrink-0"
                   >
                     <span>↗</span>
                     <span className="italic line-clamp-1">{claim2Title}</span>
                   </a>
                 )}
                 {c.claim2?.evidence && (
-                  <p className="text-[10px] text-muted-foreground/70 italic">
+                  <p className="text-[10px] text-muted-foreground/70 italic line-clamp-3">
                     {typeof c.claim2.evidence === 'string' ? c.claim2.evidence : ''}
                   </p>
                 )}
               </div>
             </div>
             {analysis && (
-              <p className="text-xs text-muted-foreground leading-relaxed">{analysis}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-6 shrink-0">{analysis}</p>
             )}
           </>
         )}
@@ -264,14 +264,14 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   const sides: any[] = Array.isArray(d.sides) ? d.sides : [];
 
                   return (
-                    <Card key={i} className="h-full flex flex-col" style={{ borderLeftWidth: '4px', borderLeftColor: '#8b5cf6' }}>
-                      <CardHeader className="p-3 pb-1">
-                        <CardTitle className="text-xs font-semibold leading-snug">{question}</CardTitle>
+                    <Card key={i} className="h-[220px] flex flex-col" style={{ borderLeftWidth: '4px', borderLeftColor: '#8b5cf6' }}>
+                      <CardHeader className="p-3 pb-1 shrink-0">
+                        <CardTitle className="text-xs font-semibold leading-snug line-clamp-2">{question}</CardTitle>
                         {significance && (
                           <CardDescription className="text-[10px] line-clamp-2">{significance}</CardDescription>
                         )}
                       </CardHeader>
-                      <CardContent className="px-3 pb-3 pt-0 mt-auto">
+                      <CardContent className="px-3 pb-3 pt-0 mt-auto shrink-0">
                         <div className="grid grid-cols-2 gap-1.5">
                           {[sides[0] ?? null, sides[1] ?? null].map((side: any, j: number) => {
                             const sideLabel = j === 0 ? 'A' : 'B';
@@ -364,10 +364,10 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   return (
                     <div
                       key={i}
-                      className="rounded-md border border-border bg-emerald-50/30 dark:bg-emerald-950/10 px-3 py-2 space-y-1 h-full flex flex-col"
+                      className="rounded-md border border-border bg-emerald-50/30 dark:bg-emerald-950/10 px-3 py-2 space-y-1 h-[140px] flex flex-col overflow-hidden"
                       style={{ borderLeftWidth: '4px', borderLeftColor: '#10b981' }}
                     >
-                      <div className="flex items-start gap-2 flex-1">
+                      <div className="flex items-start gap-2 flex-1 min-h-0">
                         <span className="shrink-0 mt-0.5 text-emerald-500 text-xs font-bold">✓</span>
                         <div className="space-y-0.5 flex-1 min-w-0">
                           {finding && (firstSPId || firstSPTitle) ? (
@@ -375,12 +375,12 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                               href={paperLink(firstSPId || undefined, firstSPTitle || finding)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs font-medium leading-snug hover:text-primary transition-colors hover:underline underline-offset-2 block"
+                              className="text-xs font-medium leading-snug hover:text-primary transition-colors hover:underline underline-offset-2 block line-clamp-2"
                             >
                               {finding}
                             </a>
                           ) : (
-                            <p className="text-xs font-medium leading-snug">{finding}</p>
+                            <p className="text-xs font-medium leading-snug line-clamp-2">{finding}</p>
                           )}
                           <div className="flex flex-wrap gap-x-1 gap-y-0.5">
                             {supportingPapers.slice(0, 3).map((sp: any, si: number) => {
@@ -444,10 +444,10 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                   return (
                     <div
                       key={i}
-                      className="rounded-md bg-amber-50/60 dark:bg-amber-950/20 border border-amber-300/40 dark:border-amber-800/30 px-3 py-2 space-y-1 h-full flex flex-col"
+                      className="rounded-md bg-amber-50/60 dark:bg-amber-950/20 border border-amber-300/40 dark:border-amber-800/30 px-3 py-2 space-y-1 h-[140px] flex flex-col overflow-hidden"
                       style={{ borderLeftWidth: '4px', borderLeftColor: '#f59e0b' }}
                     >
-                      <div className="flex items-start gap-1.5 flex-1">
+                      <div className="flex items-start gap-1.5 flex-1 min-h-0">
                         <span className="shrink-0 text-amber-600 dark:text-amber-500 mt-0.5 text-xs">⚠</span>
                         <div className="flex-1 min-w-0 space-y-0.5">
                           <div className="flex items-center gap-1.5 flex-wrap">

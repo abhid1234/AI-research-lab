@@ -278,11 +278,11 @@ function PaperCard({ paper }: { paper: any }) {
       role="link"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter') openAbs(); }}
-      className="group flex h-full flex-col rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden relative cursor-pointer"
+      className="group flex h-[300px] flex-col rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden relative cursor-pointer"
       style={{ borderLeftWidth: '4px', borderLeftColor: colors?.border ?? '#6366f1' }}
     >
       {/* Header strip with category + date */}
-      <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5">
+      <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5 shrink-0">
         <div className="flex items-center gap-1.5 min-w-0">
           <span
             className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
@@ -314,7 +314,7 @@ function PaperCard({ paper }: { paper: any }) {
 
       {/* Quality badges row */}
       {(citationTier || influentialCitations > 0 || hfUpvotes >= 50 || hasCode || orDecision || venue) && (
-        <div className="flex items-center gap-1.5 flex-wrap px-3 pb-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap px-3 pb-1.5 shrink-0">
           {citationTier && (
             <span
               className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded"
@@ -369,7 +369,7 @@ function PaperCard({ paper }: { paper: any }) {
       )}
 
       {/* Title */}
-      <div className="px-3 pb-1.5">
+      <div className="px-3 pb-1.5 shrink-0">
         <h3
           className="text-[13px] font-semibold leading-snug text-foreground group-hover:underline underline-offset-4 decoration-foreground/40 transition-colors line-clamp-2"
           style={{ wordBreak: 'break-word' }}
@@ -380,7 +380,7 @@ function PaperCard({ paper }: { paper: any }) {
 
       {/* Authors */}
       {authorStr && (
-        <div className="px-3 pb-1.5">
+        <div className="px-3 pb-1.5 shrink-0">
           <p className="text-[10.5px] text-gray-500 truncate">
             <span className="text-gray-700">{authorStr}</span>
             {moreAuthors && <span className="text-gray-400">{moreAuthors}</span>}
@@ -389,7 +389,7 @@ function PaperCard({ paper }: { paper: any }) {
       )}
 
       {/* Abstract snippet — flex-1 fills remaining space so bottom strip pins to bottom */}
-      <div className="px-3 pb-3 flex-1">
+      <div className="px-3 pb-3 flex-1 min-h-0 overflow-hidden">
         {abstract && (
           <p className="text-[11px] text-gray-600 leading-relaxed line-clamp-3">
             {abstract}
@@ -400,11 +400,11 @@ function PaperCard({ paper }: { paper: any }) {
       {/* Bottom meta strip — only show if takeaway exists */}
       {paper.takeaway && (
         <div
-          className="flex items-start gap-2 px-3 py-2 border-t text-[10.5px]"
+          className="flex items-start gap-2 px-3 py-2 border-t text-[10.5px] shrink-0"
           style={{ background: colors?.bg, borderTopColor: `${colors?.border}30` }}
         >
           {typeof paper.takeaway === 'string' && paper.takeaway && (
-            <p className="flex-1 text-gray-700 italic leading-relaxed">
+            <p className="flex-1 text-gray-700 italic leading-relaxed line-clamp-2">
               <span className="font-semibold not-italic" style={{ color: colors?.text }}>Takeaway:</span> {paper.takeaway}
             </p>
           )}
@@ -413,7 +413,7 @@ function PaperCard({ paper }: { paper: any }) {
 
       {/* Footer action bar — explicit links to abs + PDF */}
       {isRealArxiv && (
-        <div className="flex items-center gap-3 px-3 py-1.5 border-t border-gray-100 text-[10px] text-gray-500 bg-gray-50/50">
+        <div className="flex items-center gap-3 px-3 py-1.5 border-t border-gray-100 text-[10px] text-gray-500 bg-gray-50/50 shrink-0">
           <a
             href={url}
             target="_blank"

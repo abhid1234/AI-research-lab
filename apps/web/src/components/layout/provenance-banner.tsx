@@ -3,7 +3,15 @@ interface ProvenanceBannerProps {
   topicName?: string;
   dateRange?: string;
   lastUpdated?: string;
-  dbPapers?: { publishedAt?: string | Date | null; citationCount?: number; hasCode?: boolean; isOpenAccess?: boolean }[];
+  dbPapers?: {
+    publishedAt?: string | Date | null;
+    citationCount?: number;
+    influentialCitationCount?: number;
+    venue?: string | null;
+    authors?: { name?: string }[] | null;
+    hasCode?: boolean;
+    isOpenAccess?: boolean;
+  }[];
   agentCount?: number;
 }
 
@@ -42,10 +50,28 @@ export function ProvenanceBanner({
   const citationValues = papers.map((p) => Number(p.citationCount ?? 0)).filter((n) => !isNaN(n));
   const totalCitations = citationValues.reduce((a, b) => a + b, 0);
   const medianCitations = Math.round(median(citationValues));
+  const maxCitations = citationValues.length ? Math.max(...citationValues) : 0;
 
-  const withCode = papers.filter((p) => Boolean(p.hasCode)).length;
-  const openAccess = papers.filter((p) => Boolean(p.isOpenAccess)).length;
-  const pct = (n: number) => (paperCount > 0 ? Math.round((n / paperCount) * 100) : 0);
+  const influentialValues = papers.map((p) => Number(p.influentialCitationCount ?? 0)).filter((n) => !isNaN(n));
+  const totalInfluential = influentialValues.reduce((a, b) => a + b, 0);
+  const papersWithInfluential = influentialValues.filter((n) => n >= 1).length;
+
+  const uniqueVenues = new Set<string>();
+  for (const p of papers) {
+    const v = (p.venue ?? '').trim();
+    if (v) uniqueVenues.add(v);
+  }
+
+  const uniqueAuthors = new Set<string>();
+  for (const p of papers) {
+    const list = Array.isArray(p.authors) ? p.authors : [];
+    for (const a of list) {
+      const name = typeof a === 'object' && a !== null ? (a.name ?? '').trim() : '';
+      if (name) uniqueAuthors.add(name);
+    }
+  }
+
+  const topicsCovered = 9;
 
   // Soft pinkish-lavender (mauve) wash with a deeper plum left rule.
   // Restrained but distinct — reads as a curated editorial callout.
@@ -101,16 +127,28 @@ export function ProvenanceBanner({
       </header>
 
       <div className="px-6 pb-5 grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4 lg:divide-x lg:divide-[color:var(--hairline)]">
-        {/* Left: Where this came from */}
+        {/* Left: Source + selection criteria */}
         <div className="space-y-2 lg:pr-6">
           <p className="text-eyebrow">Where this came from</p>
           <dl className="space-y-1.5 text-xs">
-            <Row label="Papers">
+            <Row label="Source">
               <span className="text-foreground">arxiv</span>
               <span className="text-muted-foreground"> · cs.AI, CL, LG, MA, CV · via Semantic Scholar</span>
             </Row>
-            <Row label="Quality">
-              <span className="text-muted-foreground">HuggingFace · Papers with Code · OpenReview</span>
+            <Row label="Topics">
+              <span className="text-foreground">9 fixed queries</span>
+              <span className="text-muted-foreground"> · LLM Agents, Reasoning, Vision, RAG, Code, Safety, Fine-tuning, Scaling, Eval</span>
+            </Row>
+            <Row label="Selection">
+              <span className="text-foreground">top ~50 per topic</span>
+              <span className="text-muted-foreground"> · relevance-ranked, citation-sorted</span>
+            </Row>
+            <Row label="Quality bar">
+              <span className="text-foreground">influential cites ≥ 1 OR total cites ≥ 5</span>
+              <span className="text-muted-foreground"> · abstract required · CS only</span>
+            </Row>
+            <Row label="Enrichment">
+              <span className="text-muted-foreground">HuggingFace upvotes · Papers with Code · OpenReview</span>
             </Row>
             <Row label="Embeddings">
               <span className="text-foreground">Gemini text-embedding-001</span>
@@ -121,7 +159,7 @@ export function ProvenanceBanner({
               <span className="text-muted-foreground"> · {agentCount ?? 5} specialized agents</span>
             </Row>
             <Row label="Refresh">
-              <span className="text-foreground">Weekly cron</span>
+              <span className="text-foreground">Weekly cron · same quality bar</span>
               {lastSyncStr && <span className="text-muted-foreground"> · last sync {lastSyncStr}</span>}
             </Row>
           </dl>
@@ -142,14 +180,31 @@ export function ProvenanceBanner({
               {medianCitations > 0 && (
                 <span className="text-muted-foreground"> · median {medianCitations.toLocaleString()}</span>
               )}
+              {maxCitations > 0 && (
+                <span className="text-muted-foreground"> · max {maxCitations.toLocaleString()}</span>
+              )}
             </Row>
-            <Row label="With code">
-              <span className="font-semibold tabular-nums text-foreground">{withCode.toLocaleString()}</span>
-              <span className="text-muted-foreground"> ({pct(withCode)}%)</span>
+            <Row label="Influential">
+              <span className="font-semibold tabular-nums text-foreground">{totalInfluential.toLocaleString()}</span>
+              <span className="text-muted-foreground"> influential cites</span>
+              {papersWithInfluential > 0 && (
+                <span className="text-muted-foreground"> · {papersWithInfluential.toLocaleString()} papers w/ ≥1</span>
+              )}
             </Row>
-            <Row label="Open access">
-              <span className="font-semibold tabular-nums text-foreground">{openAccess.toLocaleString()}</span>
-              <span className="text-muted-foreground"> ({pct(openAccess)}%)</span>
+            <Row label="Topics">
+              <span className="font-semibold tabular-nums text-foreground">{topicsCovered}</span>
+              <span className="text-muted-foreground"> categories · papers can span multiple</span>
+            </Row>
+            <Row label="Venues">
+              <span className="font-semibold tabular-nums text-foreground">{uniqueVenues.size.toLocaleString()}</span>
+              <span className="text-muted-foreground"> unique conferences / journals</span>
+            </Row>
+            <Row label="Authors">
+              <span className="font-semibold tabular-nums text-foreground">{uniqueAuthors.size.toLocaleString()}</span>
+              <span className="text-muted-foreground"> unique researchers</span>
+            </Row>
+            <Row label="Excluded">
+              <span className="text-muted-foreground">papers without abstracts, low-citation papers, non-CS work, papers that don&apos;t match any of the 9 queries</span>
             </Row>
           </dl>
         </div>

@@ -334,7 +334,11 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
 function ResultCard({ paper: p }: { paper: any }) {
   const finding: string = typeof p.mainResult === 'string' && p.mainResult ? p.mainResult
     : typeof p.takeaway === 'string' && p.takeaway ? p.takeaway : '—';
-  const paperTitle: string = typeof p.title === 'string' ? p.title : (typeof p.paperId === 'string' ? p.paperId : '');
+  const rawTitle: string = typeof p.title === 'string' ? p.title.trim() : '';
+  // Don't fall back to paperId — those are opaque hashes, never user-readable.
+  // Empty title → footer is skipped entirely (handled below).
+  const looksLikeId = /^[a-f0-9]{32,}$/i.test(rawTitle) || /^\d{4}\.\d{4,5}(v\d+)?$/.test(rawTitle);
+  const paperTitle: string = looksLikeId ? '' : rawTitle;
   const paperId: string = typeof p.paperId === 'string' ? p.paperId : (typeof p.id === 'string' ? p.id : '');
   const authorName: string = typeof p.authors === 'string' ? p.authors : (typeof p.author === 'string' ? p.author : '');
   const date: string = typeof p.date === 'string' ? p.date : (typeof p.year === 'string' || typeof p.year === 'number' ? String(p.year) : (typeof p.publishedAt === 'string' ? p.publishedAt : ''));
@@ -353,11 +357,11 @@ function ResultCard({ paper: p }: { paper: any }) {
       role="link"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter') openAbs(); }}
-      className="group flex h-full flex-col rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden cursor-pointer"
+      className="group flex h-[180px] flex-col rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden cursor-pointer"
       style={{ borderLeftWidth: '4px', borderLeftColor: colors.border }}
     >
       {/* Header strip — category pill + meta */}
-      <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5">
+      <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5 shrink-0">
         <span
           className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
           style={{ background: colors.pill, color: colors.text }}
@@ -371,7 +375,7 @@ function ResultCard({ paper: p }: { paper: any }) {
       </div>
 
       {/* Finding (the headline result) */}
-      <div className="px-3 pb-1.5">
+      <div className="px-3 pb-1.5 shrink-0">
         <h3 className="text-[13px] font-semibold leading-snug text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2">
           {finding}
         </h3>
@@ -379,7 +383,7 @@ function ResultCard({ paper: p }: { paper: any }) {
 
       {/* Approach / details */}
       {approach && (
-        <div className="px-3 pb-3 flex-1">
+        <div className="px-3 pb-3 flex-1 min-h-0 overflow-hidden">
           <p className="text-[11px] text-gray-600 leading-relaxed line-clamp-3">{approach}</p>
         </div>
       )}
@@ -387,7 +391,7 @@ function ResultCard({ paper: p }: { paper: any }) {
       {/* Footer — paper attribution */}
       {paperTitle && (
         <div
-          className="flex items-center gap-2 px-3 py-1.5 border-t text-[10.5px] text-gray-700"
+          className="flex items-center gap-2 px-3 py-1.5 border-t text-[10.5px] text-gray-700 shrink-0 mt-auto"
           style={{ background: colors.bg, borderTopColor: `${colors.border}30` }}
         >
           <span className="font-semibold not-italic shrink-0" style={{ color: colors.text }}>From:</span>
@@ -434,7 +438,7 @@ function buildTimelineFromPapers(dbPapers: any[]): { topic: string; timeline: { 
     const catTotals = monthCatMap[baseMonth];
     return Object.entries(catTotals)
       .filter(([, count]) => count >= 2)
-      .slice(0, 8)
+      .slice(0, CATEGORIES.length)
       .map(([cat, total]) => ({
         topic: cat,
         timeline: fakeMonths.map((mo, i) => ({
@@ -450,7 +454,7 @@ function buildTimelineFromPapers(dbPapers: any[]): { topic: string; timeline: { 
     months.some(m => (monthCatMap[m]?.[cat] ?? 0) > 0)
   );
 
-  return activeCats.slice(0, 8).map(cat => ({
+  return activeCats.slice(0, CATEGORIES.length).map(cat => ({
     topic: cat,
     timeline: months.map(m => ({
       month: m,
@@ -517,13 +521,13 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
             role={clickable ? 'link' : undefined}
             tabIndex={clickable ? 0 : undefined}
             onKeyDown={clickable ? (e) => { if (e.key === 'Enter') openAbs!(); } : undefined}
-            className={`group flex h-full flex-col rounded-lg bg-white border border-gray-200 transition-all overflow-hidden ${
+            className={`group flex h-[180px] flex-col rounded-lg bg-white border border-gray-200 transition-all overflow-hidden ${
               clickable ? 'hover:border-gray-300 hover:shadow-md cursor-pointer' : ''
             }`}
             style={{ borderLeftWidth: '4px', borderLeftColor: accent.border }}
           >
             {/* Header strip — type pill */}
-            <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5">
+            <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5 shrink-0">
               <span
                 className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
                 style={{ background: accent.pill, color: accent.text }}
@@ -536,14 +540,14 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
             </div>
 
             {/* Question text */}
-            <div className="px-3 pb-1.5">
+            <div className="px-3 pb-1.5 shrink-0">
               <h3 className={`text-[13px] font-semibold leading-snug text-gray-900 line-clamp-2 ${clickable ? 'group-hover:text-blue-700 transition-colors' : ''}`}>
                 {q.text}
               </h3>
             </div>
 
             {/* Detail */}
-            <div className="px-3 pb-3 flex-1">
+            <div className="px-3 pb-3 flex-1 min-h-0 overflow-hidden">
               {q.detail && (
                 <p className="text-[11px] text-gray-600 leading-relaxed line-clamp-3">{q.detail}</p>
               )}
@@ -552,7 +556,7 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
             {/* Footer — paper attribution if available */}
             {q.paperTitle && (
               <div
-                className="flex items-center gap-2 px-3 py-1.5 border-t text-[10.5px] text-gray-700"
+                className="flex items-center gap-2 px-3 py-1.5 border-t text-[10.5px] text-gray-700 shrink-0 mt-auto"
                 style={{ background: accent.bg, borderTopColor: `${accent.border}30` }}
               >
                 <span className="font-semibold not-italic shrink-0" style={{ color: accent.text }}>From:</span>

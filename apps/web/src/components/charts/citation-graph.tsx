@@ -4,8 +4,23 @@ import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { CATEGORIES, CATEGORY_COLORS as SHARED_COLORS, derivePaperCategory, type Category } from '@/lib/categories';
 
-// Bar chart needs just a single border color per category — flatten the shared map.
-const CATEGORY_COLORS: Record<Category, string> = Object.fromEntries(
+// Two-tone fill for bars: a soft pastel body with the saturated border color
+// kept available for accents (tooltip header, modal). Lightens the L of the
+// canonical border color and reduces chroma so the chart reads editorial
+// rather than poster-paint.
+function softenOklch(oklch: string): string {
+  const m = oklch.match(/oklch\(([\d.]+)\s+([\d.]+)\s+([\d.]+)\)/);
+  if (!m) return oklch;
+  const L = parseFloat(m[1]);
+  const C = parseFloat(m[2]);
+  const H = parseFloat(m[3]);
+  return `oklch(${Math.min(0.92, L + 0.25).toFixed(2)} ${(C * 0.55).toFixed(3)} ${H})`;
+}
+
+const CATEGORY_FILL: Record<Category, string> = Object.fromEntries(
+  CATEGORIES.map((c) => [c, softenOklch(SHARED_COLORS[c].border)])
+) as Record<Category, string>;
+const CATEGORY_BORDER: Record<Category, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c, SHARED_COLORS[c].border])
 ) as Record<Category, string>;
 
@@ -19,13 +34,21 @@ interface PaperRef {
 interface BarPoint {
   category: Category;
   count: number;
-  color: string;
+  color: string;       // saturated accent (border)
+  fillColor: string;   // soft pastel fill
   papers: PaperRef[];
 }
 
 interface CustomTooltipProps {
   active?: boolean;
   payload?: { payload: BarPoint }[];
+}
+
+function paperUrl(p: PaperRef): string {
+  const isRealArxiv = p.arxivId && !p.arxivId.startsWith('demo-') && (p.arxivId.includes('.') || p.arxivId.includes('/'));
+  if (isRealArxiv) return `https://arxiv.org/abs/${p.arxivId}`;
+  if (p.title) return `https://scholar.google.com/scholar?q=${encodeURIComponent(p.title)}`;
+  return '#';
 }
 
 function CustomTooltip({ active, payload }: CustomTooltipProps) {
@@ -35,25 +58,52 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
     <div
       style={{
         background: 'white',
-        border: '1px solid #e5e7eb',
+        border: `1px solid ${d.color}40`,
+        borderLeft: `3px solid ${d.color}`,
         borderRadius: '8px',
         padding: '10px 14px',
         fontSize: '12px',
-        maxWidth: '300px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        maxWidth: '320px',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+        // Critical: allow pointer events through to the tooltip itself so
+        // the user can move the mouse onto the links and click them.
+        pointerEvents: 'auto',
       }}
     >
-      <p style={{ fontWeight: 600, color: d.color, marginBottom: 4, fontSize: '13px' }}>
-        {d.category} ({d.count} papers)
+      <p style={{ fontWeight: 600, color: d.color, marginBottom: 6, fontSize: '13px' }}>
+        {d.category} <span style={{ color: '#666', fontWeight: 400 }}>· {d.count} papers</span>
       </p>
-      {d.papers.slice(0, 3).map((p, i) => (
-        <p key={i} style={{ color: '#666', marginBottom: 2, lineHeight: 1.4, fontSize: '11px' }}>
-          · {p.title.length > 60 ? `${p.title.slice(0, 60)}…` : p.title}
-        </p>
-      ))}
-      {d.papers.length > 3 && (
-        <p style={{ color: d.color, marginTop: 6, fontSize: '11px', fontWeight: 600 }}>
-          Click bar to view all {d.papers.length} papers →
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+        {d.papers.slice(0, 5).map((p, i) => (
+          <li key={i} style={{ marginBottom: 3, lineHeight: 1.35 }}>
+            <a
+              href={paperUrl(p)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: '#374151',
+                fontSize: '11px',
+                textDecoration: 'none',
+                borderBottom: '1px solid transparent',
+                transition: 'color 120ms, border-color 120ms',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = d.color;
+                e.currentTarget.style.borderBottomColor = `${d.color}60`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#374151';
+                e.currentTarget.style.borderBottomColor = 'transparent';
+              }}
+            >
+              {p.title.length > 70 ? `${p.title.slice(0, 70)}…` : p.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+      {d.papers.length > 5 && (
+        <p style={{ color: d.color, marginTop: 6, fontSize: '11px', fontWeight: 500 }}>
+          Click bar to view all {d.papers.length} →
         </p>
       )}
     </div>
@@ -76,7 +126,13 @@ export function CitationGraph({ papers }: { papers: any[] }) {
   for (const p of papers) {
     const cat = derivePaperCategory(p);
     if (!grouped[cat]) {
-      grouped[cat] = { category: cat, count: 0, color: CATEGORY_COLORS[cat], papers: [] };
+      grouped[cat] = {
+        category: cat,
+        count: 0,
+        color: CATEGORY_BORDER[cat],
+        fillColor: CATEGORY_FILL[cat],
+        papers: [],
+      };
     }
     const authors: any[] = Array.isArray(p.authors) ? p.authors : [];
     const authorStr = authors
@@ -132,10 +188,22 @@ export function CitationGraph({ papers }: { papers: any[] }) {
             tick={{ fontSize: 11, fill: '#444' }}
             width={90}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
-          <Bar dataKey="count" radius={[0, 4, 4, 0]} cursor="pointer">
+          <Tooltip
+            content={<CustomTooltip />}
+            cursor={{ fill: 'rgba(0,0,0,0.04)' }}
+            wrapperStyle={{ pointerEvents: 'auto', outline: 'none' }}
+            // Keep tooltip alive briefly so the cursor can travel from the bar
+            // onto the tooltip links without flicker-dismissing.
+            animationDuration={120}
+          />
+          <Bar dataKey="count" radius={[0, 6, 6, 0]} cursor="pointer">
             {data.map((entry, index) => (
-              <Cell key={index} fill={entry.color} />
+              <Cell
+                key={index}
+                fill={entry.fillColor}
+                stroke={entry.color}
+                strokeWidth={1}
+              />
             ))}
           </Bar>
         </BarChart>

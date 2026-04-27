@@ -10,6 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { CATEGORIES } from '@/lib/categories';
 
 interface TimelinePoint {
   month: string;
@@ -105,7 +106,7 @@ function consolidateSeries(series: TopicSeries[]): CanonicalSeries[] {
       _total: s.timeline.reduce((a, b) => a + b.count, 0),
     }))
     .sort((a, b) => (b as any)._total - (a as any)._total)
-    .slice(0, 8) // cap at 8 lines so chart stays readable
+    .slice(0, CATEGORIES.length) // one line per canonical category
     .map(({ _total, ...s }: any) => s);
 }
 

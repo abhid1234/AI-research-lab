@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { CitationGraph } from '@/components/charts/citation-graph';
 import { EmptyState } from '@/components/ui/empty-state';
 import { paperLink } from '@/lib/paper-utils';
+import { derivePaperCategory } from '@/lib/categories';
 
 interface ConnectionsTabProps {
   artifacts: { agentType: string; data: any }[];
@@ -79,11 +80,11 @@ export function ConnectionsTab({ dbPapers = [] }: ConnectionsTabProps) {
     );
   }
 
-  // Stats
+  // Stats — use the canonical 9-category taxonomy (same as the dropdown,
+  // chart, and Overview tab) instead of raw arxiv field-of-study tags.
   const uniqueCategories = new Set<string>();
   for (const p of dbPapers) {
-    const cats = Array.isArray(p.categories) ? p.categories : [];
-    for (const c of cats) if (typeof c === 'string') uniqueCategories.add(c);
+    uniqueCategories.add(derivePaperCategory(p));
   }
 
   return (
@@ -136,7 +137,7 @@ export function ConnectionsTab({ dbPapers = [] }: ConnectionsTabProps) {
               {dbClusters.map((cluster, i) => (
                 <div
                   key={i}
-                  className="rounded-md border border-border bg-card/50 p-2 hover:border-primary/30 transition-colors"
+                  className="rounded-md border border-border bg-card/50 p-2 hover:border-primary/30 transition-colors h-[100px] overflow-hidden flex flex-col"
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <p className="text-xs font-semibold leading-snug truncate" title={cluster.affiliation}>
