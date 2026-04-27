@@ -35,12 +35,26 @@ const TAB_LABELS: Record<TabId, string> = {
   frontiers: 'Research Frontiers',
 };
 
-function CountBadge({ count }: { count: number }) {
+// Per-tab tint mapping — mirrors the four stat-card colors from
+// "Collection at a Glance" so the tab strip teaches the color system
+// (papers=plum, insights=amber, frontiers=teal, connections=rose) before
+// the user ever scrolls. Uses chart palette CSS vars from globals.css.
+const TAB_TINT: Partial<Record<TabId, string>> = {
+  papers: 'var(--chart-1)',
+  insights: 'var(--chart-2)',
+  frontiers: 'var(--chart-3)',
+  connections: 'var(--chart-5)',
+};
+
+function CountBadge({ count, tint }: { count: number; tint?: string }) {
   if (count <= 0) return null;
   return (
     <>
       <span className="ml-1.5 text-[10px] text-foreground/30" aria-hidden="true">·</span>
-      <span className="ml-1 text-[10px] text-foreground/65 tabular-nums tracking-tight">
+      <span
+        className="ml-1 text-[10px] tabular-nums tracking-tight font-semibold"
+        style={tint ? { color: tint } : { color: 'oklch(0.45 0.005 30)' }}
+      >
         {count}
       </span>
     </>
@@ -125,7 +139,7 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName
               return (
                 <TabsTrigger key={id} value={id}>
                   {TAB_LABELS[id]}
-                  <CountBadge count={count} />
+                  <CountBadge count={count} tint={TAB_TINT[id]} />
                 </TabsTrigger>
               );
             })}
