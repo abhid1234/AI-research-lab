@@ -96,7 +96,7 @@ export function GlobalSearch({ topicId }: GlobalSearchProps) {
             onChange={handleChange}
             onFocus={() => results.length > 0 && setOpen(true)}
             placeholder="Search papers..."
-            className="w-full pl-8 pr-3 py-1 text-xs rounded-md bg-[oklch(0.97_0_0)] border border-[oklch(0.88_0_0)] text-[oklch(0.145_0_0)] placeholder:text-[oklch(0.6_0_0)] focus:outline-none focus:ring-1 focus:ring-[oklch(0.55_0.19_260)] focus:border-[oklch(0.55_0.19_260)]"
+            className="w-full h-10 pl-8 pr-3 text-xs rounded-md bg-[oklch(0.97_0_0)] border border-[oklch(0.88_0_0)] text-[oklch(0.145_0_0)] placeholder:text-[oklch(0.6_0_0)] focus:outline-none focus:ring-1 focus:ring-[oklch(0.55_0.19_260)] focus:border-[oklch(0.55_0.19_260)]"
           />
           {/* Search icon */}
           <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[oklch(0.6_0_0)] pointer-events-none">

@@ -88,7 +88,7 @@ export function TopicSelector({ selectedId, onChange }: TopicSelectorProps) {
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="group inline-flex h-8 items-center gap-2 rounded-full border border-foreground/80 bg-transparent pl-3.5 pr-2.5 text-[13px] font-medium tracking-tight text-foreground transition-colors hover:bg-foreground/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/40"
+        className="group inline-flex h-10 items-center gap-2 rounded-full border border-foreground/80 bg-transparent pl-3.5 pr-2.5 text-[13px] font-medium tracking-tight text-foreground transition-colors hover:bg-foreground/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/40"
       >
         <span className="truncate max-w-[200px]">{current.name}</span>
         <svg
