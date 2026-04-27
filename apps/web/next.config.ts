@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.airesearchlab.space' }],
+        destination: 'https://airesearchlab.space/:path*',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
