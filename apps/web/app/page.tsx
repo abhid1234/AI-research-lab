@@ -7,7 +7,6 @@ import { JobStatusBar } from '@/components/layout/job-status-bar';
 import { ArtifactViewer, type ArtifactItem } from '@/components/artifacts/artifact-viewer';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { PaperDrawer } from '@/components/layout/paper-drawer';
-import { WeeklyPulse } from '@/components/layout/weekly-pulse';
 
 export default function Home() {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
@@ -135,11 +134,6 @@ const fetchArtifacts = useCallback(async (topicId: string) => {
                 </button>
               )}
             </div>
-
-            {/* Weekly pulse — single editorial sentence about the topic's last week */}
-            {selectedTopicId && dbPapers.length > 0 && (
-              <WeeklyPulse papers={dbPapers} />
-            )}
 
             {/* Artifact viewer */}
             <div className="flex-1 overflow-hidden">
