@@ -106,7 +106,7 @@ const fetchArtifacts = useCallback(async (topicId: string) => {
         exportArtifacts={artifacts}
       >
         <main className="flex flex-1 flex-col overflow-hidden">
-          <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex flex-col flex-1 overflow-hidden mx-auto w-full max-w-[1400px]">
             {/* Topic selector toolbar */}
             <div className="flex flex-wrap items-center gap-4 border-b border-[color:var(--hairline)] px-6 min-h-12 py-2.5 shrink-0">
               <span className="text-eyebrow shrink-0">Topic</span>

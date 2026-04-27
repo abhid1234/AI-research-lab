@@ -167,7 +167,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
       <section>
         <div className="mb-4 space-y-1">
           <p className="text-eyebrow">Collection at a Glance</p>
-          <p className="text-h2-tight font-light text-foreground">
+          <p className="text-h2-tight text-foreground">
             {displayPaperCount.toLocaleString()} papers <span className="text-foreground/55">spanning {(dbTopicEvolution.length || topicEvolution.length) || 'multiple'} research topics.</span>
           </p>
         </div>
@@ -258,7 +258,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
           <div className="flex flex-col gap-3">
             <div className="space-y-1">
               <p className="text-eyebrow">Open Research Questions</p>
-              <h3 className="text-h2-tight font-light text-foreground">What the field still doesn&apos;t know.</h3>
+              <h3 className="text-h2-tight text-foreground">What the field still doesn&apos;t know.</h3>
             </div>
             <OpenQuestionsSection artifacts={artifacts} />
           </div>
@@ -267,7 +267,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
           <div className="flex flex-col gap-3">
             <div className="space-y-1">
               <p className="text-eyebrow">Key Results Worth Knowing</p>
-              <h3 className="text-h2-tight font-light text-foreground">Important findings across the collection.</h3>
+              <h3 className="text-h2-tight text-foreground">Important findings across the collection.</h3>
             </div>
             {papers.length > 0 ? (
               <div className="grid grid-cols-1 gap-2 auto-rows-fr">
@@ -287,7 +287,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
         <div className="space-y-3">
           <div className="space-y-1">
             <p className="text-eyebrow">New Benchmarks</p>
-            <h3 className="text-h2-tight font-light text-foreground">Papers introducing new evaluation frameworks.</h3>
+            <h3 className="text-h2-tight text-foreground">Papers introducing new evaluation frameworks.</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3">
             {newBenchmarks.map((b, i) => {

@@ -103,7 +103,7 @@ export function ProvenanceBanner({
       <div className="px-6 pb-5 grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4 lg:divide-x lg:divide-[color:var(--hairline)]">
         {/* Left: Where this came from */}
         <div className="space-y-2 lg:pr-6">
-          <h4 className="text-eyebrow">Where this came from</h4>
+          <p className="text-eyebrow">Where this came from</p>
           <dl className="space-y-1.5 text-xs">
             <Row label="Papers">
               <span className="text-foreground">arxiv</span>
@@ -128,7 +128,7 @@ export function ProvenanceBanner({
         </div>
         {/* Right: What's in it */}
         <div className="space-y-2 lg:pl-6">
-          <h4 className="text-eyebrow">What&apos;s in it</h4>
+          <p className="text-eyebrow">What&apos;s in it</p>
           <dl className="space-y-1.5 text-xs">
             <Row label="Papers">
               <span className="font-semibold tabular-nums text-foreground">{paperCount.toLocaleString()}</span>

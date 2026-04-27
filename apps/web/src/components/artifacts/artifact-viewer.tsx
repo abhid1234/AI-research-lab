@@ -38,7 +38,7 @@ const TAB_LABELS: Record<TabId, string> = {
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="ml-1 text-[10px] text-foreground/45 tabular-nums">
+    <span className="ml-1 text-[10px] text-foreground/65 tabular-nums tracking-tight">
       {count}
     </span>
   );
