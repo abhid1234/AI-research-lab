@@ -9,6 +9,7 @@ import { EmptyState as SharedEmptyState } from '@/components/ui/empty-state';
 import { paperLink } from '@/lib/paper-utils';
 import { CATEGORIES, CATEGORY_COLORS, derivePaperCategory } from '@/lib/categories';
 import { ProvenanceBanner } from '@/components/layout/provenance-banner';
+import { ArxivPaperFooter } from '@/components/layout/arxiv-paper-footer';
 
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
@@ -397,7 +398,7 @@ function ResultCard({ paper: p }: { paper: any }) {
       role={clickable ? 'link' : undefined}
       tabIndex={clickable ? 0 : undefined}
       onKeyDown={openAbs ? (e) => { if (e.key === 'Enter') openAbs(); } : undefined}
-      className={`group flex h-[180px] flex-col rounded-lg bg-white border border-gray-200 transition-all overflow-hidden ${clickable ? 'hover:border-gray-300 hover:shadow-md cursor-pointer' : ''}`}
+      className={`group flex h-[215px] flex-col rounded-lg bg-white border border-gray-200 transition-all overflow-hidden ${clickable ? 'hover:border-gray-300 hover:shadow-md cursor-pointer' : ''}`}
       style={{ borderLeftWidth: '4px', borderLeftColor: colors.border }}
     >
       {/* Header strip — category pill + meta */}
@@ -439,6 +440,7 @@ function ResultCard({ paper: p }: { paper: any }) {
           {authorName && <span className="text-gray-500 shrink-0 truncate max-w-[40%]">— {authorName}</span>}
         </div>
       )}
+      <ArxivPaperFooter arxivId={arxivId} />
     </div>
   );
 }
@@ -609,7 +611,7 @@ function OpenQuestionsSection({ artifacts, dbPapers }: { artifacts: { agentType:
             role={clickable ? 'link' : undefined}
             tabIndex={clickable ? 0 : undefined}
             onKeyDown={clickable ? (e) => { if (e.key === 'Enter') openAbs!(); } : undefined}
-            className={`group flex h-[180px] flex-col rounded-lg bg-white border border-gray-200 transition-all overflow-hidden ${
+            className={`group flex h-[215px] flex-col rounded-lg bg-white border border-gray-200 transition-all overflow-hidden ${
               clickable ? 'hover:border-gray-300 hover:shadow-md cursor-pointer' : ''
             }`}
             style={{ borderLeftWidth: '4px', borderLeftColor: accent.border }}
@@ -655,6 +657,7 @@ function OpenQuestionsSection({ artifacts, dbPapers }: { artifacts: { agentType:
                 {q.paperAuthor && <span className="text-gray-500 shrink-0 truncate max-w-[40%]">— {q.paperAuthor}</span>}
               </div>
             )}
+            <ArxivPaperFooter arxivId={q.paperArxivId} />
           </div>
         );
       })}
