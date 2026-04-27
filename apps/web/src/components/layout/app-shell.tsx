@@ -2,7 +2,6 @@
 
 import { ExportButton } from './export-button';
 import { GlobalSearch } from './global-search';
-import { ThemeToggle } from './theme-toggle';
 import { ShareButton } from './share-button';
 import { ReadingListsButton } from './reading-lists-button';
 
@@ -75,7 +74,6 @@ export function AppShell({ children, paperCount, topicCount, dateRange, lastSync
             <ReadingListsButton />
             <ShareButton />
             <ExportButton topic={exportTopic} papers={exportPapers} artifacts={exportArtifacts} />
-            <ThemeToggle />
           </div>
         </div>
       </header>

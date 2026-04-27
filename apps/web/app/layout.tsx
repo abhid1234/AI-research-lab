@@ -45,18 +45,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={cn("font-sans", inter.variable, interDisplay.variable)}>
-      {/* Inline theme script: reads localStorage before React hydrates to prevent flash.
-          Default light (matches new editorial palette); dark only if explicitly chosen. */}
-      <head>
-        {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
-        <script
-          // nosec: static string, no user-controlled input
-          // biome-ignore lint: intentional dangerouslySetInnerHTML for theme flash prevention
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){}})();`,
-          }}
-        />
-      </head>
       <body className="font-sans">{children}</body>
     </html>
   );
