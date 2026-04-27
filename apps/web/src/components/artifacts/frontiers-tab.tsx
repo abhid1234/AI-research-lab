@@ -10,6 +10,7 @@ import {
   frontierCategoryLabel as categoryLabel,
 } from '@/lib/design-tokens';
 import { SurprisingFindings } from '@/components/layout/surprising-findings';
+import { ArxivPaperFooter } from '@/components/layout/arxiv-paper-footer';
 
 interface FrontiersTabProps {
   artifacts: { agentType: string; data: any }[];
@@ -33,7 +34,7 @@ function ConfidenceInline({ value }: { value: number }) {
   );
 }
 
-function FrontierCard({ f, arxivLink }: { f: any; arxivLink: (id?: string) => string }) {
+function FrontierCard({ f, arxivLink, arxivIdFor }: { f: any; arxivLink: (id?: string) => string; arxivIdFor: (id?: string) => string }) {
   const [expanded, setExpanded] = useState(false);
   const [sourcesOpen, setSourcesOpen] = useState(false);
 
@@ -46,6 +47,11 @@ function FrontierCard({ f, arxivLink }: { f: any; arxivLink: (id?: string) => st
   const sourcePapers: any[] = Array.isArray(f.sourcePapers) ? f.sourcePapers : [];
   const finding = safeString(f.finding);
   const explanation = typeof f.explanation === 'string' ? f.explanation : '';
+  // Primary paper drives the card-level footer (arXiv abs / PDF / arxivId)
+  const primaryPaper = sourcePapers.length > 0 ? sourcePapers[0] : null;
+  const primaryId: string = primaryPaper
+    ? (typeof primaryPaper?.paperId === 'string' ? primaryPaper.paperId : typeof primaryPaper?.id === 'string' ? primaryPaper.id : '')
+    : '';
 
   return (
     <Card className="overflow-hidden">
@@ -64,10 +70,6 @@ function FrontierCard({ f, arxivLink }: { f: any; arxivLink: (id?: string) => st
         </div>
 
         {finding && (() => {
-          const primaryPaper = sourcePapers.length > 0 ? sourcePapers[0] : null;
-          const primaryId: string = primaryPaper
-            ? (typeof primaryPaper?.paperId === 'string' ? primaryPaper.paperId : typeof primaryPaper?.id === 'string' ? primaryPaper.id : '')
-            : '';
           const primaryTitle: string = primaryPaper
             ? (typeof primaryPaper === 'string' ? primaryPaper : safeString(primaryPaper?.title ?? primaryPaper))
             : '';
@@ -215,6 +217,7 @@ function FrontierCard({ f, arxivLink }: { f: any; arxivLink: (id?: string) => st
           </div>
         )}
       </CardContent>
+      <ArxivPaperFooter arxivId={arxivIdFor(primaryId)} />
     </Card>
   );
 }
@@ -277,7 +280,7 @@ function PivotingTrendsList({ pivotingTrends }: { pivotingTrends: any[] }) {
   );
 }
 
-function GapCard({ g, arxivLink }: { g: any; arxivLink: (id?: string) => string }) {
+function GapCard({ g, arxivLink, arxivIdFor }: { g: any; arxivLink: (id?: string) => string; arxivIdFor: (id?: string) => string }) {
   const [adjacentOpen, setAdjacentOpen] = useState(false);
   const area = typeof g.area === 'string' ? g.area : safeString(g.area);
   const why = typeof g.whyItMatters === 'string' ? g.whyItMatters : '';
@@ -342,22 +345,29 @@ function GapCard({ g, arxivLink }: { g: any; arxivLink: (id?: string) => string 
   );
 }
 
-function buildArxivLink(dbPapers?: any[]) {
+// Returns two helpers built off the same Semantic-Scholar-id → arxiv-id map.
+// arxivLink: convenience for href={...}; arxivIdFor: raw id for the
+// ArxivPaperFooter component (which builds its own abs/PDF URLs).
+function buildArxivResolver(dbPapers?: any[]) {
   const s2ToArxiv = new Map<string, string>();
   for (const p of dbPapers ?? []) {
     if (p.id && p.arxivId) s2ToArxiv.set(p.id, p.arxivId);
   }
-  return (id?: string): string => {
+  const arxivIdFor = (id?: string): string => {
     if (!id) return '';
-    if (isArxivId(id)) return `https://arxiv.org/abs/${id}`;
-    const arxivId = s2ToArxiv.get(id);
-    if (arxivId && isArxivId(arxivId)) return `https://arxiv.org/abs/${arxivId}`;
-    return '';
+    if (isArxivId(id)) return id;
+    const mapped = s2ToArxiv.get(id);
+    return mapped && isArxivId(mapped) ? mapped : '';
   };
+  const arxivLink = (id?: string): string => {
+    const aid = arxivIdFor(id);
+    return aid ? `https://arxiv.org/abs/${aid}` : '';
+  };
+  return { arxivLink, arxivIdFor };
 }
 
 export function FrontiersTab({ artifacts, dbPapers }: FrontiersTabProps) {
-  const arxivLink = buildArxivLink(dbPapers);
+  const { arxivLink, arxivIdFor } = buildArxivResolver(dbPapers);
   const frontierArtifact = artifacts.find((a) => a.agentType === 'frontier-detector');
   const data = frontierArtifact?.data ?? {};
 
@@ -418,7 +428,7 @@ export function FrontiersTab({ artifacts, dbPapers }: FrontiersTabProps) {
           </h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {frontiers.map((f, i) => (
-              <FrontierCard key={i} f={f} arxivLink={arxivLink} />
+              <FrontierCard key={i} f={f} arxivLink={arxivLink} arxivIdFor={arxivIdFor} />
             ))}
           </div>
         </section>
@@ -442,7 +452,7 @@ export function FrontiersTab({ artifacts, dbPapers }: FrontiersTabProps) {
           </h3>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {gaps.map((g: any, i: number) => (
-              <GapCard key={i} g={g} arxivLink={arxivLink} />
+              <GapCard key={i} g={g} arxivLink={arxivLink} arxivIdFor={arxivIdFor} />
             ))}
           </div>
         </section>
