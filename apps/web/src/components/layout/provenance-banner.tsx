@@ -79,9 +79,9 @@ export function ProvenanceBanner({
     <section
       className="relative overflow-hidden rounded-2xl"
       style={{
-        background: 'oklch(0.95 0.03 330)',
-        ['--prov-rule' as string]: 'oklch(0.50 0.18 325)',
-        ['--prov-accent' as string]: 'oklch(0.38 0.18 325)',
+        background: 'oklch(0.97 0.012 80)',
+        ['--prov-rule' as string]: 'oklch(0.72 0.07 65)',
+        ['--prov-accent' as string]: 'oklch(0.44 0.10 50)',
       }}
       aria-labelledby="provenance-title"
     >
