@@ -102,7 +102,7 @@ const fetchArtifacts = useCallback(async (topicId: string) => {
           <div className="flex flex-col flex-1 overflow-hidden mx-auto w-full max-w-[1400px]">
             {/* Topic selector toolbar */}
             <div className="flex flex-wrap items-center gap-4 border-b border-[color:var(--hairline)] px-6 min-h-12 py-2.5 shrink-0">
-              <span className="text-eyebrow shrink-0">Topic</span>
+              <span className="hidden sm:inline text-eyebrow shrink-0">Topic</span>
               <TopicSelector
                 selectedId={selectedTopicId}
                 onChange={handleTopicChange}
