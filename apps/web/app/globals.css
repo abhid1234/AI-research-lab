@@ -254,6 +254,7 @@
     line-height: 1.1;
     font-weight: 400;
     letter-spacing: -0.02em;
+    text-wrap: balance;
   }
   .text-h2-tight {
     font-family: var(--font-display, var(--font-sans));
