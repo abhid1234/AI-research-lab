@@ -56,7 +56,7 @@ export function ReadingListsButton() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-10 w-10"
+        className="h-11 w-11"
         title="Reading lists"
         onClick={() => setOpen(v => !v)}
       >

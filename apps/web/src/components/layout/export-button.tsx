@@ -95,7 +95,7 @@ export function ExportButton({ topic = 'Research', papers = [], artifacts = [] }
       variant="ghost"
       size="icon"
       onClick={handleExport}
-      className="h-10 w-10"
+      className="h-11 w-11"
       title="Export report"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
