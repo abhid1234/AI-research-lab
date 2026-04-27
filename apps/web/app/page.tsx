@@ -101,6 +101,7 @@ const fetchArtifacts = useCallback(async (topicId: string) => {
         paperCount={paperCount}
         topicCount={topicCount}
         dateRange={dateRange}
+        lastSyncAt={lastSyncAt}
         selectedTopicId={selectedTopicId}
         exportTopic={topicName}
         exportPapers={dbPapers}

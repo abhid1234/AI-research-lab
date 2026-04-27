@@ -11,14 +11,29 @@ interface AppShellProps {
   paperCount?: number;
   topicCount?: number;
   dateRange?: string;
+  lastSyncAt?: string | null;
   selectedTopicId?: string | null;
   exportTopic?: string;
   exportPapers?: any[];
   exportArtifacts?: any[];
 }
 
-export function AppShell({ children, paperCount, topicCount, dateRange, selectedTopicId, exportTopic, exportPapers, exportArtifacts }: AppShellProps) {
+// Sync freshness: green if <7d, amber 7-14d, red >14d.
+// Maps to the same hues used elsewhere in the design tokens.
+function syncFreshness(lastSyncAt: string | null | undefined): { dot: string; label: string; tone: 'fresh' | 'stale' | 'cold' } | null {
+  if (!lastSyncAt) return null;
+  const t = new Date(lastSyncAt).getTime();
+  if (Number.isNaN(t)) return null;
+  const ageDays = (Date.now() - t) / (24 * 60 * 60 * 1000);
+  const label = `Updated ${new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  if (ageDays < 7) return { dot: 'bg-emerald-500', label, tone: 'fresh' };
+  if (ageDays < 14) return { dot: 'bg-amber-500', label, tone: 'stale' };
+  return { dot: 'bg-rose-500', label, tone: 'cold' };
+}
+
+export function AppShell({ children, paperCount, topicCount, dateRange, lastSyncAt, selectedTopicId, exportTopic, exportPapers, exportArtifacts }: AppShellProps) {
   const hasStats = paperCount !== undefined || topicCount !== undefined || dateRange !== undefined;
+  const freshness = syncFreshness(lastSyncAt);
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground overflow-hidden">
@@ -47,10 +62,15 @@ export function AppShell({ children, paperCount, topicCount, dateRange, selected
               )}
             </span>
           )}
-          <div className="flex items-center gap-1.5" title="Connected">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
-            <span className="hidden sm:inline text-[11px] text-muted-foreground tracking-tight">Live</span>
-          </div>
+          {freshness && (
+            <div
+              className="flex items-center gap-1.5"
+              title={freshness.tone === 'fresh' ? 'Synced this week' : freshness.tone === 'stale' ? 'Last sync 1-2 weeks ago' : 'Last sync more than 2 weeks ago'}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${freshness.dot}`} aria-hidden="true" />
+              <span className="hidden sm:inline text-[11px] text-muted-foreground tracking-tight tabular-nums">{freshness.label}</span>
+            </div>
+          )}
           <div className="flex items-center gap-1">
             <ReadingListsButton />
             <ShareButton />
