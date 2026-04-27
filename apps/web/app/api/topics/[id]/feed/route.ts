@@ -40,11 +40,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title><![CDATA[${topic.name} — AI Research Lab]]></title>
-    <link>https://ai-research-web-w5fwdeqt5a-uc.a.run.app/topics/${id}</link>
+    <link>https://www.airesearchlab.space/topics/${id}</link>
     <description><![CDATA[Latest papers in ${topic.name}]]></description>
     <language>en-us</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-    <atom:link href="https://ai-research-web-w5fwdeqt5a-uc.a.run.app/api/topics/${id}/feed" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.airesearchlab.space/api/topics/${id}/feed" rel="self" type="application/rss+xml" />
     ${items}
   </channel>
 </rss>`;

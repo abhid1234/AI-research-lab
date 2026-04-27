@@ -20,13 +20,13 @@ const interDisplay = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://airesearchlab.space'),
+  metadataBase: new URL('https://www.airesearchlab.space'),
   title: 'AI Research Lab',
   description: 'Five Claude agents arguing about AI papers, in public. 502 papers, 9 topics, fully transparent methodology.',
   openGraph: {
     title: 'AI Research Lab',
     description: 'Five Claude agents arguing about AI papers, in public. 502 papers, 9 topics, fully transparent methodology.',
-    url: 'https://airesearchlab.space',
+    url: 'https://www.airesearchlab.space',
     type: 'website',
     siteName: 'AI Research Lab',
     images: [

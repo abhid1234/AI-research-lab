@@ -110,7 +110,7 @@ function generateDigestHTML(
 
     <p style="margin-top: 32px; color: #9ca3af; font-size: 11px; border-top: 1px solid #f3f4f6; padding-top: 16px;">
       AI Research Lab &nbsp;·&nbsp;
-      <a href="https://ai-research-web-w5fwdeqt5a-uc.a.run.app" style="color: #6366f1;">View full dashboard</a>
+      <a href="https://www.airesearchlab.space" style="color: #6366f1;">View full dashboard</a>
     </p>
   </div>
 </div>
@@ -144,6 +144,6 @@ function generateDigestText(topic: string, recent: any[], all: any[]): string {
     '',
     '---',
     'AI Research Lab',
-    'https://ai-research-web-w5fwdeqt5a-uc.a.run.app',
+    'https://www.airesearchlab.space',
   ].join('\n');
 }

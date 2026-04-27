@@ -1,7 +1,7 @@
 // Cloud Scheduler setup:
 // gcloud scheduler jobs create http weekly-paper-ingest \
 //   --schedule="0 0 * * MON" \
-//   --uri="https://ai-research-web-w5fwdeqt5a-uc.a.run.app/api/cron/ingest" \
+//   --uri="https://www.airesearchlab.space/api/cron/ingest" \
 //   --http-method=GET \
 //   --headers="Authorization=Bearer YOUR_CRON_SECRET"
 
