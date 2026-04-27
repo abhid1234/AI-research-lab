@@ -8,6 +8,7 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table';
+import { paperLink } from '@/lib/paper-utils';
 
 interface SOTAEntry {
   task: string;
@@ -15,13 +16,6 @@ interface SOTAEntry {
   currentBest: { model: string; score: number; paper?: { id?: string; title?: string } };
   previousBest?: { model: string; score: number; paper?: { id?: string; title?: string } } | null;
   improvement: string;
-}
-
-function paperLink(id: string | undefined, title?: string): string {
-  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
-  if (id.includes('arxiv.org')) return id;
-  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
-  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
 }
 
 export function SOTATable({ entries }: { entries: SOTAEntry[] }) {
@@ -64,14 +58,21 @@ export function SOTATable({ entries }: { entries: SOTAEntry[] }) {
                     <TableCell>
                       <div className="flex items-center gap-1.5">
                         <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-                        <a
-                          href={paperLink(currentPaperId || undefined, entry.currentBest.model)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs font-medium hover:text-primary transition-colors underline-offset-2 hover:underline"
-                        >
-                          {entry.currentBest.model}
-                        </a>
+                        {(() => {
+                          const href = paperLink(currentPaperId || undefined, entry.currentBest.model);
+                          return href ? (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs font-medium hover:text-primary transition-colors underline-offset-2 hover:underline"
+                            >
+                              {entry.currentBest.model}
+                            </a>
+                          ) : (
+                            <span className="text-xs font-medium">{entry.currentBest.model}</span>
+                          );
+                        })()}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
@@ -85,17 +86,29 @@ export function SOTATable({ entries }: { entries: SOTAEntry[] }) {
                       {entry.previousBest ? (
                         <div className="flex items-center gap-1.5">
                           <span className="h-2 w-2 rounded-full bg-muted-foreground/40 shrink-0" />
-                          <a
-                            href={paperLink(previousPaperId || undefined, entry.previousBest.model)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-muted-foreground hover:text-primary transition-colors underline-offset-2 hover:underline"
-                          >
-                            {entry.previousBest.model}
-                            {typeof entry.previousBest.score === 'number' && (
-                              <span className="ml-1 tabular-nums">({entry.previousBest.score.toFixed(1)})</span>
-                            )}
-                          </a>
+                          {(() => {
+                            const href = paperLink(previousPaperId || undefined, entry.previousBest!.model);
+                            const inner = (
+                              <>
+                                {entry.previousBest!.model}
+                                {typeof entry.previousBest!.score === 'number' && (
+                                  <span className="ml-1 tabular-nums">({entry.previousBest!.score.toFixed(1)})</span>
+                                )}
+                              </>
+                            );
+                            return href ? (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-muted-foreground hover:text-primary transition-colors underline-offset-2 hover:underline"
+                              >
+                                {inner}
+                              </a>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">{inner}</span>
+                            );
+                          })()}
                         </div>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>

@@ -72,7 +72,7 @@ function FrontierCard({ f }: { f: any }) {
             : '';
           return primaryId || primaryTitle ? (
             <a
-              href={paperLink(primaryId || undefined, primaryTitle || finding)}
+              href={paperLink(primaryId || undefined, primaryTitle || finding) || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-semibold leading-snug hover:text-primary transition-colors hover:underline underline-offset-2 block"
@@ -118,7 +118,7 @@ function FrontierCard({ f }: { f: any }) {
                     <div key={j} className="flex items-start gap-1">
                       <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
                       <a
-                        href={paperLink(paperId || undefined, title)}
+                        href={paperLink(paperId || undefined, title) || undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[10px] text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline line-clamp-1"
@@ -159,7 +159,7 @@ function FrontierCard({ f }: { f: any }) {
                         <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-primary/50" />
                         {linkId || linkTitle ? (
                           <a
-                            href={paperLink(linkId || undefined, linkTitle || impStr)}
+                            href={paperLink(linkId || undefined, linkTitle || impStr) || undefined}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:text-primary transition-colors hover:underline underline-offset-2"
@@ -196,7 +196,7 @@ function FrontierCard({ f }: { f: any }) {
                         <span className="shrink-0 text-muted-foreground/50 text-[9px] mt-0.5">?</span>
                         {linkId || linkTitle ? (
                           <a
-                            href={paperLink(linkId || undefined, linkTitle || qStr)}
+                            href={paperLink(linkId || undefined, linkTitle || qStr) || undefined}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:text-primary transition-colors hover:underline underline-offset-2"
@@ -295,7 +295,7 @@ function GapCard({ g }: { g: any }) {
           <span className="shrink-0 mt-0.5 text-amber-400 text-sm">⬡</span>
           {gapLinkId || gapLinkTitle ? (
             <a
-              href={paperLink(gapLinkId || undefined, gapLinkTitle || area)}
+              href={paperLink(gapLinkId || undefined, gapLinkTitle || area) || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs font-semibold leading-snug hover:text-primary transition-colors hover:underline underline-offset-2"
@@ -323,7 +323,7 @@ function GapCard({ g }: { g: any }) {
                   <li key={j} className="flex items-start gap-1">
                     <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
                     <a
-                      href={paperLink(undefined, adjTitle)}
+                      href={paperLink(undefined, adjTitle) || undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[10px] text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline line-clamp-1"

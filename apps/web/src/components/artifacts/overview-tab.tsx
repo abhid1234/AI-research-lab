@@ -260,7 +260,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
               <p className="text-eyebrow">Open Research Questions</p>
               <h3 className="text-h2-tight text-foreground">What the field still doesn&apos;t know.</h3>
             </div>
-            <OpenQuestionsSection artifacts={artifacts} />
+            <OpenQuestionsSection artifacts={artifacts} dbPapers={dbPapers} />
           </div>
 
           {/* Right: Key Results */}
@@ -271,9 +271,18 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
             </div>
             {papers.length > 0 ? (
               <div className="grid grid-cols-1 gap-2 auto-rows-fr">
-                {papers.slice(0, 5).map((p, i) => (
-                  <ResultCard key={i} paper={p} />
-                ))}
+                {papers.slice(0, 5).map((p, i) => {
+                  // Enrich the analyzer's paper-shaped row with `title` and
+                  // `arxivId` from the DB record so the From: footer can render
+                  // a human-readable title and the card can link to arxiv.
+                  const match = (dbPapers ?? []).find(
+                    (d: any) => d?.id === p?.paperId || d?.paperId === p?.paperId,
+                  );
+                  const enriched = match
+                    ? { ...p, title: match.title ?? p.title, arxivId: match.arxivId ?? p.arxivId, authors: match.authors ?? p.authors, publishedAt: match.publishedAt ?? p.publishedAt }
+                    : p;
+                  return <ResultCard key={i} paper={enriched} />;
+                })}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">No key results available.</p>
@@ -293,24 +302,34 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
             {newBenchmarks.map((b, i) => {
               const name: string = typeof b.name === 'string' ? b.name : 'Untitled Benchmark';
               const measures: string = typeof b.measures === 'string' ? b.measures : '';
-              return (
-                <a
-                  key={i}
-                  href={paperLink(b.paper?.id ?? b.paper?.paperId ?? undefined, name)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group block border-t border-[color:var(--hairline)] pt-2 hover:border-foreground/40 transition-colors"
-                >
+              const href = paperLink(b.paper?.id ?? b.paper?.paperId ?? undefined, name);
+              const inner = (
+                <>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-medium tracking-tight text-foreground group-hover:underline underline-offset-4 decoration-foreground/40">
+                    <span className={`text-[13px] font-medium tracking-tight text-foreground ${href ? 'group-hover:underline underline-offset-4 decoration-foreground/40' : ''}`}>
                       {name}
                     </span>
-                    <span className="text-foreground/40 text-[11px]" aria-hidden="true">↗</span>
+                    {href && <span className="text-foreground/40 text-[11px]" aria-hidden="true">↗</span>}
                   </div>
                   {measures && (
                     <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2 mt-1">{measures}</p>
                   )}
+                </>
+              );
+              return href ? (
+                <a
+                  key={i}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block border-t border-[color:var(--hairline)] pt-2 hover:border-foreground/40 transition-colors"
+                >
+                  {inner}
                 </a>
+              ) : (
+                <div key={i} className="block border-t border-[color:var(--hairline)] pt-2">
+                  {inner}
+                </div>
               );
             })}
           </div>
@@ -335,29 +354,44 @@ function ResultCard({ paper: p }: { paper: any }) {
   const finding: string = typeof p.mainResult === 'string' && p.mainResult ? p.mainResult
     : typeof p.takeaway === 'string' && p.takeaway ? p.takeaway : '—';
   const rawTitle: string = typeof p.title === 'string' ? p.title.trim() : '';
-  // Don't fall back to paperId — those are opaque hashes, never user-readable.
-  // Empty title → footer is skipped entirely (handled below).
+  // Skip ID-shaped titles (40-char SHA hashes, raw arxiv ids) — they aren't
+  // human-readable. Empty title → footer is skipped entirely (handled below).
   const looksLikeId = /^[a-f0-9]{32,}$/i.test(rawTitle) || /^\d{4}\.\d{4,5}(v\d+)?$/.test(rawTitle);
   const paperTitle: string = looksLikeId ? '' : rawTitle;
-  const paperId: string = typeof p.paperId === 'string' ? p.paperId : (typeof p.id === 'string' ? p.id : '');
-  const authorName: string = typeof p.authors === 'string' ? p.authors : (typeof p.author === 'string' ? p.author : '');
-  const date: string = typeof p.date === 'string' ? p.date : (typeof p.year === 'string' || typeof p.year === 'number' ? String(p.year) : (typeof p.publishedAt === 'string' ? p.publishedAt : ''));
+  const arxivId: string = typeof p.arxivId === 'string' ? p.arxivId : '';
+  // Author can come from a string ("Smith et al."), an array of strings, or
+  // an array of {name} objects. Normalize all three shapes.
+  let authorName = '';
+  if (typeof p.authors === 'string') authorName = p.authors;
+  else if (Array.isArray(p.authors) && p.authors.length > 0) {
+    const first = p.authors[0];
+    const name = typeof first === 'string' ? first : (typeof first?.name === 'string' ? first.name : '');
+    const more = p.authors.length > 1 ? ` et al.` : '';
+    authorName = name ? `${name}${more}` : '';
+  } else if (typeof p.author === 'string') authorName = p.author;
+  const date: string = typeof p.date === 'string' ? p.date
+    : typeof p.year === 'string' || typeof p.year === 'number' ? String(p.year)
+    : typeof p.publishedAt === 'string' ? p.publishedAt.slice(0, 7)
+    : (p.publishedAt instanceof Date ? p.publishedAt.toISOString().slice(0, 7) : '');
   const approach: string = typeof p.approach === 'string' ? p.approach : '';
 
   const category = derivePaperCategory(p);
   const colors = CATEGORY_COLORS[category];
 
-  const isRealArxiv = paperId && !paperId.startsWith('demo-') && (paperId.includes('.') || paperId.includes('/'));
-  const url = isRealArxiv ? `https://arxiv.org/abs/${paperId}` : paperLink(paperId || undefined, paperTitle);
-  const openAbs = () => window.open(url, '_blank', 'noopener,noreferrer');
+  // Direct arxiv link only. Prefer the canonical `arxivId` field; fall back
+  // to `paperId` only if it happens to be arxiv-shaped. Returns '' otherwise
+  // so the card stays non-clickable rather than linking to a search page.
+  const url = paperLink(arxivId || undefined) || paperLink(typeof p.paperId === 'string' ? p.paperId : undefined);
+  const openAbs = url ? () => window.open(url, '_blank', 'noopener,noreferrer') : undefined;
+  const clickable = Boolean(url);
 
   return (
     <div
       onClick={openAbs}
-      role="link"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter') openAbs(); }}
-      className="group flex h-[180px] flex-col rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden cursor-pointer"
+      role={clickable ? 'link' : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onKeyDown={openAbs ? (e) => { if (e.key === 'Enter') openAbs(); } : undefined}
+      className={`group flex h-[180px] flex-col rounded-lg bg-white border border-gray-200 transition-all overflow-hidden ${clickable ? 'hover:border-gray-300 hover:shadow-md cursor-pointer' : ''}`}
       style={{ borderLeftWidth: '4px', borderLeftColor: colors.border }}
     >
       {/* Header strip — category pill + meta */}
@@ -464,14 +498,34 @@ function buildTimelineFromPapers(dbPapers: any[]): { topic: string; timeline: { 
   }));
 }
 
-function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; data: any }[] }) {
+function OpenQuestionsSection({ artifacts, dbPapers }: { artifacts: { agentType: string; data: any }[]; dbPapers?: any[] }) {
   const frontierArtifact = artifacts.find(a => a.agentType === 'frontier-detector');
   const contradictionArtifact = artifacts.find(a => a.agentType === 'contradiction-finder');
 
   const gaps: any[] = frontierArtifact?.data?.gaps ?? [];
   const debates: any[] = contradictionArtifact?.data?.openDebates ?? [];
 
-  const questions: { text: string; type: string; detail: string; paperId?: string; paperTitle?: string }[] = [];
+  // Resolve author + date via the DB so the OpenQuestion cards match the
+  // right column's "Title — Author et al." footer and YYYY-MM date chip.
+  // Index by S2 paper id.
+  function metaFor(paperId: string | undefined): { author: string; date: string } {
+    if (!paperId || !dbPapers) return { author: '', date: '' };
+    const match = dbPapers.find((d: any) => d?.id === paperId || d?.paperId === paperId);
+    if (!match) return { author: '', date: '' };
+    const list: any[] = Array.isArray(match.authors) ? match.authors : [];
+    let author = '';
+    if (list.length > 0) {
+      const first = list[0];
+      const name = typeof first === 'string' ? first : (typeof first?.name === 'string' ? first.name : '');
+      if (name) author = list.length > 1 ? `${name} et al.` : name;
+    }
+    let date = '';
+    if (typeof match.publishedAt === 'string') date = match.publishedAt.slice(0, 7);
+    else if (match.publishedAt instanceof Date) date = match.publishedAt.toISOString().slice(0, 7);
+    return { author, date };
+  }
+
+  const questions: { text: string; type: string; detail: string; paperId?: string; paperTitle?: string; paperAuthor?: string; paperDate?: string }[] = [];
 
   for (const d of debates.slice(0, 3)) {
     const q = typeof d.question === 'string' ? d.question : '';
@@ -483,7 +537,10 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
     const fp = firstSidePapers.length > 0 ? firstSidePapers[0] : null;
     const debatePaperId: string = fp ? (typeof fp?.paperId === 'string' ? fp.paperId : typeof fp?.id === 'string' ? fp.id : '') : '';
     const debatePaperTitle: string = fp ? (typeof fp === 'string' ? fp : fp?.title ?? '') : '';
-    if (q) questions.push({ text: q, type: 'debate', detail: sig, paperId: debatePaperId || undefined, paperTitle: debatePaperTitle || undefined });
+    if (q) {
+      const meta = metaFor(debatePaperId);
+      questions.push({ text: q, type: 'debate', detail: sig, paperId: debatePaperId || undefined, paperTitle: debatePaperTitle || undefined, paperAuthor: meta.author || undefined, paperDate: meta.date || undefined });
+    }
   }
 
   for (const g of gaps.slice(0, 3)) {
@@ -494,7 +551,10 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
     const fa = adjacent.length > 0 ? adjacent[0] : null;
     const gapPaperId: string = fa ? (typeof fa?.paperId === 'string' ? fa.paperId : typeof fa?.id === 'string' ? fa.id : '') : '';
     const gapPaperTitle: string = fa ? (typeof fa === 'string' ? fa : fa?.title ?? fa?.name ?? '') : '';
-    if (area) questions.push({ text: area, type: 'gap', detail: why, paperId: gapPaperId || undefined, paperTitle: gapPaperTitle || undefined });
+    if (area) {
+      const meta = metaFor(gapPaperId);
+      questions.push({ text: area, type: 'gap', detail: why, paperId: gapPaperId || undefined, paperTitle: gapPaperTitle || undefined, paperAuthor: meta.author || undefined, paperDate: meta.date || undefined });
+    }
   }
 
   if (questions.length === 0) {
@@ -509,9 +569,8 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
           ? { border: '#f59e0b', bg: '#fffbeb', text: '#b45309', pill: '#fef3c7', icon: '?', label: 'Open Debate' }
           : { border: '#3b82f6', bg: '#eff6ff', text: '#1d4ed8', pill: '#dbeafe', icon: '!', label: 'Research Gap' };
 
-        const isRealArxiv = q.paperId && !q.paperId.startsWith('demo-') && (q.paperId.includes('.') || q.paperId.includes('/'));
-        const url = isRealArxiv ? `https://arxiv.org/abs/${q.paperId}` : paperLink(q.paperId, q.paperTitle || q.text);
-        const clickable = !!(q.paperId || q.paperTitle);
+        const url = paperLink(q.paperId, q.paperTitle || q.text);
+        const clickable = Boolean(url);
         const openAbs = clickable ? () => window.open(url, '_blank', 'noopener,noreferrer') : undefined;
 
         return (
@@ -526,7 +585,7 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
             }`}
             style={{ borderLeftWidth: '4px', borderLeftColor: accent.border }}
           >
-            {/* Header strip — type pill */}
+            {/* Header strip — type pill + date (matches right-column ResultCard) */}
             <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5 shrink-0">
               <span
                 className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
@@ -534,9 +593,12 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
               >
                 {accent.icon} {accent.label}
               </span>
-              {clickable && (
-                <span className="text-[11px] text-gray-300 group-hover:text-blue-500 transition-colors">↗</span>
-              )}
+              <div className="flex items-center gap-2 shrink-0">
+                {q.paperDate && <span className="text-[10px] text-gray-500 font-medium">{q.paperDate}</span>}
+                {clickable && (
+                  <span className="text-[11px] text-gray-300 group-hover:text-blue-500 transition-colors">↗</span>
+                )}
+              </div>
             </div>
 
             {/* Question text */}
@@ -553,7 +615,7 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
               )}
             </div>
 
-            {/* Footer — paper attribution if available */}
+            {/* Footer — paper attribution + author (matches right-column ResultCard) */}
             {q.paperTitle && (
               <div
                 className="flex items-center gap-2 px-3 py-1.5 border-t text-[10.5px] text-gray-700 shrink-0 mt-auto"
@@ -561,6 +623,7 @@ function OpenQuestionsSection({ artifacts }: { artifacts: { agentType: string; d
               >
                 <span className="font-semibold not-italic shrink-0" style={{ color: accent.text }}>From:</span>
                 <span className="italic line-clamp-1 flex-1">{q.paperTitle}</span>
+                {q.paperAuthor && <span className="text-gray-500 shrink-0 truncate max-w-[40%]">— {q.paperAuthor}</span>}
               </div>
             )}
           </div>

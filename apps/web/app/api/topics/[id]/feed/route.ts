@@ -15,9 +15,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     .map((p) => {
       const abstract = typeof p.abstract === 'string' ? p.abstract.slice(0, 500) : '';
       const arxivId = typeof p.arxivId === 'string' ? p.arxivId : '';
-      const link = arxivId && (arxivId.includes('.') || arxivId.includes('/'))
-        ? `https://arxiv.org/abs/${arxivId}`
-        : `https://arxiv.org/search/?searchtype=all&query=${encodeURIComponent(p.title ?? '')}`;
+      // Direct arxiv abstract page only — never a search link.
+      const isArxiv = /^\d{4}\.\d{4,5}(v\d+)?$/.test(arxivId) || /^[a-z\-]+(\.[A-Z]{2})?\/\d{7}(v\d+)?$/.test(arxivId);
+      const link = isArxiv ? `https://arxiv.org/abs/${arxivId}` : '';
       const pubDate = p.publishedAt ? new Date(p.publishedAt).toUTCString() : new Date().toUTCString();
 
       return `

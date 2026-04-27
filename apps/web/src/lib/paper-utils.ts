@@ -22,13 +22,44 @@ export function safeString(val: any): string {
 }
 
 /**
- * Build a URL to view a paper. Prefers arxiv, falls back to Google Scholar.
+ * Arxiv id shape: `2304.07193`, `2304.07193v2`, or legacy `cs/0001234`,
+ * `math.GT/0309136`. 40-char S2 SHA-1 hashes and free text are not directly
+ * resolvable to an arxiv abstract page.
  */
-export function paperLink(id: string | undefined, title?: string): string {
-  if (!id) return title ? `https://scholar.google.com/scholar?q=${encodeURIComponent(title)}` : '#';
+export function isArxivId(id: string | undefined | null): boolean {
+  if (!id) return false;
+  if (/^\d{4}\.\d{4,5}(v\d+)?$/.test(id)) return true;
+  if (/^[a-z\-]+(\.[A-Z]{2})?\/\d{7}(v\d+)?$/.test(id)) return true;
+  return false;
+}
+
+/**
+ * Build a direct arxiv URL for a paper. Returns '' when no real arxiv id is
+ * available — callers must treat empty-string as "do not render as a link"
+ * (we never link to Google Scholar, search pages, or other indirections).
+ */
+export function paperLink(id: string | undefined, _title?: string): string {
+  if (!id) return '';
   if (id.includes('arxiv.org')) return id;
-  if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
-  return `https://scholar.google.com/scholar?q=${encodeURIComponent(title ?? id)}`;
+  if (isArxivId(id)) return `https://arxiv.org/abs/${id}`;
+  return '';
+}
+
+/**
+ * Resolve the best direct arxiv URL for a paper-shaped object by checking the
+ * canonical `arxivId` field first, then `paperId` / `id` fallbacks (some
+ * upstreams stuff the arxiv id into one of those instead).
+ */
+export function arxivUrlFor(paper: any): string {
+  const arxiv = typeof paper?.arxivId === 'string' ? paper.arxivId
+              : typeof paper?.arxiv_id === 'string' ? paper.arxiv_id
+              : '';
+  if (arxiv && isArxivId(arxiv)) return `https://arxiv.org/abs/${arxiv}`;
+  const fallback = typeof paper?.paperId === 'string' ? paper.paperId
+                : typeof paper?.id === 'string' ? paper.id
+                : '';
+  if (fallback && isArxivId(fallback)) return `https://arxiv.org/abs/${fallback}`;
+  return '';
 }
 
 /**

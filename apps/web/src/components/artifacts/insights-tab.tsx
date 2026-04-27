@@ -73,7 +73,7 @@ function ContradictionCard({ c }: { c: any }) {
           <div className="grid grid-cols-2 gap-2">
             {claim1Statement && (claim1PaperId || claim1Title) ? (
               <a
-                href={paperLink(claim1PaperId || undefined, claim1Title)}
+                href={paperLink(claim1PaperId || undefined, claim1Title) || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-rose-500/30 pl-1.5 hover:text-primary transition-colors hover:underline underline-offset-2"
@@ -86,7 +86,7 @@ function ContradictionCard({ c }: { c: any }) {
             )}
             {claim2Statement && (claim2PaperId || claim2Title) ? (
               <a
-                href={paperLink(claim2PaperId || undefined, claim2Title)}
+                href={paperLink(claim2PaperId || undefined, claim2Title) || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-teal-500/30 pl-1.5 hover:text-primary transition-colors hover:underline underline-offset-2"
@@ -108,7 +108,7 @@ function ContradictionCard({ c }: { c: any }) {
                 <p className="text-[10px] text-rose-400 font-semibold shrink-0">Claim A</p>
                 {claim1Statement && (claim1PaperId || claim1Title) ? (
                   <a
-                    href={paperLink(claim1PaperId || undefined, claim1Title)}
+                    href={paperLink(claim1PaperId || undefined, claim1Title) || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs hover:text-primary transition-colors hover:underline underline-offset-2 block line-clamp-3"
@@ -121,7 +121,7 @@ function ContradictionCard({ c }: { c: any }) {
                 )}
                 {claim1Title && (
                   <a
-                    href={paperLink(claim1PaperId || undefined, claim1Title)}
+                    href={paperLink(claim1PaperId || undefined, claim1Title) || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[10px] text-primary/70 hover:text-primary transition-colors flex items-center gap-1 hover:underline underline-offset-2 shrink-0"
@@ -140,7 +140,7 @@ function ContradictionCard({ c }: { c: any }) {
                 <p className="text-[10px] text-teal-700 dark:text-teal-400 font-semibold shrink-0">Claim B</p>
                 {claim2Statement && (claim2PaperId || claim2Title) ? (
                   <a
-                    href={paperLink(claim2PaperId || undefined, claim2Title)}
+                    href={paperLink(claim2PaperId || undefined, claim2Title) || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs hover:text-primary transition-colors hover:underline underline-offset-2 block line-clamp-3"
@@ -153,7 +153,7 @@ function ContradictionCard({ c }: { c: any }) {
                 )}
                 {claim2Title && (
                   <a
-                    href={paperLink(claim2PaperId || undefined, claim2Title)}
+                    href={paperLink(claim2PaperId || undefined, claim2Title) || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[10px] text-primary/70 hover:text-primary transition-colors flex items-center gap-1 hover:underline underline-offset-2 shrink-0"
@@ -302,7 +302,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                                 <p className={`text-[9px] font-semibold uppercase tracking-wide ${labelColor} mb-0.5`}>Side {sideLabel}</p>
                                 {position && (sidePaperId || sidePaperTitle) ? (
                                   <a
-                                    href={paperLink(sidePaperId || undefined, sidePaperTitle || position)}
+                                    href={paperLink(sidePaperId || undefined, sidePaperTitle || position) || undefined}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-[10px] font-medium leading-snug line-clamp-2 hover:text-primary transition-colors hover:underline underline-offset-2 block"
@@ -318,7 +318,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                                   return spTitle ? (
                                     <a
                                       key={si}
-                                      href={paperLink(spId || undefined, spTitle)}
+                                      href={paperLink(spId || undefined, spTitle) || undefined}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="text-[9px] text-primary/60 hover:text-primary transition-colors hover:underline underline-offset-2 block mt-0.5 line-clamp-1"
@@ -372,7 +372,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                         <div className="space-y-0.5 flex-1 min-w-0">
                           {finding && (firstSPId || firstSPTitle) ? (
                             <a
-                              href={paperLink(firstSPId || undefined, firstSPTitle || finding)}
+                              href={paperLink(firstSPId || undefined, firstSPTitle || finding) || undefined}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-xs font-medium leading-snug hover:text-primary transition-colors hover:underline underline-offset-2 block line-clamp-2"
@@ -389,7 +389,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                               return spTitle ? (
                                 <a
                                   key={si}
-                                  href={paperLink(spId || undefined, spTitle)}
+                                  href={paperLink(spId || undefined, spTitle) || undefined}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-[10px] text-primary/60 hover:text-primary transition-colors hover:underline underline-offset-2"
@@ -453,7 +453,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {issue && (paperRefId || paperRef) ? (
                               <a
-                                href={paperLink(paperRefId || undefined, paperRef || issue)}
+                                href={paperLink(paperRefId || undefined, paperRef || issue) || undefined}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-xs font-semibold text-orange-900 dark:text-amber-300 line-clamp-1 hover:text-orange-700 dark:hover:text-amber-200 transition-colors hover:underline underline-offset-2"
@@ -474,7 +474,7 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                           )}
                           {paperRef && (
                             <a
-                              href={paperLink(paperRefId || undefined, paperRef)}
+                              href={paperLink(paperRefId || undefined, paperRef) || undefined}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-[10px] text-muted-foreground/60 hover:text-primary transition-colors underline-offset-2 hover:underline line-clamp-1 block"

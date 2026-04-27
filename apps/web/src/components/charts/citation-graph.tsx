@@ -45,10 +45,12 @@ interface CustomTooltipProps {
 }
 
 function paperUrl(p: PaperRef): string {
-  const isRealArxiv = p.arxivId && !p.arxivId.startsWith('demo-') && (p.arxivId.includes('.') || p.arxivId.includes('/'));
-  if (isRealArxiv) return `https://arxiv.org/abs/${p.arxivId}`;
-  if (p.title) return `https://scholar.google.com/scholar?q=${encodeURIComponent(p.title)}`;
-  return '#';
+  // Direct arxiv only — return '' when not resolvable so the caller renders
+  // the title as plain text instead of a broken/search link.
+  const id = p.arxivId;
+  if (!id || id.startsWith('demo-')) return '';
+  const looksLikeArxiv = /^\d{4}\.\d{4,5}(v\d+)?$/.test(id) || /^[a-z\-]+(\.[A-Z]{2})?\/\d{7}(v\d+)?$/.test(id);
+  return looksLikeArxiv ? `https://arxiv.org/abs/${id}` : '';
 }
 
 function CustomTooltip({ active, payload }: CustomTooltipProps) {
@@ -74,32 +76,40 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
         {d.category} <span style={{ color: '#666', fontWeight: 400 }}>· {d.count} papers</span>
       </p>
       <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-        {d.papers.slice(0, 5).map((p, i) => (
-          <li key={i} style={{ marginBottom: 3, lineHeight: 1.35 }}>
-            <a
-              href={paperUrl(p)}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: '#374151',
-                fontSize: '11px',
-                textDecoration: 'none',
-                borderBottom: '1px solid transparent',
-                transition: 'color 120ms, border-color 120ms',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = d.color;
-                e.currentTarget.style.borderBottomColor = `${d.color}60`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#374151';
-                e.currentTarget.style.borderBottomColor = 'transparent';
-              }}
-            >
-              {p.title.length > 70 ? `${p.title.slice(0, 70)}…` : p.title}
-            </a>
-          </li>
-        ))}
+        {d.papers.slice(0, 5).map((p, i) => {
+          const href = paperUrl(p);
+          const truncated = p.title.length > 70 ? `${p.title.slice(0, 70)}…` : p.title;
+          return (
+            <li key={i} style={{ marginBottom: 3, lineHeight: 1.35 }}>
+              {href ? (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#374151',
+                    fontSize: '11px',
+                    textDecoration: 'none',
+                    borderBottom: '1px solid transparent',
+                    transition: 'color 120ms, border-color 120ms',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = d.color;
+                    e.currentTarget.style.borderBottomColor = `${d.color}60`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#374151';
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}
+                >
+                  {truncated}
+                </a>
+              ) : (
+                <span style={{ color: '#374151', fontSize: '11px' }}>{truncated}</span>
+              )}
+            </li>
+          );
+        })}
       </ul>
       {d.papers.length > 5 && (
         <p style={{ color: d.color, marginTop: 6, fontSize: '11px', fontWeight: 500 }}>
@@ -266,12 +276,7 @@ function CategoryPapersModal({ category, onClose }: { category: BarPoint; onClos
         <div className="flex-1 overflow-y-auto">
           <div className="divide-y divide-gray-100">
             {category.papers.map((paper, i) => {
-              const isRealArxiv = paper.arxivId && !paper.arxivId.startsWith('demo-') && (paper.arxivId.includes('.') || paper.arxivId.includes('/'));
-              const url = isRealArxiv
-                ? `https://arxiv.org/abs/${paper.arxivId}`
-                : paper.title
-                  ? `https://scholar.google.com/scholar?q=${encodeURIComponent(paper.title)}`
-                  : '#';
+              const url = paperUrl(paper);
 
               const date = paper.fullPaper?.publishedAt
                 ? new Date(paper.fullPaper.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
@@ -282,15 +287,21 @@ function CategoryPapersModal({ category, onClose }: { category: BarPoint; onClos
                   <div className="flex items-start gap-2">
                     <span className="text-xs text-gray-400 font-mono mt-0.5 shrink-0 w-6">{i + 1}.</span>
                     <div className="min-w-0 flex-1">
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-foreground hover:underline underline-offset-4 decoration-foreground/40 transition-colors leading-snug block"
-                      >
-                        {paper.title}
-                        <span className="inline-block ml-1 text-foreground/50 text-xs">↗</span>
-                      </a>
+                      {url ? (
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-foreground hover:underline underline-offset-4 decoration-foreground/40 transition-colors leading-snug block"
+                        >
+                          {paper.title}
+                          <span className="inline-block ml-1 text-foreground/50 text-xs">↗</span>
+                        </a>
+                      ) : (
+                        <span className="text-sm font-medium text-foreground leading-snug block">
+                          {paper.title}
+                        </span>
+                      )}
                       {(paper.authors || date) && (
                         <p className="text-[11px] text-gray-500 mt-1">
                           {paper.authors}
