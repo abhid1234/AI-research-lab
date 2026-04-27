@@ -46,20 +46,23 @@ function formatRelativeTime(iso: string | null | undefined): string | null {
   return `${Math.floor(days / 30)} mo ago`;
 }
 
-type StatTone = 'primary' | 'amber' | 'emerald' | 'slate';
+// Maps the four "Collection at a Glance" stats to one chart-palette color each
+// so the numbers + icons read as four distinct artifact types at a scan, not
+// four columns of identical text. Colors come from globals.css --chart-*.
+type StatTone = 'plum' | 'amber' | 'teal' | 'rose';
 
 const TONE_STYLES: Record<StatTone, { numText: string; iconText: string }> = {
-  primary: { numText: 'text-foreground', iconText: 'text-foreground/80' },
-  amber:   { numText: 'text-foreground', iconText: 'text-foreground/80' },
-  emerald: { numText: 'text-foreground', iconText: 'text-foreground/80' },
-  slate:   { numText: 'text-foreground', iconText: 'text-foreground/80' },
+  plum:  { numText: 'text-[color:var(--chart-1)]', iconText: 'text-[color:var(--chart-1)]' },
+  amber: { numText: 'text-[color:var(--chart-2)]', iconText: 'text-[color:var(--chart-2)]' },
+  teal:  { numText: 'text-[color:var(--chart-3)]', iconText: 'text-[color:var(--chart-3)]' },
+  rose:  { numText: 'text-[color:var(--chart-5)]', iconText: 'text-[color:var(--chart-5)]' },
 };
 
 function StatItem({
   label,
   value,
   icon,
-  tone = 'primary',
+  tone = 'plum',
   onClick,
 }: {
   label: string;
@@ -172,11 +175,11 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
           </p>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-5">
-            {/* 1. Papers — primary, the dataset itself */}
+            {/* 1. Papers — plum, matches the provenance accent */}
             <StatItem
               label="Papers"
               value={displayPaperCount}
-              tone="primary"
+              tone="plum"
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -198,11 +201,11 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
               }
               onClick={() => onSwitchTab?.('insights')}
             />
-            {/* 3. Research Frontiers — frontier findings */}
+            {/* 3. Research Frontiers — teal, the "what's next" lane */}
             <StatItem
               label="Research Frontiers"
               value={reportsCount}
-              tone="emerald"
+              tone="teal"
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -210,11 +213,11 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
               }
               onClick={() => onSwitchTab?.('frontiers')}
             />
-            {/* 4. Topics — metadata */}
+            {/* 4. Topics — warm rose, the categorical lane */}
             <StatItem
               label="Topics"
               value={dbTopicEvolution.length || topicEvolution.length}
-              tone="slate"
+              tone="rose"
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
