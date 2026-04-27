@@ -135,7 +135,7 @@ export default function MethodologyPage() {
               ].map((item, i) => (
                 <li key={item.step} className="flex gap-5 items-baseline">
                   <span
-                    className="shrink-0 text-[10px] font-mono tabular-nums w-6 font-semibold"
+                    className="shrink-0 text-[15px] font-mono tabular-nums w-7 font-semibold leading-none"
                     style={{ color: SECTION_COLORS[2] }}
                   >
                     0{i + 1}
@@ -323,13 +323,13 @@ function Section({
     <section className="space-y-3">
       <div className="flex items-baseline gap-3 mb-3">
         <span
-          className="text-[10px] font-mono tabular-nums shrink-0 font-semibold"
+          className="text-[20px] font-mono tabular-nums shrink-0 font-semibold leading-none"
           style={{ color: tone }}
         >
           {number}
         </span>
         <span
-          className="h-1.5 w-1.5 rounded-full shrink-0 self-center"
+          className="h-2 w-2 rounded-full shrink-0 self-center"
           style={{ background: tone }}
           aria-hidden="true"
         />
