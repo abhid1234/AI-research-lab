@@ -69,7 +69,7 @@ export function ProvenanceBanner({
       <header className="px-6 pt-5 pb-4 flex items-start justify-between gap-4 flex-wrap">
         <div className="space-y-1.5 min-w-0">
           <p className="text-eyebrow">About this collection</p>
-          <h3
+          <h2
             id="provenance-title"
             className="text-[17px] sm:text-[18px] font-medium tracking-tight leading-snug text-foreground"
           >
@@ -80,12 +80,12 @@ export function ProvenanceBanner({
             >
               and what&apos;s inside.
             </span>
-          </h3>
+          </h2>
         </div>
         <div className="flex items-center gap-4 text-[12px] tracking-tight">
           <a
             href="/methodology"
-            className="text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors"
+            className="text-foreground inline-flex items-center px-2 py-2 -mx-2 -my-2 underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors rounded-md"
           >
             methodology ↗
           </a>
@@ -93,7 +93,7 @@ export function ProvenanceBanner({
             href="https://github.com/abhid1234/AI-research-lab"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors"
+            className="text-foreground inline-flex items-center px-2 py-2 -mx-2 -my-2 underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors rounded-md"
           >
             source ↗
           </a>

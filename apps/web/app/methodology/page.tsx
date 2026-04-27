@@ -13,7 +13,7 @@ export default function MethodologyPage() {
         {/* Back link */}
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.10em] text-muted-foreground hover:text-foreground transition-colors mb-12"
+          className="inline-flex items-center gap-1.5 px-2 py-2 -mx-2 -my-2 text-[11px] uppercase tracking-[0.10em] text-muted-foreground hover:text-foreground transition-colors mb-12 rounded-md"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
