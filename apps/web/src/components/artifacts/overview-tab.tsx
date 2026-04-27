@@ -491,10 +491,15 @@ function buildTimelineFromPapers(dbPapers: any[]): { topic: string; timeline: { 
       }));
   }
 
-  // Build series per category
-  const activeCats = CATEGORIES.filter(cat =>
-    months.some(m => (monthCatMap[m]?.[cat] ?? 0) > 0)
-  );
+  // Build series per category — only include categories with enough papers
+  // to avoid noise lines (e.g. 1-2 stray papers in a topic collection).
+  // Threshold: at least 3 papers OR at least 4% of total papers, whichever is smaller.
+  const totalPapers = dbPapers.length;
+  const minCount = Math.min(3, Math.max(1, Math.round(totalPapers * 0.04)));
+  const activeCats = CATEGORIES.filter(cat => {
+    const catTotal = months.reduce((sum, m) => sum + (monthCatMap[m]?.[cat] ?? 0), 0);
+    return catTotal >= minCount;
+  });
 
   return activeCats.slice(0, CATEGORIES.length).map(cat => ({
     topic: cat,
