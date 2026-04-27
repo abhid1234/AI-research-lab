@@ -218,10 +218,10 @@ function CategoryPapersModal({ category, onClose }: { category: BarPoint; onClos
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors leading-snug block"
+                        className="text-sm font-medium text-foreground hover:underline underline-offset-4 decoration-foreground/40 transition-colors leading-snug block"
                       >
                         {paper.title}
-                        <span className="inline-block ml-1 text-blue-500 text-xs">↗</span>
+                        <span className="inline-block ml-1 text-foreground/50 text-xs">↗</span>
                       </a>
                       {(paper.authors || date) && (
                         <p className="text-[11px] text-gray-500 mt-1">

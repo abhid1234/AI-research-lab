@@ -89,13 +89,13 @@ function ContradictionCard({ c }: { c: any }) {
                 href={paperLink(claim2PaperId || undefined, claim2Title)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-blue-500/30 pl-1.5 hover:text-primary transition-colors hover:underline underline-offset-2"
+                className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-teal-500/30 pl-1.5 hover:text-primary transition-colors hover:underline underline-offset-2"
                 onClick={(e) => e.stopPropagation()}
               >
                 {claim2Statement}
               </a>
             ) : (
-              <p className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-blue-500/30 pl-1.5">{claim2Statement}</p>
+              <p className="text-[10px] text-muted-foreground line-clamp-2 border-l-2 border-teal-500/30 pl-1.5">{claim2Statement}</p>
             )}
           </div>
         )}
@@ -136,8 +136,8 @@ function ContradictionCard({ c }: { c: any }) {
                   </p>
                 )}
               </div>
-              <div className="rounded-md bg-blue-500/5 border border-blue-500/15 p-2 space-y-1">
-                <p className="text-[10px] text-blue-400 font-semibold">Claim B</p>
+              <div className="rounded-md bg-teal-500/5 border border-teal-500/15 p-2 space-y-1">
+                <p className="text-[10px] text-teal-700 dark:text-teal-400 font-semibold">Claim B</p>
                 {claim2Statement && (claim2PaperId || claim2Title) ? (
                   <a
                     href={paperLink(claim2PaperId || undefined, claim2Title)}
@@ -275,8 +275,8 @@ export function InsightsTab({ artifacts }: InsightsTabProps) {
                         <div className="grid grid-cols-2 gap-1.5">
                           {[sides[0] ?? null, sides[1] ?? null].map((side: any, j: number) => {
                             const sideLabel = j === 0 ? 'A' : 'B';
-                            const labelColor = j === 0 ? 'text-violet-400' : 'text-sky-400';
-                            const borderColor = j === 0 ? 'border-violet-500/20 bg-violet-500/5' : 'border-sky-500/20 bg-sky-500/5';
+                            const labelColor = j === 0 ? 'text-amber-700 dark:text-amber-400' : 'text-teal-700 dark:text-teal-400';
+                            const borderColor = j === 0 ? 'border-amber-500/20 bg-amber-500/5' : 'border-teal-500/20 bg-teal-500/5';
 
                             if (!side) {
                               return (

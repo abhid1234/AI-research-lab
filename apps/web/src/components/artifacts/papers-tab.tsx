@@ -308,7 +308,7 @@ function PaperCard({ paper }: { paper: any }) {
               {dbCats[0]}
             </span>
           )}
-          <span className="text-[11px] text-gray-300 group-hover:text-blue-500 transition-colors">↗</span>
+          <span className="text-[11px] text-foreground/30 group-hover:text-foreground transition-colors">↗</span>
         </div>
       </div>
 
@@ -343,7 +343,7 @@ function PaperCard({ paper }: { paper: any }) {
           )}
           {orDecision && (
             <span
-              className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-violet-100 text-violet-700"
+              className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-stone-100 text-stone-700 dark:bg-stone-500/15 dark:text-stone-300"
               title={`${orDecision} acceptance`}
             >
               🏆 {orDecision}
@@ -371,7 +371,7 @@ function PaperCard({ paper }: { paper: any }) {
       {/* Title */}
       <div className="px-3 pb-1.5">
         <h3
-          className="text-[13px] font-semibold leading-snug text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2"
+          className="text-[13px] font-semibold leading-snug text-foreground group-hover:underline underline-offset-4 decoration-foreground/40 transition-colors line-clamp-2"
           style={{ wordBreak: 'break-word' }}
         >
           {displayTitle}
@@ -419,7 +419,7 @@ function PaperCard({ paper }: { paper: any }) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 hover:text-blue-600 transition-colors font-medium"
+            className="flex items-center gap-1 hover:text-foreground transition-colors font-medium"
             title="Open arXiv abstract page"
           >
             <span>📑</span>
@@ -431,7 +431,7 @@ function PaperCard({ paper }: { paper: any }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 hover:text-blue-600 transition-colors font-medium"
+              className="flex items-center gap-1 hover:text-foreground transition-colors font-medium"
               title="Download PDF directly"
             >
               <span>⬇</span>
