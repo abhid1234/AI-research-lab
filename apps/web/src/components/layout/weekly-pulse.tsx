@@ -38,21 +38,8 @@ function pickPulse(papers: any[]): Pulse | null {
   const thisCount = thisWeek.length;
   const lastCount = lastWeek.length;
 
-  // Empty weeks — quiet but honest.
-  if (thisCount === 0 && lastCount === 0) {
-    return {
-      intro: '',
-      highlight: 'Quiet weeks',
-      rest: ' — no new papers in the last 14 days.',
-    };
-  }
-  if (thisCount === 0) {
-    return {
-      intro: 'A quiet week — ',
-      highlight: 'no new papers',
-      rest: `, vs ${lastCount} the week before.`,
-    };
-  }
+  // No new papers this week — render nothing rather than negative-space noise.
+  if (thisCount === 0) return null;
 
   // Strong acceleration: ≥5 paper jump and ≥50% growth.
   if (thisCount >= lastCount + 5 && lastCount > 0 && thisCount >= lastCount * 1.5) {
