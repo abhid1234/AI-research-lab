@@ -300,30 +300,36 @@
     background: color-mix(in oklch, var(--foreground) 8%, transparent);
   }
 
-  /* Signature chartreuse text-wash — use on ONE phrase per page */
+  /* Signature chartreuse highlighter — use on ONE phrase per page.
+     Sits BEHIND the text (not text-clipped) so the words stay solid
+     foreground and read at full contrast. The chartreuse band reads as
+     a hand-painted highlighter mark across the lower 60% of the line. */
   .signature-wash {
+    color: var(--foreground);
     background: linear-gradient(
       180deg,
       transparent 0%,
-      var(--signature-accent-soft) 45%,
+      transparent 38%,
+      color-mix(in oklch, var(--c-chartreuse) 75%, transparent) 38%,
+      color-mix(in oklch, var(--c-chartreuse) 75%, transparent) 92%,
+      transparent 92%,
       transparent 100%
     );
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+    padding: 0 0.04em;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
   }
-  /* In dark mode the wash is a soft blue glow instead of chartreuse */
+  /* Dark mode: same highlighter pattern, blue glow instead of chartreuse */
   .dark .signature-wash {
+    color: var(--foreground);
     background: linear-gradient(
       180deg,
       transparent 0%,
-      color-mix(in oklch, var(--c-blue-bright) 60%, transparent) 45%,
+      transparent 38%,
+      color-mix(in oklch, var(--c-blue-bright) 55%, transparent) 38%,
+      color-mix(in oklch, var(--c-blue-bright) 55%, transparent) 92%,
+      transparent 92%,
       transparent 100%
     );
-    -webkit-background-clip: text;
-    background-clip: text;
   }
 }
