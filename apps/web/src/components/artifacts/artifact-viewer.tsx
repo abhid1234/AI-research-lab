@@ -145,7 +145,7 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName
         </TabsContent>
 
         <TabsContent value="insights" className="p-4">
-          <InsightsTab artifacts={artifacts} />
+          <InsightsTab artifacts={artifacts} dbPapers={dbPapers} />
         </TabsContent>
 
         <TabsContent value="connections" className="p-4">
@@ -157,7 +157,7 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName
         </TabsContent>
 
         <TabsContent value="frontiers" className="p-4">
-          <FrontiersTab artifacts={artifacts} />
+          <FrontiersTab artifacts={artifacts} dbPapers={dbPapers} />
         </TabsContent>
       </div>
     </Tabs>

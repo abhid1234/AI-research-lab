@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
-import { safeString, paperLink } from '@/lib/paper-utils';
+import { safeString, isArxivId } from '@/lib/paper-utils';
 import {
   frontierCategoryColors as categoryStyles,
   frontierCategoryDotColors as categoryDot,
@@ -13,6 +13,7 @@ import { SurprisingFindings } from '@/components/layout/surprising-findings';
 
 interface FrontiersTabProps {
   artifacts: { agentType: string; data: any }[];
+  dbPapers?: any[];
 }
 
 function ConfidenceInline({ value }: { value: number }) {
@@ -32,7 +33,7 @@ function ConfidenceInline({ value }: { value: number }) {
   );
 }
 
-function FrontierCard({ f }: { f: any }) {
+function FrontierCard({ f, arxivLink }: { f: any; arxivLink: (id?: string) => string }) {
   const [expanded, setExpanded] = useState(false);
   const [sourcesOpen, setSourcesOpen] = useState(false);
 
@@ -72,7 +73,7 @@ function FrontierCard({ f }: { f: any }) {
             : '';
           return primaryId || primaryTitle ? (
             <a
-              href={paperLink(primaryId || undefined, primaryTitle || finding) || undefined}
+              href={arxivLink(primaryId || undefined) || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-semibold leading-snug hover:text-primary transition-colors hover:underline underline-offset-2 block"
@@ -118,7 +119,7 @@ function FrontierCard({ f }: { f: any }) {
                     <div key={j} className="flex items-start gap-1">
                       <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
                       <a
-                        href={paperLink(paperId || undefined, title) || undefined}
+                        href={arxivLink(paperId || undefined) || undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[10px] text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline line-clamp-1"
@@ -159,7 +160,7 @@ function FrontierCard({ f }: { f: any }) {
                         <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-primary/50" />
                         {linkId || linkTitle ? (
                           <a
-                            href={paperLink(linkId || undefined, linkTitle || impStr) || undefined}
+                            href={arxivLink(linkId || undefined) || undefined}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:text-primary transition-colors hover:underline underline-offset-2"
@@ -196,7 +197,7 @@ function FrontierCard({ f }: { f: any }) {
                         <span className="shrink-0 text-muted-foreground/50 text-[9px] mt-0.5">?</span>
                         {linkId || linkTitle ? (
                           <a
-                            href={paperLink(linkId || undefined, linkTitle || qStr) || undefined}
+                            href={arxivLink(linkId || undefined) || undefined}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:text-primary transition-colors hover:underline underline-offset-2"
@@ -276,7 +277,7 @@ function PivotingTrendsList({ pivotingTrends }: { pivotingTrends: any[] }) {
   );
 }
 
-function GapCard({ g }: { g: any }) {
+function GapCard({ g, arxivLink }: { g: any; arxivLink: (id?: string) => string }) {
   const [adjacentOpen, setAdjacentOpen] = useState(false);
   const area = typeof g.area === 'string' ? g.area : safeString(g.area);
   const why = typeof g.whyItMatters === 'string' ? g.whyItMatters : '';
@@ -295,7 +296,7 @@ function GapCard({ g }: { g: any }) {
           <span className="shrink-0 mt-0.5 text-amber-400 text-sm">⬡</span>
           {gapLinkId || gapLinkTitle ? (
             <a
-              href={paperLink(gapLinkId || undefined, gapLinkTitle || area) || undefined}
+              href={arxivLink(gapLinkId || undefined) || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs font-semibold leading-snug hover:text-primary transition-colors hover:underline underline-offset-2"
@@ -323,7 +324,7 @@ function GapCard({ g }: { g: any }) {
                   <li key={j} className="flex items-start gap-1">
                     <span className="shrink-0 mt-1 w-1 h-1 rounded-full bg-muted-foreground/40" />
                     <a
-                      href={paperLink(undefined, adjTitle) || undefined}
+                      href={arxivLink(undefined) || undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[10px] text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline line-clamp-1"
@@ -341,7 +342,22 @@ function GapCard({ g }: { g: any }) {
   );
 }
 
-export function FrontiersTab({ artifacts }: FrontiersTabProps) {
+function buildArxivLink(dbPapers?: any[]) {
+  const s2ToArxiv = new Map<string, string>();
+  for (const p of dbPapers ?? []) {
+    if (p.id && p.arxivId) s2ToArxiv.set(p.id, p.arxivId);
+  }
+  return (id?: string): string => {
+    if (!id) return '';
+    if (isArxivId(id)) return `https://arxiv.org/abs/${id}`;
+    const arxivId = s2ToArxiv.get(id);
+    if (arxivId && isArxivId(arxivId)) return `https://arxiv.org/abs/${arxivId}`;
+    return '';
+  };
+}
+
+export function FrontiersTab({ artifacts, dbPapers }: FrontiersTabProps) {
+  const arxivLink = buildArxivLink(dbPapers);
   const frontierArtifact = artifacts.find((a) => a.agentType === 'frontier-detector');
   const data = frontierArtifact?.data ?? {};
 
@@ -402,7 +418,7 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
           </h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {frontiers.map((f, i) => (
-              <FrontierCard key={i} f={f} />
+              <FrontierCard key={i} f={f} arxivLink={arxivLink} />
             ))}
           </div>
         </section>
@@ -426,7 +442,7 @@ export function FrontiersTab({ artifacts }: FrontiersTabProps) {
           </h3>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {gaps.map((g: any, i: number) => (
-              <GapCard key={i} g={g} />
+              <GapCard key={i} g={g} arxivLink={arxivLink} />
             ))}
           </div>
         </section>
