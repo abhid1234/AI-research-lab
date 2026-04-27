@@ -161,14 +161,41 @@ export function TopicEvolutionChart({ data: rawData }: TopicEvolutionProps) {
             tickLine={false}
           />
           <Tooltip
-            contentStyle={{
-              background: 'white',
-              border: '1px solid oklch(0.9 0 0)',
-              borderRadius: '8px',
-              fontSize: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            cursor={{ stroke: 'oklch(0.85 0 0)', strokeWidth: 1 }}
+            content={({ active, payload, label }) => {
+              if (!active || !payload || payload.length === 0) return null;
+              // Sort by value descending, hide zeros
+              const items = payload
+                .map((p) => ({
+                  name: String(p.name ?? p.dataKey ?? ''),
+                  value: Number(p.value ?? 0),
+                  color: String(p.color ?? p.stroke ?? '#999'),
+                }))
+                .filter((p) => p.value > 0)
+                .sort((a, b) => b.value - a.value);
+              if (items.length === 0) return null;
+              const total = items.reduce((s, p) => s + p.value, 0);
+              return (
+                <div className="rounded-md border border-border bg-popover/95 backdrop-blur-sm shadow-md text-[11px] min-w-[160px] max-w-[220px]">
+                  <div className="px-2.5 py-1.5 border-b border-border/60 flex items-baseline justify-between gap-2">
+                    <span className="font-semibold text-foreground tabular-nums">{label}</span>
+                    <span className="text-muted-foreground tabular-nums">{total} papers</span>
+                  </div>
+                  <div className="px-2.5 py-1.5 space-y-0.5">
+                    {items.map((p) => (
+                      <div key={p.name} className="flex items-center gap-2 leading-tight">
+                        <span
+                          className="h-1.5 w-1.5 rounded-full shrink-0"
+                          style={{ background: p.color }}
+                        />
+                        <span className="flex-1 truncate text-foreground/80">{p.name}</span>
+                        <span className="font-medium tabular-nums text-foreground">{p.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
             }}
-            labelStyle={{ color: 'oklch(0.3 0 0)', fontWeight: 600, marginBottom: 4 }}
           />
           <Legend
             wrapperStyle={{ fontSize: '12px' }}

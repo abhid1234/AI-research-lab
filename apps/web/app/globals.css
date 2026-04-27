@@ -4,46 +4,95 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ───────────────────────────────────────────────────────────────
+   PRIMITIVE LAYER — raw values, used by semantic layer below.
+   Don't reference these directly in components.
+   ─────────────────────────────────────────────────────────────── */
 :root {
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: 210 40% 98%;
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Warm-neutral light palette (adaptionlabs-inspired) */
+  --c-warm-white: oklch(0.985 0.003 80);    /* ~#FAFAFA */
+  --c-warm-cream: oklch(0.97 0.005 85);
+  --c-warm-stone: oklch(0.94 0.004 70);
+  --c-warm-stone-2: oklch(0.88 0.004 60);
+  --c-warm-mid: oklch(0.45 0.005 30);
+  --c-warm-ink: oklch(0.18 0.005 30);       /* ~#1a1718 */
+
+  /* Accents — used sparingly */
+  --c-chartreuse: oklch(0.88 0.10 105);     /* ~#d6da84 — signature, hero text-wash only */
+  --c-chartreuse-soft: oklch(0.93 0.06 105);
+  --c-electric-blue: oklch(0.66 0.13 240);  /* ~#46a5d8 — interactive states */
+
+  /* Cool-navy dark palette (kept from current dark mode) */
+  --c-navy-950: oklch(0.13 0.015 260);
+  --c-navy-900: oklch(0.15 0.015 260);
+  --c-navy-800: oklch(0.17 0.018 260);
+  --c-navy-700: oklch(0.20 0.020 260);
+  --c-navy-600: oklch(0.22 0.025 260);
+  --c-navy-500: oklch(0.25 0.020 260);
+  --c-blue-bright: oklch(0.65 0.18 255);
+
+  /* Off-white text on dark */
+  --c-foreground-on-dark: oklch(0.93 0.005 260);
+  --c-muted-on-dark: oklch(0.55 0.015 260);
 }
 
+/* ───────────────────────────────────────────────────────────────
+   SEMANTIC LAYER — what shadcn/Tailwind references.
+   Light mode: editorial, warm, restrained.
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  --background: var(--c-warm-white);
+  --foreground: var(--c-warm-ink);
+  --card: var(--c-warm-white);
+  --card-foreground: var(--c-warm-ink);
+  --popover: var(--c-warm-white);
+  --popover-foreground: var(--c-warm-ink);
+  --primary: var(--c-warm-ink);
+  --primary-foreground: var(--c-warm-white);
+  --secondary: var(--c-warm-cream);
+  --secondary-foreground: var(--c-warm-ink);
+  --muted: var(--c-warm-cream);
+  --muted-foreground: var(--c-warm-mid);
+  --accent: var(--c-chartreuse);
+  --accent-foreground: var(--c-warm-ink);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: var(--c-warm-stone-2);
+  --input: var(--c-warm-stone-2);
+  --ring: var(--c-warm-ink);
+  --radius: 0.625rem;
+
+  /* Recharts color stops — warm-tuned for light mode */
+  --chart-1: oklch(0.55 0.16 240);  /* blue */
+  --chart-2: oklch(0.65 0.14 195);  /* cyan */
+  --chart-3: oklch(0.65 0.16 70);   /* warm orange */
+  --chart-4: oklch(0.60 0.14 160);  /* teal */
+  --chart-5: oklch(0.55 0.18 340);  /* magenta */
+
+  --sidebar: var(--c-warm-white);
+  --sidebar-foreground: var(--c-warm-ink);
+  --sidebar-primary: var(--c-warm-ink);
+  --sidebar-primary-foreground: var(--c-warm-white);
+  --sidebar-accent: var(--c-warm-cream);
+  --sidebar-accent-foreground: var(--c-warm-ink);
+  --sidebar-border: var(--c-warm-stone-2);
+  --sidebar-ring: var(--c-warm-ink);
+
+  /* ───── Component layer — editorial-specific ───── */
+  --hairline: color-mix(in oklch, var(--foreground) 12%, transparent);
+  --hairline-strong: color-mix(in oklch, var(--foreground) 24%, transparent);
+  --pill-radius: 9999px;
+  --pill-border: 1px;
+  --bare-card-tint: color-mix(in oklch, var(--foreground) 1.5%, transparent);
+  --signature-accent: var(--c-chartreuse);
+  --signature-accent-soft: var(--c-chartreuse-soft);
+}
 
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-display, var(--font-sans));
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -84,39 +133,45 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Dark theme — professional navy, single blue accent (Linear/Vercel style) */
+/* ───────────────────────────────────────────────────────────────
+   DARK MODE — kept from current navy + bright-blue scheme.
+   ─────────────────────────────────────────────────────────────── */
 .dark {
-  --background: oklch(0.13 0.015 260);
-  --foreground: oklch(0.93 0.005 260);
-  --card: oklch(0.17 0.018 260);
-  --card-foreground: oklch(0.93 0.005 260);
-  --popover: oklch(0.17 0.018 260);
-  --popover-foreground: oklch(0.93 0.005 260);
-  --primary: oklch(0.65 0.18 255);
+  --background: var(--c-navy-950);
+  --foreground: var(--c-foreground-on-dark);
+  --card: var(--c-navy-800);
+  --card-foreground: var(--c-foreground-on-dark);
+  --popover: var(--c-navy-800);
+  --popover-foreground: var(--c-foreground-on-dark);
+  --primary: var(--c-blue-bright);
   --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.2 0.02 260);
+  --secondary: var(--c-navy-700);
   --secondary-foreground: oklch(0.85 0.01 260);
-  --muted: oklch(0.2 0.015 260);
-  --muted-foreground: oklch(0.55 0.015 260);
-  --accent: oklch(0.22 0.025 260);
+  --muted: var(--c-navy-700);
+  --muted-foreground: var(--c-muted-on-dark);
+  --accent: var(--c-navy-600);
   --accent-foreground: oklch(0.9 0.005 260);
   --destructive: oklch(0.6 0.2 25);
-  --border: oklch(0.25 0.02 260);
-  --input: oklch(0.22 0.02 260);
-  --ring: oklch(0.65 0.18 255);
-  --chart-1: oklch(0.65 0.18 255);
+  --border: var(--c-navy-500);
+  --input: var(--c-navy-600);
+  --ring: var(--c-blue-bright);
+  --chart-1: var(--c-blue-bright);
   --chart-2: oklch(0.6 0.15 195);
   --chart-3: oklch(0.6 0.15 290);
   --chart-4: oklch(0.65 0.12 160);
   --chart-5: oklch(0.6 0.14 340);
-  --sidebar: oklch(0.15 0.015 260);
-  --sidebar-foreground: oklch(0.93 0.005 260);
-  --sidebar-primary: oklch(0.65 0.18 255);
+  --sidebar: var(--c-navy-900);
+  --sidebar-foreground: var(--c-foreground-on-dark);
+  --sidebar-primary: var(--c-blue-bright);
   --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.22 0.02 260);
+  --sidebar-accent: var(--c-navy-600);
   --sidebar-accent-foreground: oklch(0.9 0.005 260);
-  --sidebar-border: oklch(0.25 0.02 260);
-  --sidebar-ring: oklch(0.65 0.18 255);
+  --sidebar-border: var(--c-navy-500);
+  --sidebar-ring: var(--c-blue-bright);
+
+  --hairline: color-mix(in oklch, var(--foreground) 14%, transparent);
+  --hairline-strong: color-mix(in oklch, var(--foreground) 28%, transparent);
+  --bare-card-tint: color-mix(in oklch, var(--foreground) 3%, transparent);
 }
 
 @layer base {
@@ -124,7 +179,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11";
   }
   html {
     @apply font-sans;
@@ -164,25 +220,93 @@
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* ───────────────────────────────────────────────────────────────
+   EDITORIAL TYPOGRAPHY — Inter Display headings + Inter body.
+   Ultra-light weights, tight tracking. The signature voice.
+   ─────────────────────────────────────────────────────────────── */
 @layer components {
+  .text-hero {
+    font-family: var(--font-display, var(--font-sans));
+    font-size: clamp(2.75rem, 5vw + 1rem, 4rem); /* 44px → 64px */
+    line-height: 1.02;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+  }
   .text-display {
-    font-size: 1.875rem;
-    line-height: 1.2;
-    font-weight: 700;
+    font-family: var(--font-display, var(--font-sans));
+    font-size: 2.25rem;  /* 36px */
+    line-height: 1.1;
+    font-weight: 400;
     letter-spacing: -0.02em;
   }
-  .text-hero {
-    font-size: 2.5rem;
-    line-height: 1.1;
-    font-weight: 800;
-    letter-spacing: -0.03em;
+  .text-h2-tight {
+    font-family: var(--font-display, var(--font-sans));
+    font-size: 1.5rem;   /* 24px */
+    line-height: 1.2;
+    font-weight: 500;
+    letter-spacing: -0.015em;
   }
   .text-caption {
-    font-size: 0.625rem;
-    line-height: 1.4;
+    font-size: 0.6875rem; /* 11px */
+    line-height: 1.3;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     font-weight: 600;
   }
-}
+  .text-eyebrow {
+    font-size: 0.625rem;  /* 10px */
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
 
+  /* Hairline divider — replaces border for editorial section breaks */
+  .hairline {
+    height: 1px;
+    background: var(--hairline);
+  }
+  .hairline-strong {
+    height: 1px;
+    background: var(--hairline-strong);
+  }
+
+  /* Pill button (editorial) — used by Button variant="pill" */
+  .pill {
+    border-radius: var(--pill-radius);
+    border: var(--pill-border) solid var(--foreground);
+    background: transparent;
+    transition: background-color 150ms ease;
+  }
+  .pill:hover {
+    background: color-mix(in oklch, var(--foreground) 8%, transparent);
+  }
+
+  /* Signature chartreuse text-wash — use on ONE phrase per page */
+  .signature-wash {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--signature-accent-soft) 45%,
+      transparent 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  /* In dark mode the wash is a soft blue glow instead of chartreuse */
+  .dark .signature-wash {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      color-mix(in oklch, var(--c-blue-bright) 60%, transparent) 45%,
+      transparent 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}

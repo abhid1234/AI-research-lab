@@ -17,16 +17,16 @@ interface JobStatusBarProps {
 
 const statusStyles: Record<Job['status'], string> = {
   pending: 'text-muted-foreground',
-  running: 'text-amber-400',
-  completed: 'text-emerald-400',
-  failed: 'text-rose-400',
+  running: 'text-amber-600 dark:text-amber-400',
+  completed: 'text-emerald-600 dark:text-emerald-400',
+  failed: 'text-rose-600 dark:text-rose-400',
 };
 
 const statusDot: Record<Job['status'], string> = {
   pending: 'bg-muted-foreground',
-  running: 'bg-amber-400 animate-pulse',
-  completed: 'bg-emerald-400',
-  failed: 'bg-rose-400',
+  running: 'bg-amber-500 animate-pulse',
+  completed: 'bg-emerald-500',
+  failed: 'bg-rose-500',
 };
 
 export function JobStatusBar({ jobId }: JobStatusBarProps) {
@@ -60,27 +60,27 @@ export function JobStatusBar({ jobId }: JobStatusBarProps) {
   const progress = job.progress ?? (job.status === 'completed' ? 100 : 0);
 
   return (
-    <div className="h-8 shrink-0 border-t border-border bg-muted/30 flex items-center gap-3 px-4">
-      <span className={`flex items-center gap-1.5 text-xs ${statusStyles[job.status]}`}>
+    <div className="h-7 shrink-0 border-t border-[color:var(--hairline)] flex items-center gap-3 px-6">
+      <span className={`flex items-center gap-1.5 text-[11px] tracking-tight ${statusStyles[job.status]}`}>
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot[job.status]}`} />
         Analysis {job.status}
       </span>
 
       {(job.status === 'running' || job.status === 'pending') && (
-        <div className="flex-1 max-w-xs h-1 rounded-full bg-muted overflow-hidden">
+        <div className="flex-1 max-w-[180px] h-px bg-[color:var(--hairline)] overflow-hidden">
           <div
-            className="h-full rounded-full bg-primary transition-all duration-500"
+            className="h-full bg-foreground transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
       )}
 
       {job.error && (
-        <span className="text-xs text-rose-400 truncate max-w-xs">{job.error}</span>
+        <span className="text-[11px] text-rose-600 dark:text-rose-400 truncate max-w-xs">{job.error}</span>
       )}
 
-      <span className="text-xs text-muted-foreground ml-auto">
-        Job {job.id.slice(0, 8)}
+      <span className="text-[10px] text-muted-foreground ml-auto tabular-nums tracking-tight">
+        {job.id.slice(0, 8)}
       </span>
     </div>
   );

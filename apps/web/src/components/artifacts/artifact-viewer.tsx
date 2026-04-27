@@ -38,7 +38,7 @@ const TAB_LABELS: Record<TabId, string> = {
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="ml-1.5 text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full tabular-nums">
+    <span className="ml-1 text-[10px] text-foreground/45 tabular-nums">
       {count}
     </span>
   );
@@ -114,9 +114,9 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName
   // Some tabs aggregate multiple agent outputs — pass all artifacts and let each tab pick what it needs
   return (
     <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabId)} className="flex flex-col h-full">
-      <div className="border-b border-border">
-        <div className="overflow-x-auto scrollbar-none px-4 pt-3 pb-0.5">
-          <TabsList className="min-w-max">
+      <div className="border-b border-[color:var(--hairline)]">
+        <div className="overflow-x-auto scrollbar-none px-6 pt-2 pb-0">
+          <TabsList className="min-w-max gap-5">
             {TAB_IDS.map((id) => {
               const count = getTabCount(id, artifacts, dbPapers, totalPaperCount);
               return (

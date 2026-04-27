@@ -9,221 +9,233 @@ export const metadata: Metadata = {
 export default function MethodologyPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-3xl mx-auto px-6 py-12">
+      <div className="max-w-3xl mx-auto px-6 py-16 lg:py-24">
         {/* Back link */}
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-10"
+          className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.10em] text-muted-foreground hover:text-foreground transition-colors mb-12"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
           Back to dashboard
         </Link>
 
-        {/* Page header */}
-        <div className="mb-12">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-3">
-            Methodology
+        {/* Page header — editorial hero */}
+        <header className="mb-16 space-y-5">
+          <p className="text-eyebrow">Methodology</p>
+          <h1 className="text-hero text-foreground">
+            How a thousand papers become{' '}
+            <span className="signature-wash">a single map.</span>
           </h1>
-          <p className="text-muted-foreground text-base leading-relaxed">
-            How the AI Research Lab collects, processes, and surfaces insights from the AI literature.
+          <p className="text-foreground/70 text-base leading-relaxed font-light max-w-2xl">
+            The AI Research Lab continuously ingests papers from arXiv, embeds them into
+            a vector database, and runs a coordinated team of specialist agents to extract
+            structured insights — contradictions, emerging benchmarks, research frontiers,
+            cross-paper connections.
           </p>
-        </div>
+        </header>
 
-        <div className="space-y-12">
+        <div className="space-y-16">
           {/* 1. What this is */}
-          <section>
-            <SectionHeading number="01" title="What this is" />
-            <div className="prose-content">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                The AI Research Lab is an agent-powered observatory for the AI literature. It continuously ingests
-                papers from arxiv, embeds their content into a vector database, and runs a coordinated team of
-                specialist agents to extract structured insights — contradictions, emerging benchmarks, research
-                frontiers, and cross-paper connections. The goal is to surface what matters across hundreds of
-                papers without requiring you to read them all.
-              </p>
-            </div>
-          </section>
+          <Section number="01" title="What this is">
+            <p>
+              The AI Research Lab is an agent-powered observatory for the AI literature.
+              The goal is to surface what matters across hundreds of papers without requiring
+              you to read them all.
+            </p>
+          </Section>
 
           {/* 2. Data sources */}
-          <section>
-            <SectionHeading number="02" title="Data sources" />
-            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              Papers are fetched exclusively from{' '}
-              <a href="https://arxiv.org" target="_blank" rel="noopener noreferrer" className="text-[oklch(0.55_0.19_260)] hover:underline">
+          <Section number="02" title="Data sources">
+            <p>
+              Papers are fetched from{' '}
+              <a href="https://arxiv.org" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors">
                 arxiv.org
-              </a>
-              {' '}via the Semantic Scholar API, which provides richer metadata (citation counts, open-access
-              status, author affiliations) on top of the arxiv corpus. We cover these subject categories:
+              </a>{' '}
+              via the Semantic Scholar API for richer metadata (citations, open-access status,
+              author affiliations). Quality signals come from HuggingFace, Papers with Code,
+              and OpenReview.
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-              {['cs.AI — Artificial Intelligence', 'cs.CL — Computation & Language', 'cs.LG — Machine Learning', 'cs.MA — Multiagent Systems', 'cs.CV — Computer Vision', 'stat.ML — Statistics / ML'].map((cat) => (
-                <div key={cat} className="rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-foreground font-mono">
-                  {cat}
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2">
+              {[
+                ['cs.AI', 'Artificial Intelligence'],
+                ['cs.CL', 'Computation & Language'],
+                ['cs.LG', 'Machine Learning'],
+                ['cs.MA', 'Multiagent Systems'],
+                ['cs.CV', 'Computer Vision'],
+                ['stat.ML', 'Statistics / ML'],
+              ].map(([code, name]) => (
+                <div key={code} className="flex items-baseline gap-2 py-1.5 border-b border-[color:var(--hairline)]">
+                  <span className="text-xs font-mono text-foreground tabular-nums">{code}</span>
+                  <span className="text-xs text-muted-foreground">{name}</span>
                 </div>
               ))}
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Papers are filtered by recency (configurable window, default 6 months), abstract quality
-              (&gt;100 characters), and minimum relevance score. The collection is sorted by recency
-              and then by influence signals (citation count, Hugging Face upvotes, open-review decisions)
-              to surface high-signal work early.
+            <p className="mt-6">
+              Papers are filtered by recency (default 6 months), abstract length, and minimum
+              relevance score — then sorted by influence signals to surface high-signal work early.
             </p>
-          </section>
+          </Section>
 
           {/* 3. Ingestion pipeline */}
-          <section>
-            <SectionHeading number="03" title="Ingestion pipeline" />
-            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              Each ingestion run follows four sequential steps:
-            </p>
-            <div className="space-y-4">
+          <Section number="03" title="Ingestion pipeline">
+            <p>Each ingestion run follows four sequential steps.</p>
+            <ol className="mt-6 space-y-5">
               {[
                 {
-                  step: '1. Search',
-                  description: 'Query the Semantic Scholar Graph API with the topic\'s search terms. Paginate results, apply category and abstract-length filters, and deduplicate against already-stored paper IDs.',
+                  step: 'Search',
+                  description: 'Query the Semantic Scholar Graph API with the topic\'s search terms. Paginate, filter by category and abstract length, deduplicate against stored IDs.',
                 },
                 {
-                  step: '2. Embed',
-                  description: 'Each paper\'s abstract (and title) is chunked into ~500-token segments with a 50-token overlap, then passed to Gemini text-embedding-001 to produce 768-dimensional vectors.',
+                  step: 'Embed',
+                  description: 'Each paper\'s abstract and title is chunked into ~500-token segments with 50-token overlap, then embedded via Gemini text-embedding-001 to 768-dimensional vectors.',
                 },
                 {
-                  step: '3. Store',
-                  description: 'Paper metadata is stored in PostgreSQL. Embeddings are written into a pgvector column indexed with HNSW (cosine similarity) for sub-millisecond ANN lookup at scale.',
+                  step: 'Store',
+                  description: 'Metadata into PostgreSQL. Embeddings into a pgvector column indexed with HNSW (cosine) for sub-millisecond ANN lookup.',
                 },
                 {
-                  step: '4. Link',
-                  description: 'Papers are associated with their topic via a join table, and the topic\'s paper count and last-sync timestamp are updated atomically.',
+                  step: 'Link',
+                  description: 'Papers are joined to their topic; the topic\'s paper count and last-sync timestamp update atomically.',
                 },
-              ].map(({ step, description }) => (
-                <div key={step} className="flex gap-4">
-                  <div className="shrink-0 w-24 text-xs font-semibold text-[oklch(0.55_0.19_260)] pt-0.5">{step}</div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
-                </div>
+              ].map((item, i) => (
+                <li key={item.step} className="flex gap-5 items-baseline">
+                  <span className="shrink-0 text-[10px] font-mono text-muted-foreground tabular-nums w-6">
+                    0{i + 1}
+                  </span>
+                  <div className="space-y-1.5">
+                    <p className="text-foreground font-medium tracking-tight">{item.step}</p>
+                    <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                  </div>
+                </li>
               ))}
-            </div>
-          </section>
+            </ol>
+          </Section>
 
           {/* 4. Agent system */}
-          <section>
-            <SectionHeading number="04" title="Agent system" />
-            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              Five specialist agents process the ingested papers. Each receives the full paper corpus for the
-              topic and produces a structured JSON artifact that powers a dedicated tab in the dashboard.
+          <Section number="04" title="Agent system">
+            <p>
+              Five specialist agents process the ingested papers. Each receives the full
+              corpus for the topic and produces a structured artifact powering a dashboard tab.
             </p>
-            <div className="space-y-4">
+            <div className="mt-6 divide-y divide-[color:var(--hairline)]">
               {[
                 {
                   name: 'Paper Analyzer',
-                  purpose: 'For each paper, extracts the core problem statement, the approach taken, the main result or claim, and a plain-language takeaway. Outputs the "Papers" tab.',
+                  purpose: 'Extracts the core problem, the approach, the main result, and a plain-language takeaway for each paper. Powers the Papers tab.',
                 },
                 {
                   name: 'Trend Mapper',
-                  purpose: 'Identifies how research intensity has shifted across sub-topics over time. Flags emerging topics gaining momentum and declining areas. Drives the Topic Evolution chart.',
+                  purpose: 'Tracks how research intensity has shifted across sub-topics over time. Surfaces emerging and declining areas. Drives the Topic Evolution chart.',
                 },
                 {
                   name: 'Contradiction Finder',
-                  purpose: 'Surfaces pairs or groups of papers making conflicting empirical claims or methodological recommendations. Also identifies areas of emerging consensus and open debates across the collection.',
+                  purpose: 'Surfaces papers making conflicting empirical or methodological claims. Also identifies areas of consensus and open debates across the collection.',
                 },
                 {
                   name: 'Benchmark Extractor',
-                  purpose: 'Pulls benchmark names, metrics, and scores from paper results sections. Warns when papers report incomparable numbers (different datasets, splits, or metrics) — a common source of misleading leaderboard comparisons.',
+                  purpose: 'Pulls benchmark names, metrics, and scores. Warns when papers report incomparable numbers (different datasets, splits, or metrics).',
                 },
                 {
                   name: 'Frontier Detector',
-                  purpose: 'Identifies paradigm shifts, breakthrough results, and underexplored gaps. Surfaces papers that represent genuinely new directions rather than incremental improvements. Drives the Research Frontiers tab.',
+                  purpose: 'Identifies paradigm shifts, breakthroughs, and underexplored gaps. Surfaces genuinely new directions over incremental improvements.',
                 },
               ].map(({ name, purpose }) => (
-                <div key={name} className="rounded-lg border border-border bg-card p-4">
-                  <h3 className="text-sm font-semibold text-foreground mb-1.5">{name}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{purpose}</p>
+                <div key={name} className="py-4 grid grid-cols-1 md:grid-cols-[12rem_1fr] gap-1 md:gap-6">
+                  <p className="text-foreground font-medium tracking-tight">{name}</p>
+                  <p className="text-muted-foreground leading-relaxed">{purpose}</p>
                 </div>
               ))}
             </div>
-          </section>
+          </Section>
 
           {/* 5. 3-phase execution */}
-          <section>
-            <SectionHeading number="05" title="3-phase execution" />
-            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              Agents are orchestrated in three phases to manage dependencies and maximize parallelism:
+          <Section number="05" title="Three-phase execution">
+            <p>
+              Agents are orchestrated in three phases to manage dependencies and maximize parallelism.
             </p>
-            <div className="space-y-3">
+            <div className="mt-6 space-y-6">
               {[
                 {
-                  phase: 'Phase 1 — Parallel foundation',
-                  agents: 'Paper Analyzer + Trend Mapper',
-                  description: 'These two agents have no dependencies on each other and run in parallel. They process the raw paper corpus directly.',
+                  phase: 'Phase I',
+                  label: 'Parallel foundation',
+                  agents: 'Paper Analyzer · Trend Mapper',
+                  description: 'No dependencies. Run in parallel against the raw corpus.',
                 },
                 {
-                  phase: 'Phase 2 — Needs Phase 1',
-                  agents: 'Contradiction Finder + Benchmark Extractor',
-                  description: 'These agents benefit from the structured summaries produced by the Paper Analyzer in Phase 1. They wait for Phase 1 to complete, then run in parallel with each other.',
+                  phase: 'Phase II',
+                  label: 'Builds on Phase I',
+                  agents: 'Contradiction Finder · Benchmark Extractor',
+                  description: 'Use the structured summaries from the Paper Analyzer. Run in parallel with each other.',
                 },
                 {
-                  phase: 'Phase 3 — Synthesis',
+                  phase: 'Phase III',
+                  label: 'Synthesis',
                   agents: 'Frontier Detector',
-                  description: 'The Frontier Detector synthesizes outputs from all four prior agents to identify the most significant advances and gaps. It runs last, with full context from the entire analysis.',
+                  description: 'Synthesizes outputs from all four prior agents. Runs last with full context.',
                 },
-              ].map(({ phase, agents, description }) => (
-                <div key={phase} className="flex gap-4 rounded-lg border border-border bg-muted/20 p-4">
-                  <div className="shrink-0 min-w-0">
-                    <p className="text-xs font-semibold text-foreground">{phase}</p>
-                    <p className="text-[11px] text-[oklch(0.55_0.19_260)] font-mono mt-0.5">{agents}</p>
+              ].map(({ phase, label, agents, description }) => (
+                <div key={phase} className="grid grid-cols-1 md:grid-cols-[8rem_1fr] gap-2 md:gap-6">
+                  <div>
+                    <p className="text-foreground font-medium tracking-tight">{phase}</p>
+                    <p className="text-eyebrow mt-0.5">{label}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
+                  <div className="space-y-1">
+                    <p className="text-foreground/70 font-mono text-[12px]">{agents}</p>
+                    <p className="text-muted-foreground leading-relaxed">{description}</p>
+                  </div>
                 </div>
               ))}
             </div>
-          </section>
+          </Section>
 
           {/* 6. Tech stack */}
-          <section>
-            <SectionHeading number="06" title="Tech stack" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <Section number="06" title="Stack">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3">
               {[
-                ['Next.js 15', 'App Router, Server Components'],
-                ['Drizzle ORM', 'Type-safe PostgreSQL queries'],
-                ['pgvector', 'HNSW ANN embeddings index'],
-                ['Gemini', 'text-embedding-001 (768 dims)'],
-                ['Vercel AI Gateway', 'Multi-provider LLM routing'],
-                ['Recharts', 'Trend and landscape charts'],
+                ['Next.js 15', 'App Router'],
+                ['Drizzle ORM', 'PostgreSQL'],
+                ['pgvector', 'HNSW ANN index'],
+                ['Gemini', 'text-embedding-001'],
+                ['Claude', 'Haiku 4.5 agents'],
+                ['Recharts', 'Trend & landscape charts'],
               ].map(([tech, desc]) => (
-                <div key={tech} className="rounded-md border border-border bg-card p-3">
-                  <p className="text-xs font-semibold text-foreground">{tech}</p>
+                <div key={tech} className="border-t border-[color:var(--hairline)] pt-2">
+                  <p className="text-foreground text-[13px] font-medium tracking-tight">{tech}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">{desc}</p>
                 </div>
               ))}
             </div>
-          </section>
+          </Section>
 
           {/* 7. Open source */}
-          <section>
-            <SectionHeading number="07" title="Open source" />
-            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              The full source code — ingestion scripts, agent definitions, API routes, and frontend components
-              — is available on GitHub. Issues and pull requests are welcome.
+          <Section number="07" title="Open source">
+            <p>
+              The full source code — ingestion, agents, API routes, frontend — is on GitHub.
+              Issues and pull requests are welcome.
             </p>
-            <a
-              href="https://github.com/abhid1234/AI-research-lab"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-[oklch(0.55_0.19_260)]/30 bg-[oklch(0.55_0.19_260)]/5 px-4 py-2.5 text-sm font-medium text-[oklch(0.55_0.19_260)] hover:bg-[oklch(0.55_0.19_260)]/10 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-              </svg>
-              View on GitHub
-            </a>
-          </section>
+            <div className="mt-6">
+              <a
+                href="https://github.com/abhid1234/AI-research-lab"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-foreground bg-transparent pl-4 pr-3.5 py-2 text-[13px] font-medium text-foreground hover:bg-foreground/8 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+                View on GitHub
+              </a>
+            </div>
+          </Section>
         </div>
 
         {/* Footer */}
-        <div className="mt-16 pt-8 border-t border-border">
-          <p className="text-xs text-muted-foreground">
+        <div className="mt-20 pt-8 border-t border-[color:var(--hairline)]">
+          <p className="text-[11px] text-muted-foreground tracking-tight">
             AI Research Lab · built by Abhi Das ·{' '}
-            <Link href="/" className="text-[oklch(0.55_0.19_260)] hover:underline">
+            <Link href="/" className="text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors">
               Back to dashboard
             </Link>
           </p>
@@ -233,11 +245,16 @@ export default function MethodologyPage() {
   );
 }
 
-function SectionHeading({ number, title }: { number: string; title: string }) {
+function Section({ number, title, children }: { number: string; title: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-baseline gap-3 mb-4">
-      <span className="text-[11px] font-mono text-muted-foreground/50 shrink-0">{number}</span>
-      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-    </div>
+    <section className="space-y-3">
+      <div className="flex items-baseline gap-3 mb-3">
+        <span className="text-[10px] font-mono text-muted-foreground tabular-nums shrink-0">{number}</span>
+        <h2 className="text-h2-tight text-foreground">{title}</h2>
+      </div>
+      <div className="text-[15px] text-muted-foreground leading-relaxed font-light max-w-2xl space-y-3">
+        {children}
+      </div>
+    </section>
   );
 }

@@ -9,8 +9,6 @@ import { EmptyState as SharedEmptyState } from '@/components/ui/empty-state';
 import { paperLink } from '@/lib/paper-utils';
 import { CATEGORIES, CATEGORY_COLORS, derivePaperCategory } from '@/lib/categories';
 import { ProvenanceBanner } from '@/components/layout/provenance-banner';
-import { RunHistory } from '@/components/layout/run-history';
-import { TopicRecommendations } from '@/components/layout/topic-recommendations';
 
 const TopicEvolutionChart = dynamic(
   () => import('@/components/charts/topic-evolution').then(m => ({ default: m.TopicEvolutionChart })),
@@ -50,39 +48,11 @@ function formatRelativeTime(iso: string | null | undefined): string | null {
 
 type StatTone = 'primary' | 'amber' | 'emerald' | 'slate';
 
-const TONE_STYLES: Record<StatTone, { ring: string; bg: string; numText: string; iconBg: string; iconText: string; hoverBorder: string }> = {
-  primary: {
-    ring: 'ring-blue-500/20',
-    bg: 'bg-gradient-to-br from-blue-500/10 to-blue-500/5',
-    numText: 'text-blue-600 dark:text-blue-400',
-    iconBg: 'bg-blue-500/15',
-    iconText: 'text-blue-600 dark:text-blue-400',
-    hoverBorder: 'hover:ring-blue-500/40',
-  },
-  amber: {
-    ring: 'ring-amber-500/20',
-    bg: 'bg-gradient-to-br from-amber-500/10 to-amber-500/5',
-    numText: 'text-amber-600 dark:text-amber-400',
-    iconBg: 'bg-amber-500/15',
-    iconText: 'text-amber-600 dark:text-amber-400',
-    hoverBorder: 'hover:ring-amber-500/40',
-  },
-  emerald: {
-    ring: 'ring-emerald-500/20',
-    bg: 'bg-gradient-to-br from-emerald-500/10 to-emerald-500/5',
-    numText: 'text-emerald-600 dark:text-emerald-400',
-    iconBg: 'bg-emerald-500/15',
-    iconText: 'text-emerald-600 dark:text-emerald-400',
-    hoverBorder: 'hover:ring-emerald-500/40',
-  },
-  slate: {
-    ring: 'ring-slate-400/20',
-    bg: 'bg-gradient-to-br from-slate-400/10 to-slate-400/5',
-    numText: 'text-slate-600 dark:text-slate-300',
-    iconBg: 'bg-slate-400/15',
-    iconText: 'text-slate-600 dark:text-slate-400',
-    hoverBorder: 'hover:ring-slate-400/40',
-  },
+const TONE_STYLES: Record<StatTone, { numText: string; iconText: string }> = {
+  primary: { numText: 'text-foreground', iconText: 'text-foreground/80' },
+  amber:   { numText: 'text-foreground', iconText: 'text-foreground/80' },
+  emerald: { numText: 'text-foreground', iconText: 'text-foreground/80' },
+  slate:   { numText: 'text-foreground', iconText: 'text-foreground/80' },
 };
 
 function StatItem({
@@ -99,19 +69,21 @@ function StatItem({
   onClick?: () => void;
 }) {
   const styles = TONE_STYLES[tone];
-  const baseClass = `relative rounded-lg ring-1 ${styles.ring} ${styles.bg} px-3 py-2.5 transition-all`;
-  const interactiveClass = onClick ? `cursor-pointer ${styles.hoverBorder} hover:scale-[1.02]` : '';
+  // Editorial: no chip background, just spacing + a hairline left rule.
+  // Number is the hero; everything else recedes.
+  const baseClass = `relative pl-4 border-l border-[color:var(--hairline-strong)] py-1 transition-opacity`;
+  const interactiveClass = onClick ? `cursor-pointer hover:opacity-70` : '';
   const inner = (
-    <div className="flex items-center gap-3">
-      <div className={`shrink-0 w-8 h-8 rounded-md ${styles.iconBg} ${styles.iconText} flex items-center justify-center`}>
-        {icon}
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-2">
+        <span className={`${styles.iconText} opacity-60`}>{icon}</span>
+        <span className="text-eyebrow">{label}</span>
       </div>
-      <div className="min-w-0 flex-1">
-        <p className={`text-2xl font-bold leading-none tabular-nums ${styles.numText}`}>{value}</p>
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{label}</p>
-      </div>
+      <p className={`text-3xl font-light leading-none tabular-nums tracking-tight ${styles.numText}`}>
+        {value.toLocaleString()}
+      </p>
       {onClick && (
-        <span className="text-[10px] text-muted-foreground/40 absolute top-1.5 right-2">↗</span>
+        <span className="text-[10px] text-muted-foreground/50 absolute top-0.5 right-0">↗</span>
       )}
     </div>
   );
@@ -166,35 +138,40 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
   const relativeSync = formatRelativeTime(lastSyncAt);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8 max-w-7xl mx-auto px-2 py-2">
       {/* Topic headline + analysis meta */}
       {(topicName || relativeSync || agentCount > 0) && (
-        <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between">
+        <header className="space-y-2 pb-2">
           {topicName && (
-            <h2 className="text-sm font-semibold tracking-tight text-foreground">
-              {topicName}
-            </h2>
+            <h1 className="text-display text-foreground">{topicName}</h1>
           )}
-          <p className="text-[11px] uppercase tracking-wider text-muted-foreground tabular-nums">
+          <p className="text-[11px] uppercase tracking-[0.10em] text-muted-foreground tabular-nums">
             {relativeSync && <span>Last analyzed {relativeSync}</span>}
-            {relativeSync && agentCount > 0 && <span className="mx-1.5">·</span>}
+            {relativeSync && agentCount > 0 && <span className="mx-2">·</span>}
             {agentCount > 0 && <span>{agentCount} agents</span>}
-            {(relativeSync || agentCount > 0) && displayPaperCount > 0 && <span className="mx-1.5">·</span>}
-            {displayPaperCount > 0 && <span>{displayPaperCount} papers</span>}
+            {(relativeSync || agentCount > 0) && displayPaperCount > 0 && <span className="mx-2">·</span>}
+            {displayPaperCount > 0 && <span>{displayPaperCount.toLocaleString()} papers</span>}
           </p>
-        </div>
+        </header>
       )}
 
-      {/* 1. Collection at a Glance card */}
-      <Card>
-        <CardHeader className="pb-2 pt-3 px-4">
-          <CardTitle className="text-sm font-semibold">Collection at a Glance</CardTitle>
-          <CardDescription className="text-xs">
-            {displayPaperCount} papers spanning research topics.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 pb-3">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* 1. Collection Provenance Card — what this is, where it came from, what's in it */}
+      <ProvenanceBanner
+        paperCount={displayPaperCount}
+        lastUpdated={lastSyncAt ?? undefined}
+        dbPapers={dbPapers}
+        agentCount={agentCount > 0 ? agentCount : undefined}
+      />
+
+      {/* 2. Collection at a Glance — bare, hero numbers, hairline-anchored */}
+      <section>
+        <div className="mb-4 space-y-1">
+          <p className="text-eyebrow">Collection at a Glance</p>
+          <p className="text-h2-tight font-light text-foreground">
+            {displayPaperCount.toLocaleString()} papers <span className="text-foreground/55">spanning {(dbTopicEvolution.length || topicEvolution.length) || 'multiple'} research topics.</span>
+          </p>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-5">
             {/* 1. Papers — primary, the dataset itself */}
             <StatItem
               label="Papers"
@@ -248,64 +225,49 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
                 document.getElementById('topic-evolution-chart')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
             />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 2. Collection Provenance Banner */}
-      <ProvenanceBanner
-        paperCount={displayPaperCount}
-        lastUpdated={lastSyncAt ?? undefined}
-      />
-
-      {/* 2b. Topic recommendations */}
-      <TopicRecommendations
-        currentTopicId={topicId ?? null}
-        currentTopicName={topicName ?? ''}
-      />
+        </div>
+      </section>
 
       {/* 3. Side-by-side charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="animate-chart-in">
-          <CardHeader className="pb-2 pt-3 px-4">
-            <CardTitle className="text-sm font-semibold">Research Landscape</CardTitle>
-            <CardDescription className="text-xs">
-              Topic distribution across research clusters
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="px-4 pb-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section className="animate-chart-in space-y-3">
+          <header className="space-y-1">
+            <p className="text-eyebrow">Research Landscape</p>
+            <h3 className="text-h2-tight text-foreground">Topic distribution across research clusters</h3>
+          </header>
+          <div>
             <ResearchLandscape papers={dbPapers && dbPapers.length > 0 ? dbPapers : papers} />
-          </CardContent>
-        </Card>
+          </div>
+        </section>
 
-        <Card id="topic-evolution-chart" className="animate-chart-in scroll-mt-4" style={{ animationDelay: '100ms' }}>
-          <CardHeader className="pb-2 pt-3 px-4">
-            <CardTitle className="text-sm font-semibold">Topic Evolution Over Time</CardTitle>
-            <CardDescription className="text-xs">Research intensity across key topics</CardDescription>
-          </CardHeader>
-          <CardContent className="px-4 pb-3">
+        <section id="topic-evolution-chart" className="animate-chart-in scroll-mt-4 space-y-3" style={{ animationDelay: '100ms' }}>
+          <header className="space-y-1">
+            <p className="text-eyebrow">Topic Evolution Over Time</p>
+            <h3 className="text-h2-tight text-foreground">Research intensity across key topics</h3>
+          </header>
+          <div>
             <TopicEvolutionChart data={dbTopicEvolution.length > 0 ? dbTopicEvolution : topicEvolution} />
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       </div>
 
       {/* 4. Two-column: Open Questions + Key Results — equal-height columns */}
       {papers.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Left: Open Research Questions */}
-          <div className="flex flex-col gap-2">
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">Open Research Questions</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">What the field still doesn&apos;t know</p>
+          <div className="flex flex-col gap-3">
+            <div className="space-y-1">
+              <p className="text-eyebrow">Open Research Questions</p>
+              <h3 className="text-h2-tight font-light text-foreground">What the field still doesn&apos;t know.</h3>
             </div>
             <OpenQuestionsSection artifacts={artifacts} />
           </div>
 
           {/* Right: Key Results */}
-          <div className="flex flex-col gap-2">
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">Key Results Worth Knowing</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Important findings across the collection</p>
+          <div className="flex flex-col gap-3">
+            <div className="space-y-1">
+              <p className="text-eyebrow">Key Results Worth Knowing</p>
+              <h3 className="text-h2-tight font-light text-foreground">Important findings across the collection.</h3>
             </div>
             {papers.length > 0 ? (
               <div className="grid grid-cols-1 gap-2 auto-rows-fr">
@@ -322,37 +284,33 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
 
       {/* 5. New Benchmarks grid */}
       {newBenchmarks.length > 0 && (
-        <div className="space-y-2">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">New Benchmarks</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Papers introducing new evaluation frameworks.
-            </p>
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <p className="text-eyebrow">New Benchmarks</p>
+            <h3 className="text-h2-tight font-light text-foreground">Papers introducing new evaluation frameworks.</h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3">
             {newBenchmarks.map((b, i) => {
               const name: string = typeof b.name === 'string' ? b.name : 'Untitled Benchmark';
               const measures: string = typeof b.measures === 'string' ? b.measures : '';
               return (
-                <div
+                <a
                   key={i}
-                  className="rounded-lg border border-border bg-card p-2 space-y-1"
+                  href={paperLink(b.paper?.id ?? b.paper?.paperId ?? undefined, name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block border-t border-[color:var(--hairline)] pt-2 hover:border-foreground/40 transition-colors"
                 >
-                  <div className="flex items-center gap-1">
-                    <a
-                      href={paperLink(b.paper?.id ?? b.paper?.paperId ?? undefined, name)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-bold text-foreground hover:text-primary transition-colors underline-offset-2 hover:underline"
-                    >
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[13px] font-medium tracking-tight text-foreground group-hover:underline underline-offset-4 decoration-foreground/40">
                       {name}
-                    </a>
-                    <span className="text-primary/50 text-xs" aria-hidden="true">↗</span>
+                    </span>
+                    <span className="text-foreground/40 text-[11px]" aria-hidden="true">↗</span>
                   </div>
                   {measures && (
-                    <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{measures}</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2 mt-1">{measures}</p>
                   )}
-                </div>
+                </a>
               );
             })}
           </div>
@@ -361,17 +319,6 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
 
       {papers.length === 0 && topicEvolution.length === 0 && (
         <SharedEmptyState title="Nothing here yet" description="Run an analysis to populate the overview." />
-      )}
-
-      {/* 6. Agent Run History */}
-      {topicId && (
-        <div className="space-y-2">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Agent Run History</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Last 5 ingestion and analysis jobs</p>
-          </div>
-          <RunHistory topicId={topicId} />
-        </div>
       )}
 
       {/* Paper drawer (hidden by default) */}

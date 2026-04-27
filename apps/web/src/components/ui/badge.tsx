@@ -15,10 +15,13 @@ const badgeVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
         outline:
-          "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
+          "border-[color:var(--hairline-strong)] text-foreground [a]:hover:bg-muted [a]:hover:text-foreground",
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        // Editorial caption — uppercase, tight tracking, hairline border, transparent
+        caption:
+          "h-auto rounded-full border-[color:var(--hairline-strong)] text-foreground/80 bg-transparent text-[10px] font-semibold uppercase tracking-[0.10em] py-0.5 px-2",
+        link: "text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground",
       },
     },
     defaultVariants: {

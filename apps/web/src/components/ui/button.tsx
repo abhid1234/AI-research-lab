@@ -8,7 +8,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
+        // Editorial pill (default) — transparent fill, hairline border, hover wash
+        default:
+          "rounded-full border-foreground bg-transparent text-foreground hover:bg-foreground/8 aria-expanded:bg-foreground/12",
+        pill:
+          "rounded-full border-foreground bg-transparent text-foreground hover:bg-foreground/8 aria-expanded:bg-foreground/12",
+        // Solid pill — primary CTAs only
+        "solid-pill":
+          "rounded-full bg-foreground text-background border-transparent hover:bg-foreground/90 aria-expanded:bg-foreground/85",
+        // Legacy variants retained for charts/forms not in scope this round
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
@@ -17,7 +25,7 @@ const buttonVariants = cva(
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground",
       },
       size: {
         default:

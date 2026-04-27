@@ -42,17 +42,7 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
-  // Listen for topic-change events dispatched by the TopicRecommendations widget
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const id = (e as CustomEvent<{ id: string }>).detail?.id;
-      if (typeof id === 'string') handleTopicChange(id);
-    };
-    window.addEventListener('topic-change', handler);
-    return () => window.removeEventListener('topic-change', handler);
-  }, []);
-
-  const fetchArtifacts = useCallback(async (topicId: string) => {
+const fetchArtifacts = useCallback(async (topicId: string) => {
     setLoadingArtifacts(true);
     try {
       const res = await fetch(`/api/topics/${topicId}`);
@@ -118,8 +108,8 @@ export default function Home() {
         <main className="flex flex-1 flex-col overflow-hidden">
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Topic selector toolbar */}
-            <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 min-h-12 py-2 shrink-0">
-              <span className="text-xs text-muted-foreground font-medium">Topic</span>
+            <div className="flex flex-wrap items-center gap-4 border-b border-[color:var(--hairline)] px-6 min-h-12 py-2.5 shrink-0">
+              <span className="text-eyebrow shrink-0">Topic</span>
               <TopicSelector
                 selectedId={selectedTopicId}
                 onChange={handleTopicChange}
@@ -127,8 +117,13 @@ export default function Home() {
               {selectedTopicId && (
                 <button
                   onClick={() => fetchArtifacts(selectedTopicId)}
-                  className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors tracking-tight"
                 >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="23 4 23 10 17 10" />
+                    <polyline points="1 20 1 14 7 14" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                  </svg>
                   Refresh
                 </button>
               )}
@@ -137,28 +132,22 @@ export default function Home() {
             {/* Artifact viewer */}
             <div className="flex-1 overflow-hidden">
               {loadingArtifacts ? (
-                <div className="p-4 space-y-6 animate-pulse">
-                  {/* Skeleton stat cards */}
+                <div className="p-6 space-y-6 animate-pulse">
+                  <div className="space-y-2">
+                    <div className="h-4 w-24 rounded bg-[color:var(--bare-card-tint)]" />
+                    <div className="h-3 w-72 rounded bg-[color:var(--bare-card-tint)]" />
+                  </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {[...Array(4)].map((_, i) => (
-                      <div key={i} className="rounded-xl bg-muted h-[76px]" />
+                      <div key={i} className="space-y-1.5">
+                        <div className="h-2.5 w-12 rounded bg-[color:var(--bare-card-tint)]" />
+                        <div className="h-7 w-20 rounded bg-[color:var(--bare-card-tint)]" />
+                      </div>
                     ))}
                   </div>
-                  {/* Skeleton banner */}
-                  <div className="h-4 w-3/4 rounded bg-muted" />
-                  {/* Skeleton charts */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div className="rounded-lg bg-muted h-[340px]" />
-                    <div className="rounded-lg bg-muted h-[340px]" />
-                  </div>
-                  {/* Skeleton content */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div className="rounded-lg bg-muted h-[200px]" />
-                    <div className="space-y-3">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="rounded-lg bg-muted h-[80px]" />
-                      ))}
-                    </div>
+                    <div className="rounded-lg bg-[color:var(--bare-card-tint)] h-[300px]" />
+                    <div className="rounded-lg bg-[color:var(--bare-card-tint)] h-[300px]" />
                   </div>
                 </div>
               ) : (
