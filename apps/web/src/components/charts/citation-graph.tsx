@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { CATEGORIES, CATEGORY_COLORS as SHARED_COLORS, derivePaperCategory, type Category } from '@/lib/categories';
 
 // Two-tone fill for bars: a soft pastel body with the saturated border color
@@ -14,7 +14,8 @@ function softenOklch(oklch: string): string {
   const L = parseFloat(m[1]);
   const C = parseFloat(m[2]);
   const H = parseFloat(m[3]);
-  return `oklch(${Math.min(0.92, L + 0.25).toFixed(2)} ${(C * 0.55).toFixed(3)} ${H})`;
+  // Richer fills: less lightening + more chroma than before
+  return `oklch(${Math.min(0.87, L + 0.16).toFixed(2)} ${(C * 0.68).toFixed(3)} ${H})`;
 }
 
 const CATEGORY_FILL: Record<Category, string> = Object.fromEntries(
@@ -174,53 +175,53 @@ export function CitationGraph({ papers }: { papers: any[] }) {
 
   return (
     <div>
-      <ResponsiveContainer width="100%" height={Math.max(280, data.length * 32 + 40)}>
+      <ResponsiveContainer width="100%" height={data.length * 30 + 24}>
         <BarChart
           data={data}
           layout="vertical"
-          margin={{ top: 5, right: 30, bottom: 5, left: 10 }}
+          barSize={18}
+          margin={{ top: 2, right: 44, bottom: 2, left: 4 }}
           onClick={(e: any) => {
-            // Recharts onClick fires when clicking a bar — payload has the data point
             if (e?.activePayload?.[0]?.payload) {
               setOpenCategory(e.activePayload[0].payload);
             }
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
-          <XAxis
-            type="number"
-            tick={{ fontSize: 10, fill: '#666' }}
-            allowDecimals={false}
-          />
+          <XAxis type="number" hide />
           <YAxis
             type="category"
             dataKey="category"
-            tick={{ fontSize: 11, fill: '#444' }}
-            width={90}
+            tick={{ fontSize: 10, fill: '#555' }}
+            width={145}
+            tickLine={false}
+            axisLine={false}
           />
           <Tooltip
             content={<CustomTooltip />}
             cursor={{ fill: 'rgba(0,0,0,0.04)' }}
             wrapperStyle={{ pointerEvents: 'auto', outline: 'none' }}
-            // Keep tooltip alive briefly so the cursor can travel from the bar
-            // onto the tooltip links without flicker-dismissing.
             animationDuration={120}
           />
-          <Bar dataKey="count" radius={[0, 6, 6, 0]} cursor="pointer">
+          <Bar dataKey="count" radius={[0, 4, 4, 0]} cursor="pointer">
             {data.map((entry, index) => (
               <Cell
                 key={index}
                 fill={entry.fillColor}
                 stroke={entry.color}
-                strokeWidth={1}
+                strokeWidth={1.5}
               />
             ))}
+            <LabelList
+              dataKey="count"
+              position="right"
+              style={{ fontSize: 10, fill: '#888', fontVariantNumeric: 'tabular-nums' }}
+            />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
 
       {/* Total count caption */}
-      <p className="text-[10px] text-muted-foreground mt-2 text-right pr-4">
+      <p className="text-[10px] text-muted-foreground mt-1 text-right pr-1">
         {papers.length} total papers across {data.length} categories — click any bar to explore
       </p>
 

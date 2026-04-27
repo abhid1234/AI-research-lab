@@ -2,7 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
 
 /* ───────────────────────────────────────────────────────────────
    PRIMITIVE LAYER — raw values, used by semantic layer below.
@@ -143,51 +142,6 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* ───────────────────────────────────────────────────────────────
-   DARK MODE — kept from current navy + bright-blue scheme.
-   ─────────────────────────────────────────────────────────────── */
-.dark {
-  --background: var(--c-navy-950);
-  --foreground: var(--c-foreground-on-dark);
-  --card: var(--c-navy-800);
-  --card-foreground: var(--c-foreground-on-dark);
-  --popover: var(--c-navy-800);
-  --popover-foreground: var(--c-foreground-on-dark);
-  --primary: var(--c-blue-bright);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: var(--c-navy-700);
-  --secondary-foreground: oklch(0.85 0.01 260);
-  --muted: var(--c-navy-700);
-  --muted-foreground: var(--c-muted-on-dark);
-  --accent: var(--c-navy-600);
-  --accent-foreground: oklch(0.9 0.005 260);
-  --destructive: oklch(0.6 0.2 25);
-  --border: var(--c-navy-500);
-  --input: var(--c-navy-600);
-  --ring: var(--c-blue-bright);
-  --chart-1: var(--c-blue-bright);
-  --chart-2: oklch(0.6 0.15 195);
-  --chart-3: oklch(0.6 0.15 290);
-  --chart-4: oklch(0.65 0.12 160);
-  --chart-5: oklch(0.6 0.14 340);
-  --chart-6: oklch(0.65 0.13 70);
-  --chart-7: oklch(0.65 0.13 110);
-  --chart-8: oklch(0.60 0.12 30);
-  --chart-9: oklch(0.65 0.13 230);
-  --chart-10: oklch(0.65 0.13 350);
-  --sidebar: var(--c-navy-900);
-  --sidebar-foreground: var(--c-foreground-on-dark);
-  --sidebar-primary: var(--c-blue-bright);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: var(--c-navy-600);
-  --sidebar-accent-foreground: oklch(0.9 0.005 260);
-  --sidebar-border: var(--c-navy-500);
-  --sidebar-ring: var(--c-blue-bright);
-
-  --hairline: color-mix(in oklch, var(--foreground) 14%, transparent);
-  --hairline-strong: color-mix(in oklch, var(--foreground) 28%, transparent);
-  --bare-card-tint: color-mix(in oklch, var(--foreground) 3%, transparent);
-}
 
 @layer base {
   * {
@@ -195,7 +149,7 @@
   }
   html {
     @apply font-sans bg-background text-foreground;
-    color-scheme: light dark;
+    color-scheme: light;
   }
   body {
     @apply bg-background text-foreground antialiased;
@@ -318,18 +272,5 @@
     padding: 0 0.04em;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
-  }
-  /* Dark mode: same highlighter pattern, blue glow instead of chartreuse */
-  .dark .signature-wash {
-    color: var(--foreground);
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      transparent 38%,
-      color-mix(in oklch, var(--c-blue-bright) 55%, transparent) 38%,
-      color-mix(in oklch, var(--c-blue-bright) 55%, transparent) 92%,
-      transparent 92%,
-      transparent 100%
-    );
   }
 }
