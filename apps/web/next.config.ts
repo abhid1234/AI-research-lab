@@ -15,11 +15,14 @@ const nextConfig: NextConfig = {
     return config;
   },
   async redirects() {
+    // Canonical host is www.airesearchlab.space — the apex (no-www)
+    // 308-redirects to it so every link, share, and crawl converges on
+    // a single hostname.
     return [
       {
         source: '/:path*',
-        has: [{ type: 'host', value: 'www.airesearchlab.space' }],
-        destination: 'https://airesearchlab.space/:path*',
+        has: [{ type: 'host', value: 'airesearchlab.space' }],
+        destination: 'https://www.airesearchlab.space/:path*',
         permanent: true,
       },
     ];
