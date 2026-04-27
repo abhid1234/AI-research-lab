@@ -1,5 +1,7 @@
 'use client';
 
+import { Zap } from 'lucide-react';
+
 interface SurprisingFindingsProps {
   frontiers: any[];
 }
@@ -16,7 +18,7 @@ export function SurprisingFindings({ frontiers }: SurprisingFindingsProps) {
   return (
     <div className="rounded-lg border-2 border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent p-4">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-lg">⚡</span>
+        <Zap className="h-4 w-4 text-amber-500" aria-hidden="true" />
         <h3 className="text-sm font-bold text-foreground">Surprising / Controversial Findings</h3>
         <span className="text-[10px] text-muted-foreground ml-auto">Lower confidence = more debate-worthy</span>
       </div>

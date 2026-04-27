@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Award, BookOpen, Check, Code2, FileText, Flame, ScrollText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/ui/empty-state';
 import { paperLink } from '@/lib/paper-utils';
@@ -262,13 +263,14 @@ function PaperCard({ paper }: { paper: any }) {
 
   // Source attribution
   const pubTypes: string[] = Array.isArray(paper.publicationTypes) ? paper.publicationTypes : [];
-  const sourceLabel = pubTypes.includes('Conference') || pubTypes.includes('JournalArticle')
-    ? '📄 Published'
-    : pubTypes.includes('Review')
-      ? '📚 Review'
-      : isRealArxiv
-        ? '📑 arXiv'
-        : '';
+  const source: { Icon: typeof FileText; text: string } | null =
+    pubTypes.includes('Conference') || pubTypes.includes('JournalArticle')
+      ? { Icon: FileText, text: 'Published' }
+      : pubTypes.includes('Review')
+        ? { Icon: BookOpen, text: 'Review' }
+        : isRealArxiv
+          ? { Icon: ScrollText, text: 'arXiv' }
+          : null;
 
   const openAbs = () => window.open(url, '_blank', 'noopener,noreferrer');
 
@@ -290,12 +292,13 @@ function PaperCard({ paper }: { paper: any }) {
           >
             {category}
           </span>
-          {sourceLabel && (
+          {source && (
             <span
-              className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0"
+              className="inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0"
               title={isRealArxiv ? 'Originally published on arXiv' : 'From source database'}
             >
-              {sourceLabel}
+              <source.Icon className="h-2.5 w-2.5" aria-hidden="true" />
+              {source.text}
             </span>
           )}
         </div>
@@ -330,7 +333,7 @@ function PaperCard({ paper }: { paper: any }) {
               className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700"
               title={`${influentialCitations} influential citations`}
             >
-              ✓ Influential
+              <Check className="h-2.5 w-2.5" aria-hidden="true" /> Influential
             </span>
           )}
           {hfUpvotes >= 50 && (
@@ -338,7 +341,7 @@ function PaperCard({ paper }: { paper: any }) {
               className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-orange-100 text-orange-700"
               title={`${hfUpvotes} HuggingFace upvotes`}
             >
-              🔥 {hfUpvotes}
+              <Flame className="h-2.5 w-2.5" aria-hidden="true" /> {hfUpvotes}
             </span>
           )}
           {orDecision && (
@@ -346,7 +349,7 @@ function PaperCard({ paper }: { paper: any }) {
               className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-stone-100 text-stone-700 dark:bg-stone-500/15 dark:text-stone-300"
               title={`${orDecision} acceptance`}
             >
-              🏆 {orDecision}
+              <Award className="h-2.5 w-2.5" aria-hidden="true" /> {orDecision}
             </span>
           )}
           {hasCode && (
@@ -354,7 +357,7 @@ function PaperCard({ paper }: { paper: any }) {
               className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700"
               title="Has reproducible code"
             >
-              📄 Code
+              <Code2 className="h-2.5 w-2.5" aria-hidden="true" /> Code
             </span>
           )}
           {venue && !orDecision && (
@@ -422,7 +425,7 @@ function PaperCard({ paper }: { paper: any }) {
             className="flex items-center gap-1 hover:text-foreground transition-colors font-medium"
             title="Open arXiv abstract page"
           >
-            <span>📑</span>
+            <ScrollText className="h-3 w-3" aria-hidden="true" />
             <span>arXiv abs</span>
           </a>
           {pdfUrl && (
