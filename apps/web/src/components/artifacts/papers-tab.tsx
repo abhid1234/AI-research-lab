@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Award, BookOpen, Check, Code2, FileText, Flame, ScrollText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ArxivPaperFooter } from '@/components/layout/arxiv-paper-footer';
 import { paperLink } from '@/lib/paper-utils';
 import { CATEGORY_COLORS, derivePaperCategory, type Category } from '@/lib/categories';
 
@@ -414,36 +415,8 @@ function PaperCard({ paper }: { paper: any }) {
         </div>
       )}
 
-      {/* Footer action bar — explicit links to abs + PDF */}
-      {isRealArxiv && (
-        <div className="flex items-center gap-3 px-3 py-1.5 border-t border-gray-100 text-[10px] text-gray-500 bg-gray-50/50 shrink-0">
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 hover:text-foreground transition-colors font-medium"
-            title="Open arXiv abstract page"
-          >
-            <ScrollText className="h-3 w-3" aria-hidden="true" />
-            <span>arXiv abs</span>
-          </a>
-          {pdfUrl && (
-            <a
-              href={pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 hover:text-foreground transition-colors font-medium"
-              title="Download PDF directly"
-            >
-              <span>⬇</span>
-              <span>PDF</span>
-            </a>
-          )}
-          <span className="ml-auto text-gray-400 font-mono text-[9px]">{arxivId}</span>
-        </div>
-      )}
+      {/* Footer action bar — abs + PDF + arxivId (shared across all paper cards) */}
+      <ArxivPaperFooter arxivId={arxivId} />
     </div>
   );
 }
