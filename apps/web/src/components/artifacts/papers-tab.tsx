@@ -20,6 +20,7 @@ export function PapersTab({ artifacts, dbPapers = [] }: PapersTabProps) {
   const [page, setPage] = useState(0);
   const [sortBy, setSortBy] = useState<'quality' | 'relevance' | 'date' | 'citations' | 'title'>('quality');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
   const paperArtifact = artifacts.find((a) => a.agentType === 'paper-analyzer');
   const analyzedPapers: any[] = paperArtifact?.data?.papers ?? [];
@@ -123,12 +124,35 @@ export function PapersTab({ artifacts, dbPapers = [] }: PapersTabProps) {
           <option value="title">Sort: A-Z</option>
           <option value="relevance">Sort: Default</option>
         </select>
-        {sorted.length > 0 && (
-          <span className="text-[10px] text-muted-foreground tabular-nums ml-auto">
-            {sorted.length} paper{sorted.length !== 1 ? 's' : ''}
-            {totalPages > 1 ? ` · page ${page + 1}/${totalPages}` : ''}
-          </span>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          {sorted.length > 0 && (
+            <span className="text-[10px] text-muted-foreground tabular-nums">
+              {sorted.length} paper{sorted.length !== 1 ? 's' : ''}
+              {totalPages > 1 ? ` · page ${page + 1}/${totalPages}` : ''}
+            </span>
+          )}
+          {/* View toggle */}
+          <div className="flex items-center rounded-md border border-border overflow-hidden">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-2 py-1 transition-colors ${viewMode === 'list' ? 'bg-foreground text-background' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+              title="List view"
+            >
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <line x1="2" y1="4" x2="14" y2="4" /><line x1="2" y1="8" x2="14" y2="8" /><line x1="2" y1="12" x2="14" y2="12" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-2 py-1 transition-colors ${viewMode === 'grid' ? 'bg-foreground text-background' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+              title="Grid view"
+            >
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="5" height="5" rx="1" /><rect x="9" y="2" width="5" height="5" rx="1" /><rect x="2" y="9" width="5" height="5" rx="1" /><rect x="9" y="9" width="5" height="5" rx="1" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Category filter pills */}
@@ -178,11 +202,19 @@ export function PapersTab({ artifacts, dbPapers = [] }: PapersTabProps) {
         />
       ) : (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr">
-            {pageItems.map((p, i) => (
-              <PaperCard key={page * PAGE_SIZE + i} paper={p} />
-            ))}
-          </div>
+          {viewMode === 'list' ? (
+            <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
+              {pageItems.map((p, i) => (
+                <PaperRow key={page * PAGE_SIZE + i} paper={p} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr">
+              {pageItems.map((p, i) => (
+                <PaperCard key={page * PAGE_SIZE + i} paper={p} />
+              ))}
+            </div>
+          )}
 
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 pt-2">
@@ -208,6 +240,81 @@ export function PapersTab({ artifacts, dbPapers = [] }: PapersTabProps) {
         </>
       )}
     </div>
+  );
+}
+
+function PaperRow({ paper }: { paper: any }) {
+  const displayTitle: string = typeof paper.title === 'string' && paper.title.trim() ? paper.title : (paper.paperId ?? 'Untitled Paper');
+  const arxivId: string = typeof paper.arxivId === 'string' ? paper.arxivId : '';
+  const pid: string = typeof paper.paperId === 'string' ? paper.paperId : typeof paper.id === 'string' ? paper.id : '';
+  const isRealArxiv = arxivId && !arxivId.startsWith('demo-') && (arxivId.includes('.') || arxivId.includes('/'));
+  const url = isRealArxiv ? `https://arxiv.org/abs/${arxivId}` : paperLink(pid || undefined, displayTitle);
+
+  const category = derivePaperCategory(paper);
+  const colors = CATEGORY_COLORS[category];
+
+  const authors: any[] = Array.isArray(paper.authors) ? paper.authors : [];
+  const authorStr = authors.slice(0, 2).map((a: any) => typeof a === 'string' ? a : (a?.name ?? '')).filter(Boolean).join(', ');
+  const moreAuthors = authors.length > 2 ? ` +${authors.length - 2}` : '';
+
+  const date = paper.publishedAt
+    ? new Date(paper.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
+    : '';
+
+  const citationCount: number = typeof paper.citationCount === 'number' ? paper.citationCount : 0;
+  const influentialCitations: number = typeof paper.influentialCitationCount === 'number' ? paper.influentialCitationCount : 0;
+  const venue: string = typeof paper.venue === 'string' ? paper.venue : '';
+  const hasCode: boolean = paper.hasCode === true;
+
+  return (
+    <a
+      href={url || undefined}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-start gap-4 bg-card px-4 py-3 hover:bg-muted/40 transition-colors"
+    >
+      {/* Color dot — category accent */}
+      <span
+        className="mt-1 h-2.5 w-2.5 rounded-full shrink-0"
+        style={{ background: colors?.border ?? '#6366f1' }}
+      />
+
+      {/* Main content */}
+      <div className="flex-1 min-w-0 space-y-0.5">
+        <p className="text-[13px] font-semibold leading-snug text-foreground group-hover:underline underline-offset-4 decoration-foreground/30 line-clamp-1">
+          {displayTitle}
+        </p>
+        <div className="flex items-center gap-2 flex-wrap text-[10.5px] text-muted-foreground">
+          {authorStr && (
+            <span className="truncate max-w-[220px]">
+              {authorStr}{moreAuthors && <span className="opacity-60">{moreAuthors}</span>}
+            </span>
+          )}
+          {date && <span className="shrink-0">{date}</span>}
+          {venue && <span className="shrink-0 text-blue-600/70">{venue.length > 20 ? venue.slice(0, 20) + '…' : venue}</span>}
+        </div>
+      </div>
+
+      {/* Right badges */}
+      <div className="flex items-center gap-1.5 shrink-0">
+        {influentialCitations > 0 && (
+          <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+            <Check className="h-2 w-2" />Influential
+          </span>
+        )}
+        {citationCount >= 20 && (
+          <span className="text-[9px] font-semibold tabular-nums text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full">
+            {citationCount} cites
+          </span>
+        )}
+        {hasCode && (
+          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
+            <Code2 className="h-2 w-2 inline -mt-0.5" /> Code
+          </span>
+        )}
+        <span className="text-[11px] text-foreground/25 group-hover:text-foreground/60 transition-colors">↗</span>
+      </div>
+    </a>
   );
 }
 
