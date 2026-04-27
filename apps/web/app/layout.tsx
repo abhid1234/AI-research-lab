@@ -20,18 +20,29 @@ const interDisplay = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://airesearchlab.space'),
   title: 'AI Research Lab',
-  description: 'Agent-powered research paper observatory — ingest AI papers, run 5 specialist agents, explore interactive visual artifacts.',
+  description: 'Five Claude agents arguing about AI papers, in public. 502 papers, 9 topics, fully transparent methodology.',
   openGraph: {
     title: 'AI Research Lab',
-    description: 'Agent-powered research paper observatory — ingest AI papers, run 5 specialist agents, explore interactive visual artifacts.',
+    description: 'Five Claude agents arguing about AI papers, in public. 502 papers, 9 topics, fully transparent methodology.',
+    url: 'https://airesearchlab.space',
     type: 'website',
     siteName: 'AI Research Lab',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'AI Research Lab — Five Claude agents arguing about AI papers, in public.',
+      },
+    ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'AI Research Lab',
-    description: 'Agent-powered research paper observatory',
+    description: 'Five Claude agents arguing about AI papers, in public.',
+    images: ['/og-image.png'],
   },
   icons: {
     icon: '/icon.svg',
