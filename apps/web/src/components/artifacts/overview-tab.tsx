@@ -302,7 +302,10 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
             {newBenchmarks.map((b, i) => {
               const name: string = typeof b.name === 'string' ? b.name : 'Untitled Benchmark';
               const measures: string = typeof b.measures === 'string' ? b.measures : '';
-              const href = paperLink(b.paper?.id ?? b.paper?.paperId ?? undefined, name);
+              const benchmarkPaperId: string = b.paper?.id ?? b.paper?.paperId ?? '';
+              const dbMatch = (dbPapers ?? []).find((d: any) => d?.id === benchmarkPaperId);
+              const benchmarkArxivId: string = dbMatch?.arxivId ?? '';
+              const href = paperLink(benchmarkArxivId || undefined) || paperLink(benchmarkPaperId || undefined);
               const inner = (
                 <>
                   <div className="flex items-center gap-1.5">
