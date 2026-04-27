@@ -137,7 +137,11 @@ export function ArtifactViewer({ artifacts, totalPaperCount, dbPapers, topicName
             {TAB_IDS.map((id) => {
               const count = getTabCount(id, artifacts, dbPapers, totalPaperCount);
               return (
-                <TabsTrigger key={id} value={id}>
+                <TabsTrigger
+                  key={id}
+                  value={id}
+                  aria-current={id === activeTab ? 'page' : undefined}
+                >
                   {TAB_LABELS[id]}
                   <CountBadge count={count} tint={TAB_TINT[id]} />
                 </TabsTrigger>
