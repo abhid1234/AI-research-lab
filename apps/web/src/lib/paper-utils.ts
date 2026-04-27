@@ -22,16 +22,19 @@ export function safeString(val: any): string {
 }
 
 /**
- * Build a URL to view a paper. Always lands on arxiv — direct abs page when
- * the id looks like an arxiv ID, otherwise arxiv search by title (or id).
+ * Build a URL to view a paper. Always a direct arxiv /abs page when we have
+ * a real arxiv ID (e.g., '2501.09136' or 'cs/9610001'), or a passthrough
+ * arxiv URL. Returns '#' when no arxiv ID is available — callers should treat
+ * '#' as "no link" and prefer rendering the title as plain text.
+ *
+ * Search fallbacks are intentionally not provided: per project policy, every
+ * paper link must land on an actual arxiv paper page, not a search box.
  */
 export function paperLink(id: string | undefined, title?: string): string {
-  const search = (q: string) =>
-    `https://arxiv.org/search/?searchtype=all&query=${encodeURIComponent(q)}`;
-  if (!id) return title ? search(title) : '#';
+  if (!id) return '#';
   if (id.includes('arxiv.org')) return id;
   if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
-  return search(title ?? id);
+  return '#';
 }
 
 /**

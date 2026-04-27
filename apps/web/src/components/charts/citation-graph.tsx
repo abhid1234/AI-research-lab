@@ -201,9 +201,7 @@ function CategoryPapersModal({ category, onClose }: { category: BarPoint; onClos
               const isRealArxiv = paper.arxivId && !paper.arxivId.startsWith('demo-') && (paper.arxivId.includes('.') || paper.arxivId.includes('/'));
               const url = isRealArxiv
                 ? `https://arxiv.org/abs/${paper.arxivId}`
-                : paper.title
-                  ? `https://arxiv.org/search/?searchtype=all&query=${encodeURIComponent(paper.title)}`
-                  : '#';
+                : '#';
 
               const date = paper.fullPaper?.publishedAt
                 ? new Date(paper.fullPaper.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })

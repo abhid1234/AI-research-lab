@@ -18,12 +18,10 @@ interface SOTAEntry {
 }
 
 function paperLink(id: string | undefined, title?: string): string {
-  const search = (q: string) =>
-    `https://arxiv.org/search/?searchtype=all&query=${encodeURIComponent(q)}`;
-  if (!id) return title ? search(title) : '#';
+  if (!id) return '#';
   if (id.includes('arxiv.org')) return id;
   if (id.includes('.') || id.includes('/')) return `https://arxiv.org/abs/${id}`;
-  return search(title ?? id);
+  return '#';
 }
 
 export function SOTATable({ entries }: { entries: SOTAEntry[] }) {

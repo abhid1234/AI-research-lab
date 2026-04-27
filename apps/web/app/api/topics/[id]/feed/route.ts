@@ -10,14 +10,16 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
   const papers = await getPapersByTopic(id);
 
+  // Per project policy: every link in the feed must point to an actual arxiv
+  // paper page. Papers without an arxiv ID are skipped rather than linked to
+  // a search box.
   const items = papers
-    .slice(0, 50)
     .map((p) => {
-      const abstract = typeof p.abstract === 'string' ? p.abstract.slice(0, 500) : '';
       const arxivId = typeof p.arxivId === 'string' ? p.arxivId : '';
-      const link = arxivId && (arxivId.includes('.') || arxivId.includes('/'))
-        ? `https://arxiv.org/abs/${arxivId}`
-        : `https://arxiv.org/search/?searchtype=all&query=${encodeURIComponent(p.title ?? '')}`;
+      const isArxiv = arxivId && (arxivId.includes('.') || arxivId.includes('/'));
+      if (!isArxiv) return null;
+      const abstract = typeof p.abstract === 'string' ? p.abstract.slice(0, 500) : '';
+      const link = `https://arxiv.org/abs/${arxivId}`;
       const pubDate = p.publishedAt ? new Date(p.publishedAt).toUTCString() : new Date().toUTCString();
 
       return `
@@ -29,6 +31,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       <pubDate>${pubDate}</pubDate>
     </item>`;
     })
+    .filter((s): s is string => s !== null)
+    .slice(0, 50)
     .join('\n');
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
