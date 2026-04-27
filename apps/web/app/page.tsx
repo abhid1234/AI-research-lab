@@ -21,15 +21,6 @@ export default function Home() {
   const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // On mount, read topic from URL query params
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const topicFromUrl = params.get('topic');
-    if (topicFromUrl) {
-      setSelectedTopicId(topicFromUrl);
-    }
-  }, []);
-
   // Fetch total topic count once. Exclude meta-collections ("All AI Papers")
   // so the header reads "9 topics" — same number as the dropdown's content
   // categories and the Overview "Topics" stat.
@@ -93,10 +84,6 @@ const fetchArtifacts = useCallback(async (topicId: string) => {
     setSelectedTopicId(id);
     setArtifacts([]);
     setLatestJobId(null);
-    // Update URL without navigation
-    const url = new URL(window.location.href);
-    url.searchParams.set('topic', id);
-    window.history.replaceState({}, '', url.toString());
   };
 
   return (
