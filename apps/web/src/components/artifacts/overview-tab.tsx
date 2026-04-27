@@ -233,7 +233,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
         <section className="animate-chart-in space-y-3">
           <header className="space-y-1">
             <p className="text-eyebrow">Research Landscape</p>
-            <h3 className="text-h2-tight text-foreground">Topic distribution across research clusters</h3>
+            <h2 className="text-h2-tight text-foreground">Topic distribution across research clusters</h2>
           </header>
           <div>
             <ResearchLandscape papers={dbPapers && dbPapers.length > 0 ? dbPapers : papers} />
@@ -243,7 +243,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
         <section id="topic-evolution-chart" className="animate-chart-in scroll-mt-4 space-y-3" style={{ animationDelay: '100ms' }}>
           <header className="space-y-1">
             <p className="text-eyebrow">Topic Evolution Over Time</p>
-            <h3 className="text-h2-tight text-foreground">Research intensity across key topics</h3>
+            <h2 className="text-h2-tight text-foreground">Research intensity across key topics</h2>
           </header>
           <div>
             <TopicEvolutionChart data={dbTopicEvolution.length > 0 ? dbTopicEvolution : topicEvolution} />
@@ -258,7 +258,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
           <div className="flex flex-col gap-3">
             <div className="space-y-1">
               <p className="text-eyebrow">Open Research Questions</p>
-              <h3 className="text-h2-tight text-foreground">What the field still doesn&apos;t know.</h3>
+              <h2 className="text-h2-tight text-foreground">What the field still doesn&apos;t know.</h2>
             </div>
             <OpenQuestionsSection artifacts={artifacts} dbPapers={dbPapers} />
           </div>
@@ -267,7 +267,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
           <div className="flex flex-col gap-3">
             <div className="space-y-1">
               <p className="text-eyebrow">Key Results Worth Knowing</p>
-              <h3 className="text-h2-tight text-foreground">Important findings across the collection.</h3>
+              <h2 className="text-h2-tight text-foreground">Important findings across the collection.</h2>
             </div>
             {papers.length > 0 ? (
               <div className="grid grid-cols-1 gap-2 auto-rows-fr">
@@ -296,7 +296,7 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
         <div className="space-y-3">
           <div className="space-y-1">
             <p className="text-eyebrow">New Benchmarks</p>
-            <h3 className="text-h2-tight text-foreground">Papers introducing new evaluation frameworks.</h3>
+            <h2 className="text-h2-tight text-foreground">Papers introducing new evaluation frameworks.</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3">
             {newBenchmarks.map((b, i) => {
@@ -413,9 +413,9 @@ function ResultCard({ paper: p }: { paper: any }) {
 
       {/* Finding (the headline result) */}
       <div className="px-3 pb-1.5 shrink-0">
-        <h3 className="text-[13px] font-semibold leading-snug text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2">
+        <h4 className="text-[13px] font-semibold leading-snug text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2">
           {finding}
-        </h3>
+        </h4>
       </div>
 
       {/* Approach / details */}
@@ -629,9 +629,9 @@ function OpenQuestionsSection({ artifacts, dbPapers }: { artifacts: { agentType:
 
             {/* Question text */}
             <div className="px-3 pb-1.5 shrink-0">
-              <h3 className={`text-[13px] font-semibold leading-snug text-gray-900 line-clamp-2 ${clickable ? 'group-hover:text-blue-700 transition-colors' : ''}`}>
+              <h4 className={`text-[13px] font-semibold leading-snug text-gray-900 line-clamp-2 ${clickable ? 'group-hover:text-blue-700 transition-colors' : ''}`}>
                 {q.text}
-              </h3>
+              </h4>
             </div>
 
             {/* Detail */}

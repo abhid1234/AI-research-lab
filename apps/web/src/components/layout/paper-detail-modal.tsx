@@ -150,7 +150,7 @@ export function PaperDetailModal({ paper, onClose, allPapers = [] }: PaperDetail
         .join(', ')
     : '';
 
-  // Build arxiv/scholar URL
+  // Build arxiv URL (direct abs page or arxiv search via paperLink)
   const isRealArxivId =
     arxivId && !arxivId.startsWith('demo-') && (arxivId.includes('.') || arxivId.includes('/'));
   const paperUrl = paperLink(isRealArxivId ? arxivId : undefined, title);
