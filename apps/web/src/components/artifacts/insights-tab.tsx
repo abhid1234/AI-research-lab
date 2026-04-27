@@ -385,7 +385,7 @@ export function InsightsTab({ artifacts, dbPapers }: InsightsTabProps) {
                       style={{ borderLeftWidth: '4px', borderLeftColor: '#10b981' }}
                     >
                       <div className="flex items-start gap-2 flex-1 min-h-0">
-                        <span className="shrink-0 mt-0.5 text-emerald-500 text-xs font-bold">✓</span>
+                        <CheckCircle2 className="h-3 w-3 shrink-0 mt-0.5 text-emerald-500" aria-hidden="true" />
                         <div className="space-y-0.5 flex-1 min-w-0">
                           {finding && (firstSPId || firstSPTitle) ? (
                             <a
@@ -426,11 +426,14 @@ export function InsightsTab({ artifacts, dbPapers }: InsightsTabProps) {
                           </div>
                           {strength && <p className="text-[10px] text-muted-foreground">{strength}</p>}
                           {caveats.length > 0 && (
-                            <p className="text-[10px] text-muted-foreground/80">
-                              ⚠ {caveats.slice(0, 1).map((caveat: any) =>
-                                typeof caveat === 'string' ? caveat : safeString(caveat)
-                              ).join('')}
-                              {caveats.length > 1 ? ` +${caveats.length - 1} more` : ''}
+                            <p className="text-[10px] text-muted-foreground/80 inline-flex items-start gap-1">
+                              <AlertTriangle className="h-2.5 w-2.5 shrink-0 mt-0.5" aria-hidden="true" />
+                              <span>
+                                {caveats.slice(0, 1).map((caveat: any) =>
+                                  typeof caveat === 'string' ? caveat : safeString(caveat)
+                                ).join('')}
+                                {caveats.length > 1 ? ` +${caveats.length - 1} more` : ''}
+                              </span>
                             </p>
                           )}
                         </div>
@@ -465,7 +468,7 @@ export function InsightsTab({ artifacts, dbPapers }: InsightsTabProps) {
                       style={{ borderLeftWidth: '4px', borderLeftColor: '#f59e0b' }}
                     >
                       <div className="flex items-start gap-1.5 flex-1 min-h-0">
-                        <span className="shrink-0 text-amber-600 dark:text-amber-500 mt-0.5 text-xs">⚠</span>
+                        <AlertTriangle className="h-3 w-3 shrink-0 text-amber-600 dark:text-amber-500 mt-0.5" aria-hidden="true" />
                         <div className="flex-1 min-w-0 space-y-0.5">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {issue && (paperRefId || paperRef) ? (
