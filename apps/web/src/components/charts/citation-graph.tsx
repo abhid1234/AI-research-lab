@@ -202,7 +202,7 @@ function CategoryPapersModal({ category, onClose }: { category: BarPoint; onClos
               const url = isRealArxiv
                 ? `https://arxiv.org/abs/${paper.arxivId}`
                 : paper.title
-                  ? `https://scholar.google.com/scholar?q=${encodeURIComponent(paper.title)}`
+                  ? `https://arxiv.org/search/?searchtype=all&query=${encodeURIComponent(paper.title)}`
                   : '#';
 
               const date = paper.fullPaper?.publishedAt
