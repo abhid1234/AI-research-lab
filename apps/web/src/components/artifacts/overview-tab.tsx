@@ -198,9 +198,9 @@ export function OverviewTab({ artifacts, totalPaperCount, dbPapers, topicName, t
               }
               onClick={() => onSwitchTab?.('insights')}
             />
-            {/* 3. Reports — frontier findings */}
+            {/* 3. Research Frontiers — frontier findings */}
             <StatItem
-              label="Reports"
+              label="Research Frontiers"
               value={reportsCount}
               tone="emerald"
               icon={

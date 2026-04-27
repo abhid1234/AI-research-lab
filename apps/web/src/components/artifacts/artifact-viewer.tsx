@@ -24,7 +24,7 @@ interface ArtifactViewerProps {
   onOpenDrawer?: () => void;
 }
 
-const TAB_IDS = ['overview', 'insights', 'connections', 'papers', 'frontiers'] as const;
+const TAB_IDS = ['overview', 'papers', 'insights', 'frontiers', 'connections'] as const;
 type TabId = typeof TAB_IDS[number];
 
 const TAB_LABELS: Record<TabId, string> = {
