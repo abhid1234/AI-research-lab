@@ -24,7 +24,7 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  "group/tabs-list inline-flex w-fit items-center justify-start gap-2 text-muted-foreground group-data-horizontal/tabs:h-8 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
+  "group/tabs-list inline-flex w-fit items-center justify-start gap-2 text-muted-foreground group-data-horizontal/tabs:h-10 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
   {
     variants: {
       variant: {
@@ -61,7 +61,7 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
       data-slot="tabs-trigger"
       className={cn(
         // Editorial tab — no pill, no chip. Hairline-anchored, foreground underline on active.
-        "relative inline-flex h-9 items-center justify-center gap-1.5 rounded-none border-0 px-1 py-0.5",
+        "relative inline-flex h-10 items-center justify-center gap-1.5 rounded-none border-0 px-1 py-0.5",
         "text-[13px] font-medium tracking-tight whitespace-nowrap text-foreground/55 transition-colors",
         "hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/40",
         "disabled:pointer-events-none disabled:opacity-50",
