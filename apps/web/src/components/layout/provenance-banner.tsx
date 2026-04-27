@@ -203,7 +203,7 @@ export function ProvenanceBanner({
               <span className="font-semibold tabular-nums text-foreground">{uniqueAuthors.size.toLocaleString()}</span>
               <span className="text-muted-foreground"> unique researchers</span>
             </Row>
-            <Row label="Excluded">
+            <Row label="Excluded" variant="disclosure">
               <span className="text-muted-foreground">papers without abstracts, low-citation papers, non-CS work, papers that don&apos;t match any of the 9 queries</span>
             </Row>
           </dl>
@@ -213,10 +213,27 @@ export function ProvenanceBanner({
   );
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Row({
+  label,
+  children,
+  variant,
+}: {
+  label: string;
+  children: React.ReactNode;
+  variant?: 'default' | 'disclosure';
+}) {
+  // 'disclosure' tints the label in a desaturated terracotta (chart-9 hue
+  // family) so editorially-honest rows like "Excluded" read as a deliberate
+  // trust signal rather than blending into the data rows above.
+  const isDisclosure = variant === 'disclosure';
   return (
     <div className="flex items-baseline gap-2">
-      <dt className="w-24 shrink-0 text-muted-foreground">{label}</dt>
+      <dt
+        className={`w-24 shrink-0 ${isDisclosure ? 'font-medium' : 'text-muted-foreground'}`}
+        style={isDisclosure ? { color: 'oklch(0.55 0.10 40)' } : undefined}
+      >
+        {label}
+      </dt>
       <dd className="min-w-0 flex-1">{children}</dd>
     </div>
   );
