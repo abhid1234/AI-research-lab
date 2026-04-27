@@ -505,13 +505,14 @@ function OpenQuestionsSection({ artifacts, dbPapers }: { artifacts: { agentType:
   const gaps: any[] = frontierArtifact?.data?.gaps ?? [];
   const debates: any[] = contradictionArtifact?.data?.openDebates ?? [];
 
-  // Resolve author + date via the DB so the OpenQuestion cards match the
-  // right column's "Title — Author et al." footer and YYYY-MM date chip.
-  // Index by S2 paper id.
-  function metaFor(paperId: string | undefined): { author: string; date: string } {
-    if (!paperId || !dbPapers) return { author: '', date: '' };
+  // Resolve author, date, and arxivId via the DB so the OpenQuestion cards
+  // match the right column: "Title — Author et al." footer, YYYY-MM date
+  // chip, and a real direct-to-arxiv link (S2 paperId hashes alone never
+  // resolve via paperLink).
+  function metaFor(paperId: string | undefined): { author: string; date: string; arxivId: string; title: string } {
+    if (!paperId || !dbPapers) return { author: '', date: '', arxivId: '', title: '' };
     const match = dbPapers.find((d: any) => d?.id === paperId || d?.paperId === paperId);
-    if (!match) return { author: '', date: '' };
+    if (!match) return { author: '', date: '', arxivId: '', title: '' };
     const list: any[] = Array.isArray(match.authors) ? match.authors : [];
     let author = '';
     if (list.length > 0) {
@@ -522,10 +523,12 @@ function OpenQuestionsSection({ artifacts, dbPapers }: { artifacts: { agentType:
     let date = '';
     if (typeof match.publishedAt === 'string') date = match.publishedAt.slice(0, 7);
     else if (match.publishedAt instanceof Date) date = match.publishedAt.toISOString().slice(0, 7);
-    return { author, date };
+    const arxivId = typeof match.arxivId === 'string' ? match.arxivId : '';
+    const title = typeof match.title === 'string' ? match.title : '';
+    return { author, date, arxivId, title };
   }
 
-  const questions: { text: string; type: string; detail: string; paperId?: string; paperTitle?: string; paperAuthor?: string; paperDate?: string }[] = [];
+  const questions: { text: string; type: string; detail: string; paperId?: string; paperTitle?: string; paperAuthor?: string; paperDate?: string; paperArxivId?: string }[] = [];
 
   for (const d of debates.slice(0, 3)) {
     const q = typeof d.question === 'string' ? d.question : '';
@@ -539,7 +542,16 @@ function OpenQuestionsSection({ artifacts, dbPapers }: { artifacts: { agentType:
     const debatePaperTitle: string = fp ? (typeof fp === 'string' ? fp : fp?.title ?? '') : '';
     if (q) {
       const meta = metaFor(debatePaperId);
-      questions.push({ text: q, type: 'debate', detail: sig, paperId: debatePaperId || undefined, paperTitle: debatePaperTitle || undefined, paperAuthor: meta.author || undefined, paperDate: meta.date || undefined });
+      questions.push({
+        text: q,
+        type: 'debate',
+        detail: sig,
+        paperId: debatePaperId || undefined,
+        paperTitle: debatePaperTitle || meta.title || undefined,
+        paperAuthor: meta.author || undefined,
+        paperDate: meta.date || undefined,
+        paperArxivId: meta.arxivId || undefined,
+      });
     }
   }
 
@@ -553,7 +565,16 @@ function OpenQuestionsSection({ artifacts, dbPapers }: { artifacts: { agentType:
     const gapPaperTitle: string = fa ? (typeof fa === 'string' ? fa : fa?.title ?? fa?.name ?? '') : '';
     if (area) {
       const meta = metaFor(gapPaperId);
-      questions.push({ text: area, type: 'gap', detail: why, paperId: gapPaperId || undefined, paperTitle: gapPaperTitle || undefined, paperAuthor: meta.author || undefined, paperDate: meta.date || undefined });
+      questions.push({
+        text: area,
+        type: 'gap',
+        detail: why,
+        paperId: gapPaperId || undefined,
+        paperTitle: gapPaperTitle || meta.title || undefined,
+        paperAuthor: meta.author || undefined,
+        paperDate: meta.date || undefined,
+        paperArxivId: meta.arxivId || undefined,
+      });
     }
   }
 
@@ -569,7 +590,9 @@ function OpenQuestionsSection({ artifacts, dbPapers }: { artifacts: { agentType:
           ? { border: '#f59e0b', bg: '#fffbeb', text: '#b45309', pill: '#fef3c7', icon: '?', label: 'Open Debate' }
           : { border: '#3b82f6', bg: '#eff6ff', text: '#1d4ed8', pill: '#dbeafe', icon: '!', label: 'Research Gap' };
 
-        const url = paperLink(q.paperId, q.paperTitle || q.text);
+        // Prefer the arxivId resolved from dbPapers — q.paperId is a S2 hash
+        // and never resolves to a direct arxiv abstract on its own.
+        const url = paperLink(q.paperArxivId) || paperLink(q.paperId);
         const clickable = Boolean(url);
         const openAbs = clickable ? () => window.open(url, '_blank', 'noopener,noreferrer') : undefined;
 
