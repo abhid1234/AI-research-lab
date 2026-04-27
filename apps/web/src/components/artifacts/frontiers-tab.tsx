@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { safeString, paperLink } from '@/lib/paper-utils';
 import {
   frontierCategoryColors as categoryStyles,
-  frontierCategoryEmoji as categoryEmoji,
+  frontierCategoryDotColors as categoryDot,
   frontierCategoryLabel as categoryLabel,
 } from '@/lib/design-tokens';
 import { SurprisingFindings } from '@/components/layout/surprising-findings';
@@ -37,7 +37,7 @@ function FrontierCard({ f }: { f: any }) {
   const [sourcesOpen, setSourcesOpen] = useState(false);
 
   const cat = typeof f.category === 'string' ? f.category : '';
-  const emoji = categoryEmoji[cat] ?? '⚪';
+  const dotStyle = categoryDot[cat] ?? 'bg-muted-foreground';
   const label = categoryLabel[cat] ?? cat;
   const badgeStyle = categoryStyles[cat] ?? 'bg-muted text-muted-foreground border-border';
   const implications: string[] = Array.isArray(f.implications) ? f.implications.slice(0, 5) : [];
@@ -51,8 +51,8 @@ function FrontierCard({ f }: { f: any }) {
       <CardContent className="p-3 space-y-2">
         {/* Title row */}
         <div className="flex items-start gap-2 flex-wrap">
-          <span className="text-sm leading-none mt-0.5">{emoji}</span>
-          <span className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-medium ${badgeStyle}`}>
+          <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium gap-1.5 ${badgeStyle}`}>
+            <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${dotStyle}`} aria-hidden="true" />
             {label}
           </span>
           {f.confidence != null && (

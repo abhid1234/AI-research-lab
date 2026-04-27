@@ -33,16 +33,19 @@ export interface CategoryColors {
   pill: string;
 }
 
+// Warm-neutral editorial palette aligned to globals.css chart tokens.
+// Each category maps to a chart hue (so radar / line / category badges
+// share a consistent visual language).
 export const CATEGORY_COLORS: Record<Category, CategoryColors> = {
-  'LLM Agents':                  { border: '#6366f1', bg: '#eef2ff', text: '#4338ca', pill: '#e0e7ff' },
-  'Reasoning & Chain-of-Thought':{ border: '#f59e0b', bg: '#fffbeb', text: '#b45309', pill: '#fef3c7' },
-  'Vision & Multimodal':         { border: '#a855f7', bg: '#faf5ff', text: '#7e22ce', pill: '#f3e8ff' },
-  'RAG & Retrieval':             { border: '#06b6d4', bg: '#ecfeff', text: '#0e7490', pill: '#cffafe' },
-  'Code Generation':             { border: '#0ea5e9', bg: '#f0f9ff', text: '#0369a1', pill: '#e0f2fe' },
-  'AI Safety & Alignment':       { border: '#ef4444', bg: '#fef2f2', text: '#b91c1c', pill: '#fee2e2' },
-  'Fine-tuning & PEFT':          { border: '#3b82f6', bg: '#eff6ff', text: '#1d4ed8', pill: '#dbeafe' },
-  'Scaling & Architecture':      { border: '#8b5cf6', bg: '#f5f3ff', text: '#6d28d9', pill: '#ede9fe' },
-  'Evaluation & Benchmarks':     { border: '#84cc16', bg: '#f7fee7', text: '#4d7c0f', pill: '#ecfccb' },
+  'LLM Agents':                  { border: 'oklch(0.50 0.13 260)', bg: 'oklch(0.97 0.012 260)', text: 'oklch(0.38 0.13 260)', pill: 'oklch(0.94 0.020 260)' },
+  'Reasoning & Chain-of-Thought':{ border: 'oklch(0.55 0.14 70)',  bg: 'oklch(0.97 0.014 70)',  text: 'oklch(0.42 0.14 70)',  pill: 'oklch(0.94 0.022 70)'  },
+  'Vision & Multimodal':         { border: 'oklch(0.55 0.12 195)', bg: 'oklch(0.97 0.012 195)', text: 'oklch(0.42 0.12 195)', pill: 'oklch(0.94 0.020 195)' },
+  'RAG & Retrieval':             { border: 'oklch(0.55 0.14 110)', bg: 'oklch(0.97 0.014 110)', text: 'oklch(0.42 0.14 110)', pill: 'oklch(0.94 0.022 110)' },
+  'Code Generation':             { border: 'oklch(0.55 0.13 90)',  bg: 'oklch(0.97 0.013 90)',  text: 'oklch(0.42 0.13 90)',  pill: 'oklch(0.94 0.021 90)'  },
+  'AI Safety & Alignment':       { border: 'oklch(0.55 0.18 20)',  bg: 'oklch(0.97 0.018 20)',  text: 'oklch(0.42 0.18 20)',  pill: 'oklch(0.94 0.026 20)'  },
+  'Fine-tuning & PEFT':          { border: 'oklch(0.50 0.18 325)', bg: 'oklch(0.97 0.018 325)', text: 'oklch(0.38 0.18 325)', pill: 'oklch(0.94 0.026 325)' },
+  'Scaling & Architecture':      { border: 'oklch(0.50 0.12 150)', bg: 'oklch(0.97 0.012 150)', text: 'oklch(0.38 0.12 150)', pill: 'oklch(0.94 0.020 150)' },
+  'Evaluation & Benchmarks':     { border: 'oklch(0.55 0.16 40)',  bg: 'oklch(0.97 0.016 40)',  text: 'oklch(0.42 0.16 40)',  pill: 'oklch(0.94 0.024 40)'  },
 };
 
 // Short labels for tight UI surfaces (radar axis labels, narrow legend rows).
