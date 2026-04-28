@@ -128,15 +128,19 @@ There's no "trust me" anywhere on the page. If the agents are wrong, you should 
 
 ---
 
-## Tech stack
+## Tech stack — Google Cloud end-to-end
 
-- **Frontend** — Next.js 15 App Router · React · TypeScript · Tailwind v4 · shadcn/ui · Recharts
-- **Backend** — Next.js API routes · agent orchestrator
-- **Database** — PostgreSQL + pgvector (HNSW cosine ANN)
+- **Hosting** — Cloud Run (Next.js app + agent orchestrator)
+- **Database** — Cloud SQL + pgvector (HNSW cosine ANN — single DB to operate)
 - **Embeddings** — Gemini `text-embedding-001` (768d)
+- **Container pipeline** — Artifact Registry
+- **Cron** — Cloud Scheduler triggers `/api/cron/ingest` weekly
+- **Launch video** — Veo
+- **Frontend** — Next.js 15 App Router · React · TypeScript · Tailwind v4 · shadcn/ui · Recharts
 - **Agents** — instruct-tuned LLM, structured-JSON output mode
 - **Paper source** — arxiv API + Semantic Scholar (citations)
-- **Hosting** — Cloud Run + Cloud SQL · weekly cron
+
+Total cost per topic refresh: under $1.
 
 ---
 
@@ -236,6 +240,6 @@ MIT — see [LICENSE](LICENSE).
 
 ## Author
 
-Built by [Abhi Das](https://github.com/abhid1234) — software engineer by background, returning to the keyboard on weekends with an AI coding agent as the pair.
+Built by [Abhi Das](https://github.com/abhid1234) on weekends with an AI coding agent as the pair.
 
 Read the long-form story behind it: [What 502 high-signal AI papers actually say — without the academic syntax](https://abhid.substack.com/p/what-502-high-signal-ai-papers-actually) on Substack.
