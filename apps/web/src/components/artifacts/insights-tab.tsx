@@ -274,21 +274,21 @@ export function InsightsTab({ artifacts, dbPapers }: InsightsTabProps) {
           <p className="text-[10px] text-muted-foreground mb-2">
             Community is actively split on these unresolved questions.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 auto-rows-fr">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {openDebates.map((d, i) => {
                   const question = typeof d.question === 'string' ? d.question : safeString(d.question);
                   const significance = typeof d.significance === 'string' ? d.significance : '';
                   const sides: any[] = Array.isArray(d.sides) ? d.sides : [];
 
                   return (
-                    <Card key={i} className="h-[220px] flex flex-col" style={{ borderLeftWidth: '4px', borderLeftColor: '#8b5cf6' }}>
+                    <Card key={i} className="flex flex-col" style={{ borderLeftWidth: '4px', borderLeftColor: '#8b5cf6' }}>
                       <CardHeader className="p-3 pb-1 shrink-0">
-                        <CardTitle className="text-xs font-semibold leading-snug line-clamp-2">{question}</CardTitle>
+                        <CardTitle className="text-xs font-semibold leading-snug">{question}</CardTitle>
                         {significance && (
-                          <CardDescription className="text-[10px] line-clamp-2">{significance}</CardDescription>
+                          <CardDescription className="text-[10px]">{significance}</CardDescription>
                         )}
                       </CardHeader>
-                      <CardContent className="px-3 pb-3 pt-0 mt-auto shrink-0">
+                      <CardContent className="px-3 pb-3 pt-0 shrink-0">
                         <div className="grid grid-cols-2 gap-1.5">
                           {[sides[0] ?? null, sides[1] ?? null].map((side: any, j: number) => {
                             const sideLabel = j === 0 ? 'A' : 'B';
