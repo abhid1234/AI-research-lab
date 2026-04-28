@@ -22,10 +22,10 @@ const interDisplay = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.airesearchlab.space'),
   title: 'AI Research Lab',
-  description: 'Five Claude agents arguing about AI papers, in public. 502 papers, 9 topics, fully transparent methodology.',
+  description: '502 arxiv papers, read for you. Five specialized agents surface contradictions, consensus, and frontiers across nine AI subfields. Free, open source.',
   openGraph: {
-    title: 'AI Research Lab',
-    description: 'Five Claude agents arguing about AI papers, in public. 502 papers, 9 topics, fully transparent methodology.',
+    title: 'AI Research Lab — 502 arxiv papers, read for you',
+    description: '502 arxiv papers, read for you. Five specialized agents surface contradictions, consensus, and frontiers across nine AI subfields. Free, open source.',
     url: 'https://www.airesearchlab.space',
     type: 'website',
     siteName: 'AI Research Lab',
@@ -34,14 +34,14 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'AI Research Lab — Five Claude agents arguing about AI papers, in public.',
+        alt: 'AI Research Lab — 502 papers, read for you. Five agents tell you what matters.',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI Research Lab',
-    description: 'Five Claude agents arguing about AI papers, in public.',
+    title: 'AI Research Lab — 502 arxiv papers, read for you',
+    description: '502 arxiv papers, read for you. Five specialized agents surface contradictions, consensus, and frontiers.',
     images: ['/og-image.png'],
   },
   icons: {

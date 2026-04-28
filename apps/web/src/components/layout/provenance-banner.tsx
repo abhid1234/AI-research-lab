@@ -73,15 +73,18 @@ export function ProvenanceBanner({
 
   const topicsCovered = 9;
 
-  // Soft pinkish-lavender (mauve) wash with a deeper plum left rule.
-  // Restrained but distinct — reads as a curated editorial callout.
+  // Soft mauve wash + deep plum left rule + saturated plum accent.
+  // Ties the card to the chart-1 plum family used elsewhere on the site, so
+  // the provenance callout reads as a deliberate editorial surface — not a
+  // washed-out info box.
   return (
     <section
-      className="relative overflow-hidden rounded-2xl"
+      className="relative overflow-hidden rounded-2xl ring-1"
       style={{
-        background: 'oklch(0.97 0.012 80)',
-        ['--prov-rule' as string]: 'oklch(0.72 0.07 65)',
-        ['--prov-accent' as string]: 'oklch(0.44 0.10 50)',
+        background: 'oklch(0.975 0.014 320)',
+        ['--prov-rule' as string]: 'oklch(0.50 0.18 325)',
+        ['--prov-accent' as string]: 'oklch(0.42 0.18 325)',
+        ['--tw-ring-color' as string]: 'oklch(0.50 0.18 325 / 0.08)',
       }}
       aria-labelledby="provenance-title"
     >
@@ -155,7 +158,7 @@ export function ProvenanceBanner({
               <span className="text-muted-foreground"> · 768d (cosine, HNSW)</span>
             </Row>
             <Row label="Agents">
-              <span className="text-foreground">Claude Haiku 4.5</span>
+              <span className="text-foreground">instruct-tuned LLM</span>
               <span className="text-muted-foreground"> · {agentCount ?? 5} specialized agents</span>
             </Row>
             <Row label="Refresh">

@@ -257,7 +257,7 @@ export default function MethodologyPage() {
                 ['Drizzle ORM', 'PostgreSQL'],
                 ['pgvector', 'HNSW ANN index'],
                 ['Gemini', 'text-embedding-001'],
-                ['Claude', 'Haiku 4.5 agents'],
+                ['Instruct LLM', 'Agent reasoning'],
                 ['Recharts', 'Trend & landscape charts'],
               ].map(([tech, desc]) => (
                 <div key={tech} className="border-t border-[color:var(--hairline)] pt-2">
