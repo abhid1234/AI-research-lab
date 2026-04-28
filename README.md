@@ -2,7 +2,7 @@
 
 **502 arxiv papers, read for you.** Five specialized agents surface the contradictions, consensus, and frontiers across nine AI subfields — in plain English.
 
-[**Live app → airesearchlab.space**](https://www.airesearchlab.space) · [Methodology](https://www.airesearchlab.space/methodology) · [MIT license](#license)
+[**Live app → airesearchlab.space**](https://www.airesearchlab.space) · [Methodology](https://www.airesearchlab.space/methodology) · [Read the essay on Substack ↗](https://abhid.substack.com/p/what-502-high-signal-ai-papers-actually) · [MIT license](#license)
 
 ![AI Research Lab — hero overview](docs/screenshots/01-hero-overview.png)
 
@@ -238,4 +238,4 @@ MIT — see [LICENSE](LICENSE).
 
 Built by [Abhi Das](https://github.com/abhid1234) — software engineer by background, returning to the keyboard on weekends with an AI coding agent as the pair.
 
-Read the long-form story behind it: [What 502 high-signal AI papers actually say — without the academic syntax](https://www.airesearchlab.space).
+Read the long-form story behind it: [What 502 high-signal AI papers actually say — without the academic syntax](https://abhid.substack.com/p/what-502-high-signal-ai-papers-actually) on Substack.
